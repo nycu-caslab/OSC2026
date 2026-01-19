@@ -220,7 +220,7 @@ Below is a minimal example of a valid ``kernel.its`` file that includes only the
 
 
 
-The required device tree file can be `downloaded <https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/x1_orangepi-rv2.dtb>`_ from the course resource page.
+The required device tree file can be `downloaded <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/x1_orangepi-rv2.dtb>`_ from the course resource page.
 
 Once the required files and the ``kernel.its`` configuration are prepared,
 use the following command to generate the final FIT image:
@@ -242,7 +242,7 @@ There are two ways to prepare your SD card:
 
 .. **Method 1： Use a prebuilt image (recommended)**
 **Test with Provided image**
-A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/opirv2-sdcard.img>`_ is available from the course repository.
+A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_ is available from the course repository.
 
 You can write it to your SD card using the ``dd`` command:
 
