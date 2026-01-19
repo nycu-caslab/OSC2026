@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lab 1: Hello World &#8212; CSIC30016: Operating System Capstone</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab1';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lab 2: Booting" href="lab2.html" />
+    <link rel="prev" title="Lab 0: Environment Setup" href="lab0.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CSIC30016: Operating System Capstone</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Class:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lab 1: Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3: Memory Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5: Thread and User Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6: Virtual Memory</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../references/external_resources.html">External Resourses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/old_course.html">Old Course Websites</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/labs/lab1.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lab 1: Hello World</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-basic-initialization-25">Basic Exercise 1 - Basic Initialization - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-uart-setup-25">Basic Exercise 2 - UART Setup - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-simple-shell-25">Basic Exercise 3 - Simple Shell - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-4-system-information-25">Basic Exercise 4 - System Information - 25%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sbi-call-design">SBI Call Design</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-device-tree-based-info-10">Advanced Exercise: Device Tree-Based Info (10%)</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="lab-1-hello-world">
+<h1>Lab 1: Hello World<a class="headerlink" href="#lab-1-hello-world" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>In this lab, you will begin practicing bare-metal programming on the VF2 board by implementing a minimal interactive shell.</p>
+<p>This lab focuses on configuring the Universal Asynchronous Receiver-Transmitter (UART) interface for serial communication,
+which serves as the primary I/O channel between your host computer and the VF2 during development.
+You will also gain experience in low-level system initialization, peripheral access, and basic input/output handling.</p>
+</section>
+<section id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Practice bare-metal programming.</p></li>
+<li><p>Understand how to access VF2’s peripherals.</p></li>
+<li><p>Set up UART for serial communication.</p></li>
+</ul>
+</section>
+<section id="basic-exercises">
+<h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
+<section id="basic-exercise-1-basic-initialization-25">
+<h3>Basic Exercise 1 - Basic Initialization - 25%<a class="headerlink" href="#basic-exercise-1-basic-initialization-25" title="Link to this heading">#</a></h3>
+<p>When a bare-metal program is loaded onto the VF2, several conditions must be satisfied
+before it can execute correctly:</p>
+<ul class="simple">
+<li><p>All data sections must be placed at the expected memory addresses.</p></li>
+<li><p>The program counter must point to the correct entry address.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">.bss</span></code> segment (which holds uninitialized global variables) must be zero-initialized.</p></li>
+<li><p>The stack pointer must be set to a valid memory location.</p></li>
+</ul>
+<p>During boot, VF2’s bootloader loads the kernel image into a designated physical address
+and begins execution from there. If your linker script is correct, the first two conditions
+are already handled.</p>
+<p>However, the <code class="docutils literal notranslate"><span class="pre">.bss</span></code> segment and the stack pointer are not initialized automatically.
+Failing to configure them properly can lead to undefined behavior, such as corrupted memory or crashes.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Initialize the system state immediately after the bootloader hands control to your program.
+This includes setting up the stack pointer and zeroing out the <code class="docutils literal notranslate"><span class="pre">.bss</span></code> segment manually.</p>
+</div>
+</section>
+<section id="basic-exercise-2-uart-setup-25">
+<h3>Basic Exercise 2 - UART Setup - 25%<a class="headerlink" href="#basic-exercise-2-uart-setup-25" title="Link to this heading">#</a></h3>
+<p>For all labs in this course, UART will be the primary interface for communication between the VF2 and your host computer.
+You will use it to read input, print output, and interact with the system while debugging.</p>
+<p>In this exercise, you will configure the UART peripheral by directly writing to its memory-mapped registers.
+This includes setting the baud rate, data format, and enabling both the transmitter and receiver.</p>
+<p>Refer to the VF2’s hardware documentation for details on the base address and layout of the UART registers.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Set up the UART interface on VF2.
+This includes configuring the UART registers to initialize the baud rate, data bits, stop bits,
+and enabling both the transmitter and receiver.</p>
+</div>
+</section>
+<section id="basic-exercise-3-simple-shell-25">
+<h3>Basic Exercise 3 - Simple Shell - 25%<a class="headerlink" href="#basic-exercise-3-simple-shell-25" title="Link to this heading">#</a></h3>
+<p>Once UART is configured correctly, you can build a simple shell interface
+to enable basic interaction between the VF2 and your host computer.</p>
+<p>The shell should process user input received via UART and respond with predefined messages.
+At minimum, it must support the following commands:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">help</span></code>: Display a list of available commands.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hello</span></code>: Display the message “Hello World!”</p></li>
+</ul>
+<p>You may implement a simple command parser that reads input character by character,
+identifies complete commands, and prints the corresponding output.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Be mindful of character alignment issues when handling screen I/O.
+Consider translating newline characters (<code class="docutils literal notranslate"><span class="pre">\n</span></code>) into carriage return + newline (<code class="docutils literal notranslate"><span class="pre">\r\n</span></code>)
+to ensure proper display across different serial terminals.</p>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement a basic shell that reads input from UART and displays output accordingly.
+The shell should recognize the listed commands and print appropriate responses.</p>
+</div>
+</section>
+<section id="basic-exercise-4-system-information-25">
+<h3>Basic Exercise 4 - System Information - 25%<a class="headerlink" href="#basic-exercise-4-system-information-25" title="Link to this heading">#</a></h3>
+<p>Interacting with low-level system firmware is a key aspect of bare-metal development on RISC-V platforms.</p>
+<p>In this exercise, you will implement a general-purpose SBI (Supervisor Binary Interface) call wrapper
+and use it to query basic system information from OpenSBI.
+This includes retrieving the current hardware thread ID (hart ID)
+and the OpenSBI version specification.</p>
+<dl class="simple">
+<dt>You will:</dt><dd><ul class="simple">
+<li><p>Implement the <code class="docutils literal notranslate"><span class="pre">sbi_ecall(...)</span></code> function in C using inline assembly.</p></li>
+<li><p>Use the RISC-V standard extension SBI_EXT_BASE to obtain:</p></li>
+<li><p>Current hart ID</p></li>
+<li><p>OpenSBI spec version</p></li>
+<li><p>Integrate the results into your shell (e.g., via info command).</p></li>
+</ul>
+</dd>
+</dl>
+<section id="sbi-call-design">
+<h4>SBI Call Design<a class="headerlink" href="#sbi-call-design" title="Link to this heading">#</a></h4>
+<p>OpenSBI exposes system services to supervisor-mode software through a standardized calling convention using the <code class="docutils literal notranslate"><span class="pre">ecall</span></code> instruction.</p>
+<p>You will implement a generic function:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">sbiret</span><span class="w"> </span><span class="n">sbi_ecall</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ext</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">fid</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg0</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg2</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg3</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg4</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arg5</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This function uses inline assembly to load arguments into the appropriate RISC-V registers <code class="docutils literal notranslate"><span class="pre">a0</span></code> to <code class="docutils literal notranslate"><span class="pre">a7</span></code>,
+executes the <code class="docutils literal notranslate"><span class="pre">ecall</span></code> instruction,
+and retrieves the result from registers <code class="docutils literal notranslate"><span class="pre">a0</span></code> (error code) and <code class="docutils literal notranslate"><span class="pre">a1</span></code> (return value).
+For a reference implementation in the Linux kernel,
+see <code class="docutils literal notranslate"><span class="pre">sbi_ecall</span></code> in the <a class="reference external" href="https://elixir.bootlin.com/linux/v6.6/source/arch/riscv/kernel/sbi.c#L25">Linux 6.6 source</a>.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement <code class="docutils literal notranslate"><span class="pre">sbi_ecall(...)</span></code> using inline assembly.
+Test it by calling the following SBI functions with
+Extension ID <code class="docutils literal notranslate"><span class="pre">0x10</span></code> (SBI_EXT_BASE):</p>
+<ul class="simple">
+<li><p>Function ID <code class="docutils literal notranslate"><span class="pre">0x0</span></code>: <code class="docutils literal notranslate"><span class="pre">sbi_get_spec_version()</span></code>: returns OpenSBI version</p></li>
+<li><p>Function ID <code class="docutils literal notranslate"><span class="pre">0x1</span></code>: <code class="docutils literal notranslate"><span class="pre">sbi_get_impl_id()</span></code>: returns implementation ID</p></li>
+<li><p>Function ID <code class="docutils literal notranslate"><span class="pre">0x2</span></code>: <code class="docutils literal notranslate"><span class="pre">sbi_get_impl_version()</span></code>: returns implementation version</p></li>
+</ul>
+<p>and Extension ID <code class="docutils literal notranslate"><span class="pre">0x53525354</span></code> (SBI_EXT_SRST),</p>
+<ul class="simple">
+<li><p>Function ID <code class="docutils literal notranslate"><span class="pre">0x0</span></code>: <code class="docutils literal notranslate"><span class="pre">sbi_system_reset(...)</span></code>: performs a system reset</p></li>
+</ul>
+</div>
+<p>After implementing <code class="docutils literal notranslate"><span class="pre">sbi_ecall(...)</span></code>, use it to support a new shell command <code class="docutils literal notranslate"><span class="pre">info</span></code>
+that displays the following information on the VF2 board:</p>
+<ul class="simple">
+<li><p>OpenSBI specification version</p></li>
+<li><p>Implementation ID</p></li>
+<li><p>Implementation version</p></li>
+</ul>
+<p>To print formatted results in your shell, you may implement a minimal <code class="docutils literal notranslate"><span class="pre">printf</span></code>-like function,
+or use your existing UART output routine with manual formatting.</p>
+<p><code class="docutils literal notranslate"><span class="pre">info</span></code> will serve as your first system-level introspection tool
+and should include both SBI-based results and DTB-based results if available (See Advanced Exercise).</p>
+</section>
+</section>
+</section>
+<section id="advanced-exercise">
+<h2>Advanced Exercise<a class="headerlink" href="#advanced-exercise" title="Link to this heading">#</a></h2>
+<section id="advanced-exercise-device-tree-based-info-10">
+<h3>Advanced Exercise: Device Tree-Based Info (10%)<a class="headerlink" href="#advanced-exercise-device-tree-based-info-10" title="Link to this heading">#</a></h3>
+<p>On most RISC-V platforms, including the VF2 board, a pre-installed firmware-level bootloader
+(such as OpenSBI or U-Boot) is responsible for early hardware initialization and for passing
+a Flattened Device Tree (FDT) to the kernel or to a custom bare-metal program.</p>
+<p>The DTB provides a structured description of the platform’s hardware components.
+It is assumed that the DTB pointer is passed in register <code class="docutils literal notranslate"><span class="pre">a1</span></code> during boot.
+You should store this value and use it as the starting point for your access functions.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement two simple accessors:</p>
+<ul class="simple">
+<li><p>Extract the <code class="docutils literal notranslate"><span class="pre">model</span></code> string from the root node.</p></li>
+<li><p>Search for a node whose <code class="docutils literal notranslate"><span class="pre">compatible</span></code> field contains either <code class="docutils literal notranslate"><span class="pre">&quot;snps,dw-apb-uart&quot;</span></code> (on VF2)
+or <code class="docutils literal notranslate"><span class="pre">&quot;ns16550a&quot;</span></code> (on QEMU <code class="docutils literal notranslate"><span class="pre">virt</span></code>) and extract its <code class="docutils literal notranslate"><span class="pre">reg</span></code> property as the UART base address.</p></li>
+</ul>
+<p>Integrate these outputs into your <code class="docutils literal notranslate"><span class="pre">info</span></code> shell command alongside the SBI results,
+and use the obtained base address to initialize the serial interface.</p>
+</div>
+<p>The device tree source file <code class="docutils literal notranslate"><span class="pre">jh7110-starfive-visionfive-2-v1.3b.dts</span></code> for vf2 can be found
+in the official <a class="reference external" href="https://github.com/starfive-tech/linux">StarFive Linux GitHub repository</a>.
+You may also consult the annotated source view provided by Bootlin,
+which offers a stable and cross-referenced archive for inspection and citation:</p>
+<ul class="simple">
+<li><p>Root node definition: <a class="reference external" href="https://elixir.bootlin.com/linux/v6.6/source/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2-v1.3b.dts#L10">https://elixir.bootlin.com/linux/v6.6/source/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2-v1.3b.dts#L10</a></p></li>
+<li><p>UART0 node definition: <a class="reference external" href="https://elixir.bootlin.com/linux/v6.6/source/arch/riscv/boot/dts/starfive/jh7110.dtsi#L374">https://elixir.bootlin.com/linux/v6.6/source/arch/riscv/boot/dts/starfive/jh7110.dtsi#L374</a></p></li>
+</ul>
+<p>Although full device tree parsing is complex and will be covered in detail in the next lab,
+in this exercise you will retrieve a few key fields using fixed property names
+and simple node matching.
+This allows you to begin using the device tree as a source of system configuration data
+without needing to understand its full hierarchical structure yet.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> property under the root node provides a human-readable description of the target board.
+It is commonly used in logs, diagnostics, and shell outputs to identify the hardware platform.
+Even though this lab explicitly targets the VF2 board, retrieving the <code class="docutils literal notranslate"><span class="pre">model</span></code> field helps illustrate how
+hardware information can be extracted from the DTB for display and verification purposes.</p>
+<p>If you run the same code under QEMU’s <code class="docutils literal notranslate"><span class="pre">virt</span></code> machine, the <code class="docutils literal notranslate"><span class="pre">model</span></code> string will differ accordingly,
+which demonstrates how the DTB reflects the platform identity
+and can be used to distinguish runtime environments.</p>
+<p>This also provides a good opportunity to replace hardcoded board-specific configuration
+values from Lab 0 with values extracted from the DTB.
+Specifically, the UART base address used to initialize the serial interface in Lab 0
+may now be retrieved by scanning the DTB for a node whose <code class="docutils literal notranslate"><span class="pre">compatible</span></code> field contains
+<code class="docutils literal notranslate"><span class="pre">&quot;snps,dw-apb-uart&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ns16550a&quot;</span></code> (QEMU). This node should also contain
+a <code class="docutils literal notranslate"><span class="pre">reg</span></code> property, which specifies the base address and size of the UART registers.</p>
+<p>Using the <code class="docutils literal notranslate"><span class="pre">compatible</span></code> field rather than a fixed node name (such as <code class="docutils literal notranslate"><span class="pre">serial&#64;10000000</span></code>)
+makes your implementation more robust and portable across board versions or different UART configurations.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">reg</span></code> field declares the UART base address using a 64-bit format:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">reg</span> <span class="pre">=</span> <span class="pre">&lt;0x0</span> <span class="pre">0x10000000</span> <span class="pre">0x0</span> <span class="pre">0x10000&gt;;</span></code></p>
+</div></blockquote>
+<p>To extract the actual base address, combine the first two 32-bit words of the <code class="docutils literal notranslate"><span class="pre">reg</span></code> property:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">base</span> <span class="pre">=</span> <span class="pre">(uint64_t)reg[0]</span> <span class="pre">&lt;&lt;</span> <span class="pre">32</span> <span class="pre">|</span> <span class="pre">reg[1];</span></code></p>
+</div></blockquote>
+<p>More details can be found in Section 2.3 of the
+<a class="reference external" href="https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/SDK_DG_UART.pdf">JH7110 UART Developing Guide</a>.
+For QEMU, you may extract the actual device tree used by the <code class="docutils literal notranslate"><span class="pre">virt</span></code> machine
+using the <code class="docutils literal notranslate"><span class="pre">-dumpdtb</span></code> option and inspect it with <code class="docutils literal notranslate"><span class="pre">dtc</span></code> for compatible strings such as <code class="docutils literal notranslate"><span class="pre">&quot;ns16550a&quot;</span></code>.</p>
+<p>As a practical code reference, you may also consult the minimal DTB-parsing example <code class="docutils literal notranslate"><span class="pre">fdtget.c</span></code>
+from the <a class="reference external" href="https://github.com/dgibson/dtc/">dgibson/dtc repository</a>,
+which is the upstream development site for the Device Tree Compiler
+maintained by David Gibson—one of the original contributors
+to the Device Tree standard and the Linux kernel support for it.
+This example demonstrates how to locate a device node by path and retrieve a property using:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fdt_path_offset(fdt,</span> <span class="pre">&quot;/path&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fdt_getprop(fdt,</span> <span class="pre">offset,</span> <span class="pre">&quot;property&quot;,</span> <span class="pre">&amp;len)</span></code></p></li>
+</ul>
+<p>While your implementation in this lab does not rely on full-featured device tree parsing,
+it may still be helpful to understand how the standard library interfaces with the DTB structure.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> property is <em>optional</em> according to the device tree specification,
+but it is typically present at the root node to provide a descriptive label for the board.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lab0.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lab 0: Environment Setup</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="lab2.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lab 2: Booting</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-basic-initialization-25">Basic Exercise 1 - Basic Initialization - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-uart-setup-25">Basic Exercise 2 - UART Setup - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-simple-shell-25">Basic Exercise 3 - Simple Shell - 25%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-4-system-information-25">Basic Exercise 4 - System Information - 25%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sbi-call-design">SBI Call Design</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-device-tree-based-info-10">Advanced Exercise: Device Tree-Based Info (10%)</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By  NYCU cas-lab
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, NYCU cas-lab.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

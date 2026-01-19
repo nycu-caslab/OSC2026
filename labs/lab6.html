@@ -1,0 +1,964 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lab 6: Virtual Memory &#8212; CSIC30016: Operating System Capstone</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab6';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="External Resourses" href="../references/external_resources.html" />
+    <link rel="prev" title="Lab 5: Thread and User Process" href="lab5.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CSIC30016: Operating System Capstone</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Class:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1: Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3: Memory Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5: Thread and User Process</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lab 6: Virtual Memory</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../references/external_resources.html">External Resourses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/old_course.html">Old Course Websites</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/labs/lab6.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lab 6: Virtual Memory</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-30">Basic Exercise 2 - Virtual Memory in User Space - 30%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-10">Advanced Exercise 1 - Mmap - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-10">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-10">Advanced Exercise 3 - Copy on Write - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This document is currently under construction and may be incomplete or subject to significant changes.
+Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
+</div>
+<section id="lab-6-virtual-memory">
+<h1>Lab 6: Virtual Memory<a class="headerlink" href="#lab-6-virtual-memory" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>Virtual memory provides isolated address spaces,
+so each user process can run in its address space without interfering with others.</p>
+<p>In this lab, you need to initialize the memory management unit (MMU) and
+set up the address spaces for the kernel and user processes to achieve process isolation.</p>
+</section>
+<section id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Understand RISC-V Sv39 virtual memory system architecture.</p></li>
+<li><p>Understand how the kernel manages memory for user processes.</p></li>
+<li><p>Understand how demand paging works.</p></li>
+<li><p>Understand how copy-on-write works.</p></li>
+</ul>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
+<section id="terminology">
+<h3>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">#</a></h3>
+<section id="translation-levels">
+<h4>Translation Levels<a class="headerlink" href="#translation-levels" title="Link to this heading">#</a></h4>
+<p>Translating a virtual address to a physical address involves levels of translation.
+RISC-V Sv39 uses a three-level page table translation.</p>
+<p>The top-level is page global directory (PGD), followed by page middle directory (PMD), and page table entry (PTE).</p>
+</section>
+<section id="page-vs-page-frame-vs-page-table">
+<h4>Page vs. Page Frame vs. Page Table<a class="headerlink" href="#page-vs-page-frame-vs-page-table" title="Link to this heading">#</a></h4>
+<p><strong>Page</strong>: A chunk of virtual memory pointed to by one entry of a page table.</p>
+<p><strong>Page frame</strong>: A chunk of physical memory.</p>
+<p><strong>Page table</strong>: A page frame whose entries point to the next level page tables or pages.
+In this documentation, PGD, PMD, and PTE are all called page tables.</p>
+</section>
+</section>
+<section id="page-entry-descriptor">
+<h3>Page Entry Descriptor<a class="headerlink" href="#page-entry-descriptor" title="Link to this heading">#</a></h3>
+<p>Each page table entry (PTE) contains the physical page number and flags describing access permissions and status.</p>
+<p>We list the necessary content for you.</p>
+<section id="descriptor-s-format-simplified">
+<h4>Descriptor’s Format (simplified)<a class="headerlink" href="#descriptor-s-format-simplified" title="Link to this heading">#</a></h4>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>63               10 9 8 7 6 5 4 3 2 1 0
++----------------+---+---------------+
+|  PPN[2:0]      |...| flags         |
++----------------+---+---------------+
+
+PPN: Physical Page Number (combined from fields across bits 10-53).
+Flags:
+  V: valid
+  R: readable
+  W: writable
+  X: executable
+  U: user accessible
+  G: global
+  A: accessed
+  D: dirty
+</pre></div>
+</div>
+</section>
+<section id="attributes-used-in-this-lab">
+<h4>Attributes Used in this Lab<a class="headerlink" href="#attributes-used-in-this-lab" title="Link to this heading">#</a></h4>
+<dl class="simple">
+<dt><strong>Bit[0] V (Valid)</strong></dt><dd><p>Indicates the entry is valid.</p>
+</dd>
+<dt><strong>Bit[1] R (Readable)</strong></dt><dd><p>Page is readable.</p>
+</dd>
+<dt><strong>Bit[2] W (Writable)</strong></dt><dd><p>Page is writable.</p>
+</dd>
+<dt><strong>Bit[3] X (Executable)</strong></dt><dd><p>Page is executable.</p>
+</dd>
+<dt><strong>Bit[4] U (User)</strong></dt><dd><p>1 for user mode accessible, 0 for kernel only.</p>
+</dd>
+<dt><strong>Bit[5] G (Global)</strong></dt><dd><p>1 if mapping is global.</p>
+</dd>
+<dt><strong>Bit[6] A (Accessed)</strong></dt><dd><p>Set by hardware when the page is accessed.</p>
+</dd>
+<dt><strong>Bit[7] D (Dirty)</strong></dt><dd><p>Set by hardware when the page is written.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="risc-v-sv39-memory-layout">
+<h3>RISC-V Sv39 Memory Layout<a class="headerlink" href="#risc-v-sv39-memory-layout" title="Link to this heading">#</a></h3>
+<p>In the 39-bit virtual address space of Sv39, the upper address space is usually for kernel mode, and the lower address space is for user mode.</p>
+<img alt="images/mem_layout_riscv.png" src="images/mem_layout_riscv.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The entire accessible physical address could be linearly mapped to offset 0xffff_ffc0_0000_0000 for kernel access in this lab.
+It simplifies the design.</p>
+</div>
+</section>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h3>
+<p>RISC-V Sv39 uses 3-level page table with 4KB page size and 512 entries per table.</p>
+<p>To keep everything simple, the following configuration is specified for this lab:</p>
+<ul class="simple">
+<li><p>Paging mode: Sv39</p></li>
+<li><p>Page size: 4KB</p></li>
+<li><p>Virtual address space: 39-bit</p></li>
+<li><p>Physical memory access via linear mapping in kernel space</p></li>
+<li><p>No ASID support</p></li>
+</ul>
+<img alt="images/lab6_sv39.jpg" src="images/lab6_sv39.jpg" />
+</section>
+<section id="reference">
+<h3>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h3>
+<p>So far, we have briefly introduced the concept of virtual memory and RISC-V Sv39 virtual memory system architecture.
+For details, you can refer to:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-853e233-2025-07-24/riscv-privileged.pdf">The RISC-V Instruction Set Manual: Volume II - Privileged Architecture(Version 20250724: Intermediate Release)</a></p></li>
+<li><p><strong>12.4. Sv39: Page-Based 39-bit Virtual-Memory System</strong> of the RISC-V privileged architecture manual.</p></li>
+</ul>
+</section>
+</section>
+<section id="basic-exercises">
+<h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
+<section id="basic-exercise-1-virtual-memory-in-kernel-space-10">
+<h3>Basic Exercise 1 - Virtual Memory in Kernel Space - 10%<a class="headerlink" href="#basic-exercise-1-virtual-memory-in-kernel-space-10" title="Link to this heading">#</a></h3>
+<p>We provide a step-by-step tutorial to guide you to make your original kernel work with virtual memory.
+However, we only give the essential explanation in each step.
+For details, please refer to the manual.</p>
+<section id="satp-register">
+<h4>SATP Register<a class="headerlink" href="#satp-register" title="Link to this heading">#</a></h4>
+<p>Paging is enabled by writing to the <cite>satp</cite> register.</p>
+<p>The following configuration is used in this lab:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SATP_SV39    (8L &lt;&lt; 60)</span>
+<span class="cp">#define SATP_MODE_MASK (0xFULL &lt;&lt; 60)</span>
+<span class="cp">#define MAKE_SATP(pagetable) (SATP_SV39 | ((((uint64_t)pagetable) &gt;&gt; 12) &amp; 0xFFFFFFFFFFF))</span>
+
+<span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">pgd</span><span class="p">);</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Set up <cite>satp</cite> to enable virtual memory.</p>
+</div>
+</section>
+<section id="memory-attributes">
+<h4>Memory Attributes<a class="headerlink" href="#memory-attributes" title="Link to this heading">#</a></h4>
+<p>In RISC-V, memory attributes like cacheability and permissions are managed through PTE bits and not separate attribute tables.</p>
+<p>Use the following for this lab:</p>
+<ul class="simple">
+<li><p>Kernel mapping: readable, writable, executable, valid</p></li>
+<li><p>MMIO mapping: readable, writable, valid (not executable)</p></li>
+<li><p>User mapping: readable, writable, valid, user</p></li>
+</ul>
+</section>
+<section id="identity-mapping">
+<h4>Identity Mapping<a class="headerlink" href="#identity-mapping" title="Link to this heading">#</a></h4>
+<p>Before enabling the MMU, you need to set up the page tables for the kernel.
+Start with identity mapping using 2MB pages.</p>
+<p>Each entry of PMD (second level) points to a 2MB block.
+Hence, you only need:</p>
+<ul class="simple">
+<li><p>One PGD</p></li>
+<li><p>One PMD (512 entries, each 2MB, for 1GB mapping)</p></li>
+</ul>
+<p><strong>Setup</strong></p>
+<ul class="simple">
+<li><p>Allocate two pages: one for PGD, one for PMD</p></li>
+<li><p>Each PGD entry points to a PMD</p></li>
+<li><p>Each PMD entry maps 2MB of physical memory</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PTE_V (1L &lt;&lt; 0)</span>
+<span class="cp">#define PTE_R (1L &lt;&lt; 1)</span>
+<span class="cp">#define PTE_W (1L &lt;&lt; 2)</span>
+<span class="cp">#define PTE_X (1L &lt;&lt; 3)</span>
+<span class="cp">#define PTE_U (1L &lt;&lt; 4)</span>
+<span class="cp">#define PTE_G (1L &lt;&lt; 5)</span>
+<span class="cp">#define PTE_A (1L &lt;&lt; 6)</span>
+<span class="cp">#define PTE_D (1L &lt;&lt; 7)</span>
+
+<span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">pgd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_page</span><span class="p">();</span>
+<span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">pmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_page</span><span class="p">();</span>
+
+<span class="n">pgd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pmd</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_V</span><span class="p">;</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">512</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mh">0x200000</span><span class="p">;</span>
+<span class="w">  </span><span class="n">pmd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">pa</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_R</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_W</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_X</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_V</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_G</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">pgd</span><span class="p">);</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Set up identity mapping and enable MMU.</p>
+</div>
+</section>
+<section id="map-the-kernel-space">
+<h4>Map the Kernel Space<a class="headerlink" href="#map-the-kernel-space" title="Link to this heading">#</a></h4>
+<p>You should map the kernel to the upper half of the virtual address space, e.g., starting from <cite>0xffffffffc0000000</cite>.</p>
+<p>Modify your linker script:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>SECTIONS
+{
+  . = 0xffffffffc0000000;
+  _kernel_start = .;
+  ...
+}
+</pre></div>
+</div>
+<p>You should create page table entries mapping the kernel’s physical memory to this virtual region.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Modify linker script and create kernel-space mappings.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Hard-coded addresses such as MMIO addresses should also be mapped in the upper address space.</p>
+</div>
+</section>
+<section id="finer-granularity-paging">
+<h4>Finer Granularity Paging<a class="headerlink" href="#finer-granularity-paging" title="Link to this heading">#</a></h4>
+<p>Use 4KB pages for regions where fine-grained protection is needed (e.g., user stack, .bss).
+RISC-V supports 3-level paging: 4KB pages via PTE entries.</p>
+<p>Map normal memory with readable/writable/executable bits as needed.
+Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avoid speculative load.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Use 3-level mapping with finer granularity to distinguish MMIO and RAM.</p>
+</div>
+</section>
+</section>
+<section id="basic-exercise-2-virtual-memory-in-user-space-30">
+<h3>Basic Exercise 2 - Virtual Memory in User Space - 30%<a class="headerlink" href="#basic-exercise-2-virtual-memory-in-user-space-30" title="Link to this heading">#</a></h3>
+<section id="pgd-allocation">
+<h4>PGD Allocation<a class="headerlink" href="#pgd-allocation" title="Link to this heading">#</a></h4>
+<p>To isolate user processes, you should allocate a separate PGD for each user process.</p>
+</section>
+<section id="map-the-user-space">
+<h4>Map the User Space<a class="headerlink" href="#map-the-user-space" title="Link to this heading">#</a></h4>
+<p>For mapping user memory, walk through 3-level page tables:</p>
+<p>PGD → PMD → PTE</p>
+<p>Allocate intermediate tables as needed. Here is a simplified walk function:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">pte_t</span><span class="w"> </span><span class="o">*</span><span class="nf">walk</span><span class="p">(</span><span class="n">pagetable_t</span><span class="w"> </span><span class="n">pagetable</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">va</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">alloc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">level</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">level</span><span class="o">--</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pte_t</span><span class="w"> </span><span class="o">*</span><span class="n">pte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pagetable</span><span class="p">[</span><span class="n">PX</span><span class="p">(</span><span class="n">level</span><span class="p">,</span><span class="w"> </span><span class="n">va</span><span class="p">)];</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">pte</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">PTE_V</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">pagetable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">pagetable_t</span><span class="p">)</span><span class="n">PTE2PA</span><span class="p">(</span><span class="o">*</span><span class="n">pte</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">alloc</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="n">pagetable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_page</span><span class="p">();</span>
+<span class="w">      </span><span class="n">memset</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">PAGE_SIZE</span><span class="p">);</span>
+<span class="w">      </span><span class="o">*</span><span class="n">pte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PA2PTE</span><span class="p">(</span><span class="n">pagetable</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_V</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pagetable</span><span class="p">[</span><span class="n">PX</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">va</span><span class="p">)];</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement function like <code class="docutils literal notranslate"><span class="pre">mappages(pagetable</span> <span class="pre">pagetable,</span> <span class="pre">uint64_t</span> <span class="pre">va,</span> <span class="pre">uint64_t</span> <span class="pre">size,</span> <span class="pre">uint64_t</span> <span class="pre">pa,</span> <span class="pre">...)</span></code> and use it to map user code at 0x0 and user stack at 0xfffffffff000.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.</p>
+</div>
+<section id="revisit-syscalls">
+<h5>Revisit Syscalls<a class="headerlink" href="#revisit-syscalls" title="Link to this heading">#</a></h5>
+<p>You can now allow user programs to share the same virtual addresses, using per-process mappings.</p>
+<p>Reimplement <cite>fork()</cite>, <cite>exec()</cite>, and system calls like <cite>mbox_call</cite> to use virtual memory properly.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Revisit syscalls to support address isolation via virtual memory.</p>
+</div>
+</section>
+</section>
+<section id="context-switch">
+<h4>Context Switch<a class="headerlink" href="#context-switch" title="Link to this heading">#</a></h4>
+<p>To switch address space, write the process’s PGD to the <cite>satp</cite> register and flush TLB.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">next_pgd</span><span class="p">);</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
+<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement address space switch using <cite>satp</cite> and <cite>sfence.vma</cite>.</p>
+</div>
+</section>
+</section>
+<section id="video-player-40">
+<h3>Video Player - 40%<a class="headerlink" href="#video-player-40" title="Link to this heading">#</a></h3>
+<p>In order to test the correctness of your previous implementation, we provide a <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> that runs only if your kernel behaves as expected.</p>
+<div class="admonition-note admonition">
+<p class="admonition-title">Note</p>
+<p>The user program uses all syscalls from the previous lab.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Only if you can run our test program fluently will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.</p>
+</div>
+</section>
+</section>
+<section id="advanced-exercises">
+<h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
+<section id="advanced-exercise-1-mmap-10">
+<h3>Advanced Exercise 1 - Mmap - 10%<a class="headerlink" href="#advanced-exercise-1-mmap-10" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mmap()</span></code> is a system call to create memory regions for a user process.
+Each region can be mapped to a file or anonymous pages (i.e., page frames not related to any file) with different protection.
+Users can create heap and memory-mapped regions using this system call.</p>
+<p>The kernel can also use it to implement the program loader.
+Memory regions such as .text and .data can be created by <strong>memory-mapped files</strong>.
+Regions like <strong>.bss</strong> and <strong>user stack</strong> can be created by <strong>anonymous page mapping</strong>.</p>
+<div class="admonition-note admonition">
+<p class="admonition-title">Note</p>
+<p>Because this lab does not use ELF files or actual files, you only need to implement anonymous page mapping.</p>
+</div>
+<section id="api-specification">
+<h4>API Specification<a class="headerlink" href="#api-specification" title="Link to this heading">#</a></h4>
+<p>(void*) mmap(void* addr, size_t len, int prot, int flags, int fd, int file_offset)</p>
+<ul class="simple">
+<li><p>If <cite>addr</cite> is NULL, the kernel chooses the start address.</p></li>
+<li><p>If <cite>addr</cite> is not NULL:
+* If the region overlaps with existing ones or is not page-aligned, treat <cite>addr</cite> as a hint.
+* Otherwise, use <cite>addr</cite> as the base of the new region.</p></li>
+<li><p><cite>len</cite> must be page-aligned (rounded up if not).</p></li>
+<li><p><cite>prot</cite> specifies access:
+* PROT_NONE: 0, inaccessible
+* PROT_READ: 1, readable
+* PROT_WRITE: 2, writable
+* PROT_EXEC: 4, executable</p></li>
+<li><p><cite>flags</cite> include:
+* MAP_ANONYMOUS: Create anonymous pages (used for stack/heap)
+* MAP_POPULATE: Allocate physical pages immediately (optional if implementing demand paging)</p></li>
+</ul>
+</section>
+<section id="region-page-mapping">
+<h4>Region Page Mapping<a class="headerlink" href="#region-page-mapping" title="Link to this heading">#</a></h4>
+<p>If the user specifies MAP_POPULATE, the kernel should map physical pages immediately.</p>
+<ul class="simple">
+<li><p>For anonymous pages:
+1. Allocate page frames.
+2. Map the region to the allocated frames using the requested protection bits.</p></li>
+</ul>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the <cite>mmap</cite> syscall. Syscall number: 10.</p>
+</div>
+</section>
+</section>
+<section id="advanced-exercise-2-page-fault-handler-demand-paging-10">
+<h3>Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%<a class="headerlink" href="#advanced-exercise-2-page-fault-handler-demand-paging-10" title="Link to this heading">#</a></h3>
+<p>So far, page frames have been pre-allocated.
+But a user program may reserve large address spaces (e.g., heap, mmap) and not use all of them.
+Pre-allocating wastes CPU time and memory.</p>
+<p>Instead, allocate page frames <strong>on demand</strong>.</p>
+<p>At process creation, only PGD is allocated.
+When a page fault occurs:</p>
+<ul class="simple">
+<li><p>If the fault address is not in any mapped region:
+* Generate segmentation fault and terminate the process.</p></li>
+<li><p>If the fault address is in a valid region:
+* Allocate a page frame and map only that page.</p></li>
+</ul>
+<div class="admonition-note admonition">
+<p class="admonition-title">Note</p>
+<p>To verify correctness, log each fault:</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Translation fault</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;[Translation fault]: %lx</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">addr</span><span class="p">);</span>
+<span class="c1">// Segmentation fault</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;[Segmentation fault]: Kill Process</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement page fault handler for demand paging.</p>
+</div>
+</section>
+<section id="advanced-exercise-3-copy-on-write-10">
+<h3>Advanced Exercise 3 - Copy on Write - 10%<a class="headerlink" href="#advanced-exercise-3-copy-on-write-10" title="Link to this heading">#</a></h3>
+<p>In your previous fork implementation, the kernel copies all page frames for the child.
+But <cite>exec()</cite> usually follows <cite>fork()</cite>, meaning those frames may never be used.</p>
+<p>To optimize this, implement <strong>copy-on-write (COW)</strong>.</p>
+<section id="on-fork-a-new-process">
+<h4>On Fork a New Process<a class="headerlink" href="#on-fork-a-new-process" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p>Copy the page tables (PGD, etc.).</p></li>
+<li><p>Mark all user PTE entries <strong>read-only</strong>, even if they were originally read-write.</p></li>
+<li><p>Increment reference counts for each shared page frame.</p></li>
+</ol>
+</section>
+<section id="on-page-write-by-either-process">
+<h4>On Page Write by Either Process<a class="headerlink" href="#on-page-write-by-either-process" title="Link to this heading">#</a></h4>
+<p>If a process writes to a read-only page, a <strong>permission fault</strong> occurs.
+Then:</p>
+<ul>
+<li><p>If the region is marked read-only:
+* Segmentation fault.</p></li>
+<li><p>If the region is writable:
+* It’s a copy-on-write fault:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Allocate a new frame</p></li>
+<li><p>Copy the data</p></li>
+<li><p>Update PTE to be writable and point to the new frame</p></li>
+<li><p>Update reference count</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Track reference counts per frame to determine when to free memory.</p>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement copy-on-write mechanism.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your user program accesses any memory-mapped I/O regions for inter-process communication, ensure these regions are mapped directly in each process without copy-on-write, to maintain correct behavior.</p>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lab5.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lab 5: Thread and User Process</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../references/external_resources.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">External Resourses</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-30">Basic Exercise 2 - Virtual Memory in User Space - 30%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-10">Advanced Exercise 1 - Mmap - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-10">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-10">Advanced Exercise 3 - Copy on Write - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By  NYCU cas-lab
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, NYCU cas-lab.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

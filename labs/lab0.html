@@ -1,0 +1,771 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lab 0: Environment Setup &#8212; CSIC30016: Operating System Capstone</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab0';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lab 1: Hello World" href="lab1.html" />
+    <link rel="prev" title="Staff" href="../class/staff.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CSIC30016: Operating System Capstone</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Class:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1: Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3: Memory Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5: Thread and User Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6: Virtual Memory</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../references/external_resources.html">External Resourses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/old_course.html">Old Course Websites</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/labs/lab0.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lab 0: Environment Setup</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-platform-development">Cross-Platform Development</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-compiler">Cross Compiler</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linker">Linker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-code-to-kernel-image">From Source Code to Kernel Image</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-code-to-object-files">From Source Code to Object Files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-object-files-to-elf">From Object Files to ELF</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-elf-to-kernel-image">From ELF to Kernel Image</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-on-qemu">Check on QEMU</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-to-orangepi-rv2">Deploy to OrangePi RV2</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-kernel-image-to-fit-image">From Kernel Image to FIT Image</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flash-bootable-image-to-sd-card">Flash Bootable Image to SD Card</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interact-with-orangepi-rv2">Interact with OrangePi RV2</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging">Debugging</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-on-qemu">Debug on QEMU</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-on-real-orangepi-rv2">Debug on Real OrangePi RV2</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="lab-0-environment-setup">
+<h1>Lab 0: Environment Setup<a class="headerlink" href="#lab-0-environment-setup" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>In Lab 0, you will prepare the development environment for the future labs.
+You should install the required toolchain and use it to build a bootable image for OrangePi RV2.</p>
+</section>
+<section id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Install the RISC-V toolchain and emulator on your host system.</p></li>
+<li><p>Learn the fundamentals of cross-platform bare-metal development.</p></li>
+<li><p>Build and boot a minimal kernel image on QEMU and OrangePi RV2.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This lab is an introductory exercise.
+It is not graded, but completing all the <code class="docutils literal notranslate"><span class="pre">Todo</span></code> parts is essential
+to ensure smooth progress in subsequent labs.
+Skipping them may result in difficulties later on.</p>
+</div>
+</section>
+<section id="cross-platform-development">
+<h2>Cross-Platform Development<a class="headerlink" href="#cross-platform-development" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This lab is designed and tested primarily on Linux-based systems.
+While it may be possible to perform the tasks on other platforms (e.g., macOS or Windows with WSL),
+such environments are not officially supported for now and may introduce unexpected issues.
+Please proceed with caution if you choose to use a non-Linux environment, and be aware that TA assistance may be limited in such cases.</p>
+</div>
+<section id="cross-compiler">
+<h3>Cross Compiler<a class="headerlink" href="#cross-compiler" title="Link to this heading">#</a></h3>
+<p>The Orange Pi RV2 is powered by the Ky X1 System-on-Chip (SoC), featuring an octa-core 64-bit RISC-V processor.
+To compile your source code to 64-bit RISC-V machine code,
+you need a cross compiler if you develop on a non-RISC-V environment.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Install the cross compiler <code class="docutils literal notranslate"><span class="pre">gcc-riscv64-unknown-elf</span></code> on your host computer.</p>
+<p>It is recommended to install it using a package managers like <code class="docutils literal notranslate"><span class="pre">apt</span></code>.
+Alternatively, you can build it from source following the instructions provided by the <a class="reference external" href="https://github.com/riscv-collab/riscv-gnu-toolchain">RISC-V GNU Toolchain project</a> if needed.</p>
+</div>
+</section>
+<section id="linker">
+<h3>Linker<a class="headerlink" href="#linker" title="Link to this heading">#</a></h3>
+<p>You might not have explicitly encountered linkers in previous development experiences.
+This is because most compilers automatically apply a default linker script
+during the build process. (Use <code class="docutils literal notranslate"><span class="pre">ld</span> <span class="pre">--verbose</span></code> to inspect the default script.)
+In bare-metal programming, you are responsible for defining the memory layout manually.</p>
+<p>The following is a linker script template.
+You will extend it in a future lab.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECTIONS</span>
+<span class="p">{</span>
+    <span class="o">.</span> <span class="o">=</span> <span class="mh">0x80200000</span><span class="p">;</span>
+    <span class="o">.</span><span class="n">text</span> <span class="p">:</span> <span class="p">{</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="p">}</span>
+    <span class="o">.</span><span class="n">rodata</span> <span class="p">:</span> <span class="p">{</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">rodata</span><span class="p">)</span> <span class="p">}</span>
+    <span class="o">.</span><span class="n">data</span> <span class="p">:</span> <span class="p">{</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="p">}</span>
+    <span class="o">.</span><span class="n">bss</span> <span class="p">:</span> <span class="p">{</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">sbss</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">bss</span><span class="p">)</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="qemu">
+<h3>QEMU<a class="headerlink" href="#qemu" title="Link to this heading">#</a></h3>
+<p>In cross-platform development,
+using an emulator can simplify the process of validating your code
+before testing it on physical hardware.
+QEMU provides such an environment for early-stage development and testing.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>QEMU provides a machine option <code class="docutils literal notranslate"><span class="pre">virt</span></code> (a general-purpose virtual board),
+but it does not fully replicate the behavior of a real OrangePi RV2 board.
+You should always verify your code on actual hardware as well.</p>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">qemu-system-riscv64</span></code> on your host computer.</p>
+</div>
+</section>
+</section>
+<section id="from-source-code-to-kernel-image">
+<h2>From Source Code to Kernel Image<a class="headerlink" href="#from-source-code-to-kernel-image" title="Link to this heading">#</a></h2>
+<p>At this point, you should have a basic understanding of the cross-platform toolchain.
+The following steps will guide you through using these tools in practice.</p>
+<section id="from-source-code-to-object-files">
+<h3>From Source Code to Object Files<a class="headerlink" href="#from-source-code-to-object-files" title="Link to this heading">#</a></h3>
+<p>Source code is converted to object files by a cross compiler.
+After saving the following assembly as <code class="docutils literal notranslate"><span class="pre">a.S</span></code>,
+you can convert it to an object file by <code class="docutils literal notranslate"><span class="pre">riscv64-unknown-elf-gcc</span> <span class="pre">-c</span> <span class="pre">a.S</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span><span class="n">section</span> <span class="s2">&quot;.text&quot;</span>
+<span class="n">_start</span><span class="p">:</span>
+  <span class="n">wfi</span>
+  <span class="n">j</span> <span class="n">_start</span>
+</pre></div>
+</div>
+</section>
+<section id="from-object-files-to-elf">
+<h3>From Object Files to ELF<a class="headerlink" href="#from-object-files-to-elf" title="Link to this heading">#</a></h3>
+<p>A linker links object files to an ELF file.
+An ELF file can be loaded and executed by program loaders.
+Program loaders are usually provided by the operating system in a regular development environment.
+In bare-metal programming, ELF can be loaded by some bootloaders.</p>
+<p>To convert the object file from the previous step to an ELF file,
+you can save the provided linker script as <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code>, and run the following command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">riscv64</span><span class="o">-</span><span class="n">unknown</span><span class="o">-</span><span class="n">elf</span><span class="o">-</span><span class="n">ld</span> <span class="o">-</span><span class="n">T</span> <span class="n">linker</span><span class="o">.</span><span class="n">ld</span> <span class="o">-</span><span class="n">o</span> <span class="n">kernel</span><span class="o">.</span><span class="n">elf</span> <span class="n">a</span><span class="o">.</span><span class="n">o</span>
+</pre></div>
+</div>
+</section>
+<section id="from-elf-to-kernel-image">
+<h3>From ELF to Kernel Image<a class="headerlink" href="#from-elf-to-kernel-image" title="Link to this heading">#</a></h3>
+<p>The OS kernel is initially compiled as an ELF file.
+To make it suitable for booting, we typically convert it into a raw binary image using <code class="docutils literal notranslate"><span class="pre">objcopy</span></code>.
+This binary image can then be included as part of a Flattened Image Tree (FIT) for use by the bootloader.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">riscv64</span><span class="o">-</span><span class="n">unknown</span><span class="o">-</span><span class="n">elf</span><span class="o">-</span><span class="n">objcopy</span> <span class="o">-</span><span class="n">O</span> <span class="n">binary</span> <span class="n">kernel</span><span class="o">.</span><span class="n">elf</span> <span class="n">kernel</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
+</div>
+</section>
+<section id="check-on-qemu">
+<h3>Check on QEMU<a class="headerlink" href="#check-on-qemu" title="Link to this heading">#</a></h3>
+<p>After building, you can use QEMU to see the dumped assembly.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qemu</span><span class="o">-</span><span class="n">system</span><span class="o">-</span><span class="n">riscv64</span> <span class="o">-</span><span class="n">M</span> <span class="n">virt</span> <span class="o">-</span><span class="n">kernel</span> <span class="n">kernel</span><span class="o">.</span><span class="n">bin</span> <span class="o">-</span><span class="n">display</span> <span class="n">none</span> <span class="o">-</span><span class="n">d</span> <span class="n">in_asm</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Build your first kernel image, and check it on QEMU.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although QEMU is convenient for early-stage testing, it does not emulate many OrangePi RV2-specific devices.
+Do not assume success in QEMU guarantees correct behavior on hardware.</p>
+</div>
+</section>
+</section>
+<section id="deploy-to-orangepi-rv2">
+<h2>Deploy to OrangePi RV2<a class="headerlink" href="#deploy-to-orangepi-rv2" title="Link to this heading">#</a></h2>
+<section id="from-kernel-image-to-fit-image">
+<h3>From Kernel Image to FIT Image<a class="headerlink" href="#from-kernel-image-to-fit-image" title="Link to this heading">#</a></h3>
+<p>The bootloader on the OrangePi RV2 board does not typically boot ELF or raw kernel binaries directly.
+Instead, it expects a single file in the Flattened Image Tree (FIT) format, which packages the kernel image,
+the device tree blob (DTB), and optionally an initramfs.</p>
+<p>To generate a FIT image, you will need the <cite>mkimage</cite> tool, which is part of the <cite>u-boot-tools</cite> package.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">u</span><span class="o">-</span><span class="n">boot</span><span class="o">-</span><span class="n">tools</span>
+</pre></div>
+</div>
+<p>You also need to create a configuration file named <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code>, which specifies
+the contents and layout of the resulting FIT image. This file must reference the following components:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kernel.bin</span></code> – the raw kernel image generated earlier</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x1_orangepi-rv2.dtb</span></code> – the device tree for OrangePi RV2</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">initramfs.cpio</span></code> – an optional root filesystem archive or initial <code class="docutils literal notranslate"><span class="pre">ramdisk</span></code> (not included in this lab; it will be introduced in a later lab. Be sure to remove the corresponding section from the <code class="docutils literal notranslate"><span class="pre">.its</span></code> file for now to avoid build errors)</p></li>
+</ul>
+<p>Below is a minimal example of a valid <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code> file that includes only the kernel and device tree:</p>
+<div class="highlight-dts notranslate"><div class="highlight"><pre><span></span><span class="cp">/dts-v1/</span><span class="p">;</span>
+<span class="nf">/</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;U-boot FIT Image for Orange Pi RV2&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kr">#address-cells</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">    </span><span class="nf">images</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nf">kernel</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Kernel Image&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cp">/incbin/(&quot;kernel.bin&quot;)</span><span class="p">;</span>
+<span class="w">            </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;kernel&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">arch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;riscv&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">os</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;linux&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">compression</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;none&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x00200000</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x00200000</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">        </span><span class="nf">fdt</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Flat Device Tree&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cp">/incbin/(&quot;x1_orangepi-rv2.dtb&quot;)</span><span class="p">;</span>
+<span class="w">            </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;flat_dt&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">arch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;riscv&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">compression</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;none&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x31000000</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">    </span><span class="nf">configurations</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;config-1&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="nf">config-1</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;NYCU OSC RISC-V KERNEL&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;kernel&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">fdt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;fdt&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The required device tree file can be <a class="reference external" href="../uploads/x1_orangepi-rv2.dtb">downloaded</a> from the course resource page.</p>
+<p>Once the required files and the <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code> configuration are prepared,
+use the following command to generate the final FIT image:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkimage</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">kernel</span><span class="o">.</span><span class="n">its</span> <span class="n">kernel</span><span class="o">.</span><span class="n">fit</span>
+</pre></div>
+</div>
+</section>
+<section id="flash-bootable-image-to-sd-card">
+<h3>Flash Bootable Image to SD Card<a class="headerlink" href="#flash-bootable-image-to-sd-card" title="Link to this heading">#</a></h3>
+<p>To boot your OrangePi RV2 board, you need to write a properly configured bootable image to an SD card.</p>
+<p>At minimum, the SD card must contain a FAT16 or FAT32 partition with the following files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kernel.fit</span></code> – the FIT image generated in the previous step</p></li>
+</ul>
+<p>There are two ways to prepare your SD card:</p>
+<p><strong>Test with Provided image</strong>
+A prebuilt bootable <a class="reference external" href="../uploads/opirv2-sdcard.img">image</a> is available from the course repository.</p>
+<p>You can write it to your SD card using the <code class="docutils literal notranslate"><span class="pre">dd</span></code> command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">opirv2</span><span class="o">-</span><span class="n">sdcard</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span> <span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">M</span> <span class="n">status</span><span class="o">=</span><span class="n">progress</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The additional parameters are included to improve the usability of the command,
+such as speeding up write operations and showing progress.
+For detailed explanations, please refer to the <code class="docutils literal notranslate"><span class="pre">dd</span></code> manual (<code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">dd</span></code>).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">/dev/sdX</span></code> with the actual device name of your SD card.
+You can check the device name using <code class="docutils literal notranslate"><span class="pre">lsblk</span></code>.
+Writing to the wrong device may cause data loss.</p>
+</div>
+<p>The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.
+You may mount the partition to inspect or modify its contents if needed.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Prepare your SD card for booting OrangePi RV2.</p>
+</div>
+</section>
+<section id="interact-with-orangepi-rv2">
+<h3>Interact with OrangePi RV2<a class="headerlink" href="#interact-with-orangepi-rv2" title="Link to this heading">#</a></h3>
+<p>After setting up your SD card and inserting it into the OrangePi RV2 board,
+you can interact with the system via UART to verify that your setup is functioning correctly.</p>
+<p>The prebuilt kernel included in the image echoes back any characters you type through the serial console.</p>
+<p>Follow these steps to test the UART connection:</p>
+<ol class="arabic simple">
+<li><p>Connect a UART-to-USB adapter to your host machine.</p></li>
+<li><p>Use a serial console program (e.g., <code class="docutils literal notranslate"><span class="pre">screen</span></code>) to open the serial port with the correct settings:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">screen</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">ttyUSB0</span> <span class="mi">115200</span>
+</pre></div>
+</div>
+<ol class="arabic" start="3">
+<li><p>Connect the TX, RX, and GND pins from the UART adapter to the corresponding UART header on the OrangePi RV2 board.
+Refer to the diagram below for the correct wiring:</p>
+<img alt="../_images/OSC2026_UART.png" src="../_images/OSC2026_UART.png" />
+</li>
+<li><p>Power on the OrangePi RV2. Once booted, try typing on your keyboard.
+You should see the characters echoed back in your serial console.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If nothing appears on the console, double-check the wiring, baud rate, and whether the kernel image was placed correctly.</p>
+</div>
+</section>
+</section>
+<section id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Link to this heading">#</a></h2>
+<section id="debug-on-qemu">
+<h3>Debug on QEMU<a class="headerlink" href="#debug-on-qemu" title="Link to this heading">#</a></h3>
+<p>QEMU supports basic debugging features such as memory/register inspection and remote debugging with GDB.
+This allows you to analyze program behavior before deploying to physical hardware.</p>
+<p>To begin, install GDB with multi-architecture support on your host machine:</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">gdb-multiarch</span></code> on your host computer.</p>
+</div>
+<p>Then launch QEMU in debug mode using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qemu</span><span class="o">-</span><span class="n">system</span><span class="o">-</span><span class="n">riscv64</span> <span class="o">-</span><span class="n">M</span> <span class="n">virt</span> <span class="o">-</span><span class="n">kernel</span> <span class="n">kernel</span><span class="o">.</span><span class="n">bin</span> <span class="o">-</span><span class="n">display</span> <span class="n">none</span> <span class="o">-</span><span class="n">S</span> <span class="o">-</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>This starts QEMU in a paused state and opens a debugging port (typically at <code class="docutils literal notranslate"><span class="pre">localhost:1234</span></code>).</p>
+<p>In a separate terminal, start GDB and connect to the running QEMU instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gdb</span><span class="o">-</span><span class="n">multiarch</span>
+<span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">file</span> <span class="n">kernel</span><span class="o">.</span><span class="n">elf</span>
+<span class="p">(</span><span class="n">gdb</span><span class="p">)</span> <span class="n">target</span> <span class="n">remote</span> <span class="p">:</span><span class="mi">1234</span>
+</pre></div>
+</div>
+<p>You can now use GDB commands to inspect registers, memory, or step through instructions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure the <code class="docutils literal notranslate"><span class="pre">kernel.elf</span></code> file includes debugging symbols (e.g., compiled with <code class="docutils literal notranslate"><span class="pre">-g</span></code> flag) for full functionality.</p>
+</div>
+</section>
+<section id="debug-on-real-orangepi-rv2">
+<h3>Debug on Real OrangePi RV2<a class="headerlink" href="#debug-on-real-orangepi-rv2" title="Link to this heading">#</a></h3>
+<p>When working on real hardware, debugging options are more limited.
+You can insert serial print statements to trace control flow or variable values.</p>
+<p>JTAG debugging is not covered in this course, but advanced users with access to JTAG hardware are welcome to explore this option independently.</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../class/staff.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Staff</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="lab1.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lab 1: Hello World</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-platform-development">Cross-Platform Development</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-compiler">Cross Compiler</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linker">Linker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-code-to-kernel-image">From Source Code to Kernel Image</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-code-to-object-files">From Source Code to Object Files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-object-files-to-elf">From Object Files to ELF</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-elf-to-kernel-image">From ELF to Kernel Image</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-on-qemu">Check on QEMU</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-to-orangepi-rv2">Deploy to OrangePi RV2</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-kernel-image-to-fit-image">From Kernel Image to FIT Image</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flash-bootable-image-to-sd-card">Flash Bootable Image to SD Card</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interact-with-orangepi-rv2">Interact with OrangePi RV2</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging">Debugging</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-on-qemu">Debug on QEMU</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-on-real-orangepi-rv2">Debug on Real OrangePi RV2</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By  NYCU cas-lab
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, NYCU cas-lab.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

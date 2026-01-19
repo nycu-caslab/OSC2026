@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lab 3: Memory Allocator &#8212; CSIC30016: Operating System Capstone</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab3';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lab 4: Exception and Interrupt" href="lab4.html" />
+    <link rel="prev" title="Lab 2: Booting" href="lab2.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CSIC30016: Operating System Capstone</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Class:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1: Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lab 3: Memory Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5: Thread and User Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6: Virtual Memory</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../references/external_resources.html">External Resourses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/old_course.html">Old Course Websites</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/labs/lab3.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lab 3: Memory Allocator</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reserved-memory">Reserved Memory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-frame-allocator">Page Frame Allocator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-memory-allocator">Dynamic Memory Allocator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#observability-of-allocators">Observability of Allocators</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-buddy-system-40">Basic Exercise 1 - Buddy System - 40%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-structure">Data Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#linked-lists-for-blocks-with-different-size-vf2-device-tree-memory-node">Linked-lists for blocks with different size (VF2 Device Tree &lt;memory&gt; node)</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#release-redundant-memory-block">Release redundant memory block</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#free-and-coalesce-blocks">Free and Coalesce Blocks</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#find-the-buddy">Find the buddy</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#merge-iteratively">Merge iteratively</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-dynamic-memory-allocator-30">Basic Exercise 2 - Dynamic Memory Allocator - 30%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-efficient-page-allocation-on-vf2-device-tree-10">Advanced Exercise 1 - Efficient Page Allocation on VF2 Device Tree - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-reserved-memory-via-vf2-device-tree-10">Advanced Exercise 2 - Reserved Memory via VF2 Device Tree - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-startup-allocation-with-vf2-device-tree-20">Advanced Exercise 3 - Startup Allocation with VF2 Device Tree - 20%</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This document is currently under construction and may be incomplete or subject to significant changes.
+Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
+</div>
+<section id="lab-3-memory-allocator">
+<h1>Lab 3: Memory Allocator<a class="headerlink" href="#lab-3-memory-allocator" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>A kernel allocates physical memory for maintaining its internal states and user programs’ use.
+Without memory allocators, you need to statically partition the physical memory into several memory pools for
+different objects.
+It’s sufficient for some systems that run known applications on known devices.
+Yet, general-purpose operating systems that run diverse applications on diverse devices determine the use and amount
+of physical memory at runtime. On VF2, available physical memory and reserved regions are described by the Device Tree,
+so you must read those descriptions at boot.</p>
+<p>In Lab 3, you need to implement memory allocators that rely on VF2 Device Tree for memory layout.
+They’ll be used in all later labs.</p>
+</section>
+<section id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Implement a Startup Allocator (bump-pointer) that uses the addresses retrieved by Lab 2’s DT parser:
+* DTB Blob
+* Kernel Image
+* Initramfs
+* Any implementer-defined reserved regions
+to reserve all those areas before setting up the Page Frame Array.</p></li>
+<li><p>Implement a Page Frame Allocator that uses Lab 2’s <cite>mem_regions[]</cite> array for all physical RAM segments.</p></li>
+<li><p>Implement a Dynamic Memory Allocator that calls <cite>p_alloc(1)</cite> (from the Page Frame Allocator) and partitions pages into chunk pools.</p></li>
+</ul>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
+<section id="reserved-memory">
+<h3>Reserved Memory<a class="headerlink" href="#reserved-memory" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>After VF2 is booted, the following memory regions must be reserved before any allocation:</dt><dd><ol class="arabic simple">
+<li><p>Device Tree Blob (DTB)</p></li>
+<li><p>Kernel image</p></li>
+<li><p>Initramfs (ramdisk)</p></li>
+<li><p>Any additional platform-specific reserved areas (e.g., spin tables, CLINT/PLIC buffers)</p></li>
+</ol>
+</dd>
+<dt>Since Lab 2 already performed DT parsing, use the parsed data directly:</dt><dd><ul class="simple">
+<li><p>For the DTB: use the <code class="docutils literal notranslate"><span class="pre">fdt_ptr</span></code> value (passed in a1) and <code class="docutils literal notranslate"><span class="pre">fdt_totalsize(fdt_ptr)</span></code> to obtain start and size.</p></li>
+<li><p>For the Kernel image: use linker symbols (e.g., <cite>&amp;_phys_start</cite> and <cite>&amp;_phys_end</cite>) to obtain its physical range.</p></li>
+<li><p>For the Initramfs: use <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> properties <code class="docutils literal notranslate"><span class="pre">linux,initrd-start</span></code> and <code class="docutils literal notranslate"><span class="pre">linux,initrd-end</span></code> to obtain its range.</p></li>
+<li><p>For any other reserved areas defined in the DTS: they should be listed by the implementer and retrieved from the parsed DT data.</p></li>
+</ul>
+</dd>
+<dt>Before initializing any allocator, call:</dt><dd><p>memory_reserve(dtb_start, dtb_size);
+memory_reserve(kernel_start, kernel_size);
+memory_reserve(initrd_start, initrd_size);
+// plus any other implementer‐defined reserved regions from DT parsing</p>
+</dd>
+</dl>
+<p>to mark those frames as reserved.</p>
+</section>
+<section id="page-frame-allocator">
+<h3>Page Frame Allocator<a class="headerlink" href="#page-frame-allocator" title="Link to this heading">#</a></h3>
+<p>You may be wondering why you are asked to implement another memory allocator for page frames.
+Isn’t a well-designed dynamic memory allocator enough for all dynamic memory allocation cases?
+Indeed, you don’t need it if you run applications in kernel space only.</p>
+<p>However, if you need to run user space applications with virtual memory,
+you’ll need a lot of 4KB memory blocks with 4KB memory alignment called page frames.
+That’s because 4KB is the unit of virtual memory mapping.
+A regular dynamic memory allocator that uses a size header before memory block turns out half of the physical memory
+can’t be used as page frames.
+Therefore, a better approach is representing available physical memory as page frames.
+The page frame allocator reserves and uses an additional page frame array to bookkeep the use of page frames.
+The page frame allocator should be able to allocate contiguous page frames for allocating large buffers.
+For fine-grained memory allocation, a dynamic memory allocator can allocate a page frame first then cut it into chunks.</p>
+</section>
+<section id="dynamic-memory-allocator">
+<h3>Dynamic Memory Allocator<a class="headerlink" href="#dynamic-memory-allocator" title="Link to this heading">#</a></h3>
+<p>Given the allocation size,
+a dynamic memory allocator needs to find a large enough contiguous memory block and return the pointer to it.
+Also, the memory block would be released after use.
+A dynamic memory allocator should be able to reuse the memory block for another memory allocation.
+Reserved or allocated memory should not be allocated again to prevent data corruption.</p>
+</section>
+<section id="observability-of-allocators">
+<h3>Observability of Allocators<a class="headerlink" href="#observability-of-allocators" title="Link to this heading">#</a></h3>
+<p>It’s hard to observe the internal state of a memory allocator and hence hard to demo.
+To check the correctness of your allocator on VF2, you need to <strong>print the log of each allocation and free</strong>
+over the VF2 UART driver. Assume Lab 2 already initialized UART from the Device Tree’s <cite>stdout-path</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TAs will verify correctness by these logs during the demo. Prefix each log message with “[VF2 Allocator] ”
+to differentiate from other kernel output.</p>
+</div>
+</section>
+</section>
+<section id="basic-exercises">
+<h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
+<p>In the basic part, your allocator can focus on a single allocable memory region provided by the VF2 Device Tree’s &lt;memory&gt; node
+and does not need to handle reserved-memory entries. Choose one available memory segment from the Device Tree
+(for example, the first &lt;memory&gt; region) and manage that part of memory only.</p>
+<section id="basic-exercise-1-buddy-system-40">
+<h3>Basic Exercise 1 - Buddy System - 40%<a class="headerlink" href="#basic-exercise-1-buddy-system-40" title="Link to this heading">#</a></h3>
+<p>Buddy system is a well-known and simple algorithm for allocating contiguous memory blocks.
+It has an internal fragmentation problem, but it’s still suitable for page frame allocation
+because the problem can be reduced with the dynamic memory allocator.
+We provide one possible implementation in the following part.
+You can still design it yourself as long as you follow the specification of the buddy system.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the buddy system for contiguous page frame allocation on VF2. Your maximum order must be larger than 5.
+Use Lab 2’s <cite>mem_regions[]</cite> array (each entry contains base and size of a RAM segment)
+to compute total page count and physical frame addresses, ignoring any gaps between segments.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You don’t need to handle the case of out-of-memory.</p>
+</div>
+<section id="data-structure">
+<h4>Data Structure<a class="headerlink" href="#data-structure" title="Link to this heading">#</a></h4>
+<p><strong>The Frame Array</strong> (or <em>“The Array”</em>, so to speak)</p>
+<p><em>The Array</em> represents the allocation status of the memory by constructing a 1-1 relationship between the physical memory frame and <em>The Array</em>’s entries.
+For example, if VF2 Device Tree indicates two allocable regions totaling 200 KiB with each frame being 4 KiB,
+then The Array would consist of 50 entries. Use the base addresses from the &lt;memory&gt; regions to compute
+each frame’s physical address (e.g., if the first region begins at 0x8000_0000, its first entry represents 0x8000_0000,
+next 0x8000_1000, etc.).</p>
+<p>However, to describe a living Buddy system with <em>The Array</em>, we need to provide extra meaning to items in <em>The Array</em> by assigning values to them, defined as followed:</p>
+<dl>
+<dt>For each entry in <em>The Array</em> with index <span class="math notranslate nohighlight">\(\text{idx}\)</span> and value <span class="math notranslate nohighlight">\(\text{val}\)</span></dt><dd><p>(Suppose the framesize to be <code class="docutils literal notranslate"><span class="pre">4kb</span></code>)</p>
+<dl class="simple">
+<dt>if <span class="math notranslate nohighlight">\(\text{val} \geq 0\)</span>:</dt><dd><p>There is an allocable, contiguous memory that starts from the <span class="math notranslate nohighlight">\(\text{idx}\)</span>’th frame with <span class="math notranslate nohighlight">\(\text{size} = 2^{\text{val}}\)</span> <span class="math notranslate nohighlight">\(\times\)</span> <code class="docutils literal notranslate"><span class="pre">4kb</span></code>.</p>
+</dd>
+<dt>if <span class="math notranslate nohighlight">\(\text{val} = \text{&lt;F&gt;}\)</span>: (user defined value)</dt><dd><p>The <span class="math notranslate nohighlight">\(\text{idx}\)</span>’th frame is free, but it belongs to a larger contiguous memory block. Hence, buddy system doesn’t directly allocate it.</p>
+</dd>
+<dt>if <span class="math notranslate nohighlight">\(\text{val} = \text{&lt;X&gt;}\)</span>: (user defined value)</dt><dd><p>The <span class="math notranslate nohighlight">\(\text{idx}\)</span>’th frame is already allocated, hence not allocable.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<img alt="../_images/buddy_frame_array.svg" src="../_images/buddy_frame_array.svg" />
+<p>Below is the generalized view of <strong>The Frame Array</strong>:</p>
+<img alt="../_images/buddy.svg" src="../_images/buddy.svg" />
+<p>You can calculate the address and the size of the contiguous block by the following formula.</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\text{block's physical address} = \text{block's index} \times 4096 +  \text{base address}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{block's size} = 4096 \times 2^\text{block's exponent}\)</span></p></li>
+</ul>
+<section id="linked-lists-for-blocks-with-different-size-vf2-device-tree-memory-node">
+<h5>Linked-lists for blocks with different size (VF2 Device Tree &lt;memory&gt; node)<a class="headerlink" href="#linked-lists-for-blocks-with-different-size-vf2-device-tree-memory-node" title="Link to this heading">#</a></h5>
+<p>You can set a maximum contiguous block size and create one linked-list for each size.
+The linked-list links free blocks of the same size.
+The buddy allocator’s search starts from the specified block size list.
+If the list is empty, it tries to find a larger block in a larger block list</p>
+</section>
+<section id="release-redundant-memory-block">
+<span id="release-redu"></span><h5>Release redundant memory block<a class="headerlink" href="#release-redundant-memory-block" title="Link to this heading">#</a></h5>
+<p>The above algorithm may allocate one block far larger than the required size.
+The allocator should cut off the bottom half of the block and put it back to the buddy system until the size equals the required size.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You should print the log of releasing redundant memory block (via VF2 UART) for the demo</p>
+</div>
+</section>
+</section>
+<section id="free-and-coalesce-blocks">
+<h4>Free and Coalesce Blocks<a class="headerlink" href="#free-and-coalesce-blocks" title="Link to this heading">#</a></h4>
+<p>To allow the buddy system to reconstruct larger contiguous memory blocks on VF2,
+when the user frees an allocated block, the buddy allocator should not naively place it back on the free list.
+Instead, it must call find_buddy() and merge_iter(), using page frame indices computed from
+VF2 Device Tree’s &lt;memory&gt; base addresses.</p>
+<section id="find-the-buddy">
+<span id="find-buddy"></span><h5>Find the buddy<a class="headerlink" href="#find-the-buddy" title="Link to this heading">#</a></h5>
+<p>On VF2, compute each block’s page frame index relative to the &lt;memory&gt; region base address.
+Then use index XOR exponent to find its buddy’s index. If the buddy lies within the same &lt;memory&gt; region,
+merge them into a larger block.</p>
+</section>
+<section id="merge-iteratively">
+<span id="merge-iter"></span><h5>Merge iteratively<a class="headerlink" href="#merge-iteratively" title="Link to this heading">#</a></h5>
+<p>There is still a possible buddy for the merged block.
+You should use the same way to find the buddy of the merge block.
+When you can’t find the buddy of the merged block or the merged block size is maximum-block-size,
+the allocator stops and put the merged block to the linked-list.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You should print the log of merge iteration for the demo.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="basic-exercise-2-dynamic-memory-allocator-30">
+<h3>Basic Exercise 2 - Dynamic Memory Allocator - 30%<a class="headerlink" href="#basic-exercise-2-dynamic-memory-allocator-30" title="Link to this heading">#</a></h3>
+<p>Your Page Frame Allocator (from Basic Exercise 1) provides 4 KB-aligned page frames via <cite>p_alloc(1)</cite>.
+The Dynamic Memory Allocator must call <cite>p_alloc(1)</cite> to obtain one page and use its physical base address.
+For small allocations (&lt; 4 KB), maintain multiple chunk pools (sizes 16, 32, 48, 96 bytes, etc.),
+partitioning each page into fixed-size chunks for the corresponding pool.</p>
+<dl class="simple">
+<dt>On each allocation request:</dt><dd><ol class="arabic simple">
+<li><p>Round up the requested size to the nearest pool size.</p></li>
+<li><p>If a free chunk exists in the corresponding pool, return it; otherwise, request a new page from the Page Frame Allocator.</p></li>
+<li><p>Slice the new page frame into chunks and add them to the pool’s free list, then return one chunk.</p></li>
+</ol>
+</dd>
+</dl>
+<p>When freeing a chunk, use its base page frame address to identify which pool it belongs to,
+and place it back onto that pool’s free list.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement a dynamic memory allocator.</p>
+</div>
+</section>
+</section>
+<section id="advanced-exercises">
+<h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
+<section id="advanced-exercise-1-efficient-page-allocation-on-vf2-device-tree-10">
+<span id="startup-alloc"></span><h3>Advanced Exercise 1 - Efficient Page Allocation on VF2 Device Tree - 10%<a class="headerlink" href="#advanced-exercise-1-efficient-page-allocation-on-vf2-device-tree-10" title="Link to this heading">#</a></h3>
+<p>Basically, when you dynamically assign or free a page on VF2, your buddy system’s response time should be as quick as possible.
+In the basic part, your allocator can focus on one of the parsed memory segments from Lab 2’s <cite>mem_regions[]</cite> array
+and does not need to handle reserved regions. Simply pick a single <cite>mem_regions[i]</cite> (e.g., the first entry)
+and manage that contiguous block of RAM only.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>You should allocate and free a page in O(log n), while ensuring any page frame lookup is O(1).</p>
+</div>
+</section>
+<section id="advanced-exercise-2-reserved-memory-via-vf2-device-tree-10">
+<h3>Advanced Exercise 2 - Reserved Memory via VF2 Device Tree - 10%<a class="headerlink" href="#advanced-exercise-2-reserved-memory-via-vf2-device-tree-10" title="Link to this heading">#</a></h3>
+<p>As previously noted in the background, when VF2 is booted, specific memory regions must be reserved.
+Since Lab 2 already parsed the Device Tree, use the parsed values directly to reserve:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>DTB Blob:
+• <cite>dtb_start = (uint64_t)fdt_ptr;</cite>
+• <cite>dtb_size  = fdt_totalsize(fdt_ptr);</cite>
+Call <cite>memory_reserve(dtb_start, dtb_size);</cite></p></li>
+<li><p>Kernel Image:
+• <cite>kernel_start = (uint64_t)&amp;_phys_start;</cite>
+• <cite>kernel_end   = (uint64_t)&amp;_phys_end;</cite>
+• <cite>kernel_size  = kernel_end - kernel_start;</cite>
+Call <cite>memory_reserve(kernel_start, kernel_size);</cite></p></li>
+<li><p>Initramfs:
+• <cite>initrd_start = fdt_getprop_u64(fdt_ptr, “/chosen”, “linux,initrd-start”);</cite>
+• <cite>initrd_end   = fdt_getprop_u64(fdt_ptr, “/chosen”, “linux,initrd-end”);</cite>
+• <cite>initrd_size  = initrd_end - initrd_start;</cite>
+Call <cite>memory_reserve(initrd_start, initrd_size);</cite></p></li>
+<li><p>Any additional reserved regions (e.g., spin tables, DMA buffers, platform-specific):
+• These must be defined by the implementer (e.g., hardcoded in C or provided via <cite>/memreserve/</cite> in DTS)
+• Retrieve their <cite>(base, size)</cite> pairs from the parsed DT data
+• Call <cite>memory_reserve(base, size);</cite> for each.</p></li>
+</ol>
+</div></blockquote>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">memory_reserve</span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Mark all 4 KB page frames in [start, start + size) as reserved</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Use the values already obtained by Lab 2’s DT parser and call <cite>memory_reserve()</cite> for each of the four categories above.</p>
+</div>
+</section>
+<section id="advanced-exercise-3-startup-allocation-with-vf2-device-tree-20">
+<h3>Advanced Exercise 3 - Startup Allocation with VF2 Device Tree - 20%<a class="headerlink" href="#advanced-exercise-3-startup-allocation-with-vf2-device-tree-20" title="Link to this heading">#</a></h3>
+<p>In general purpose operating systems, the amount of physical memory is determined at runtime. Hence, a kernel needs to dynamically allocate its page frame array for its page frame allocator. The page frame allocator then depends on dynamic memory allocation. The dynamic memory allocator depends on the page frame allocator. This introduces the chicken or the egg problem. To break the dilemma, you need a dedicated startup allocator during startup time.</p>
+<p>The design of the startup allocator is quite simple. Implement a minimal bump-pointer allocator at startup that does not rely on the Page Frame Allocator.
+Lab 2 has already parsed all <cite>&lt;memory&gt;</cite> nodes and retrieved:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>An array <cite>mem_regions[]</cite> of <cite>{ base, size }</cite> pairs for all available RAM segments.</p></li>
+</ul>
+</div></blockquote>
+<dl>
+<dt>This bump allocator must:</dt><dd><ol class="arabic">
+<li><p>Iterate over <cite>mem_regions[]</cite> (from Lab 2) to compute the combined usable memory segments.</p></li>
+<li><p>Before allocating any frame array or other structures, reserve:
+• DTB Blob: call memory_reserve(dtb_start, dtb_size).
+• Kernel Image: call memory_reserve(kernel_start, kernel_size).
+• Initramfs:   call memory_reserve(initrd_start, initrd_size).
+• Any implementer-defined reserved regions (from Lab 2’s parsed DT data): call memory_reserve(base, size).</p></li>
+<li><p>From the first usable <cite>mem_regions[i]</cite> after those reservations, allocate a contiguous region (4KB-aligned)
+of length <cite>frame_array_size = total_page_count × sizeof(struct frame_struct)</cite>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>frame_array_start = align_up(mem_regions[i].base, 4096);</cite></p></li>
+<li><p>Advance <cite>bump_ptr</cite> by <cite>frame_array_size</cite>.</p></li>
+<li><p>Call <cite>memory_reserve(frame_array_start, frame_array_size)</cite> to mark it as reserved.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Initialize the Page Frame Array data structures in that region.</p></li>
+<li><p>Handover control to the Buddy System, which will manage all remaining free 4 KB page frames.</p></li>
+</ol>
+</dd>
+</dl>
+<p>This bump allocator is used only during early boot (before Buddy System is ready).</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Use Lab 2’s <cite>mem_regions[]</cite>, plus the four categories of reservation from above, to implement <cite>startup_alloc()</cite>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Your buddy system must handle VF2’s total physical memory and any holes reported by the Device Tree.
+Read all &lt;memory&gt; regions from the VF2 Device Tree to determine usable segments.</p></li>
+<li><p>All usable memory regions must be used to build the Page Frame Array dynamically via the Startup Allocator.
+Allocate the Page Frame Array out of those ranges, skipping reserved areas.</p></li>
+<li><p>Reserved memory block detection is not part of the Startup Allocator itself.
+Instead, Startup Allocator must call <cite>memory_reserve(start, size)</cite> for each entry in &lt;reserved-memory&gt;.</p></li>
+<li><p>Do not hardcode any physical addresses. All memory ranges (usable or reserved) must be obtained from
+the VF2 Device Tree:</p>
+<ol class="arabic simple">
+<li><p>Kernel image region</p></li>
+<li><p>Initramfs region</p></li>
+<li><p>Device Tree blob itself</p></li>
+<li><p>Any additional platform-specific reserved areas (OpenSBI, Framebuffer, etc.)</p></li>
+</ol>
+</li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lab2.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lab 2: Booting</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="lab4.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lab 4: Exception and Interrupt</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reserved-memory">Reserved Memory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-frame-allocator">Page Frame Allocator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-memory-allocator">Dynamic Memory Allocator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#observability-of-allocators">Observability of Allocators</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-buddy-system-40">Basic Exercise 1 - Buddy System - 40%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-structure">Data Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#linked-lists-for-blocks-with-different-size-vf2-device-tree-memory-node">Linked-lists for blocks with different size (VF2 Device Tree &lt;memory&gt; node)</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#release-redundant-memory-block">Release redundant memory block</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#free-and-coalesce-blocks">Free and Coalesce Blocks</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#find-the-buddy">Find the buddy</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#merge-iteratively">Merge iteratively</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-dynamic-memory-allocator-30">Basic Exercise 2 - Dynamic Memory Allocator - 30%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-efficient-page-allocation-on-vf2-device-tree-10">Advanced Exercise 1 - Efficient Page Allocation on VF2 Device Tree - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-reserved-memory-via-vf2-device-tree-10">Advanced Exercise 2 - Reserved Memory via VF2 Device Tree - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-startup-allocation-with-vf2-device-tree-20">Advanced Exercise 3 - Startup Allocation with VF2 Device Tree - 20%</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By  NYCU cas-lab
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, NYCU cas-lab.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
