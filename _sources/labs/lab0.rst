@@ -156,9 +156,9 @@ After building, you can use QEMU to see the dumped assembly.
    Do not assume success in QEMU guarantees correct behavior on hardware.
 
 
-*******************
+**********************
 Deploy to OrangePi RV2
-*******************
+**********************
 
 From Kernel Image to FIT Image
 ##############################
@@ -220,7 +220,7 @@ Below is a minimal example of a valid ``kernel.its`` file that includes only the
 
 
 
-The required device tree file can be `downloaded <../uploads/x1_orangepi-rv2.dtb>`_ from the course resource page.
+The required device tree file can be `downloaded <https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/x1_orangepi-rv2.dtb>`_ from the course resource page.
 
 Once the required files and the ``kernel.its`` configuration are prepared,
 use the following command to generate the final FIT image:
@@ -237,11 +237,12 @@ To boot your OrangePi RV2 board, you need to write a properly configured bootabl
 At minimum, the SD card must contain a FAT16 or FAT32 partition with the following files:
 
 * ``kernel.fit`` – the FIT image generated in the previous step
+
 There are two ways to prepare your SD card:
 
 .. **Method 1： Use a prebuilt image (recommended)**
 **Test with Provided image**
-A prebuilt bootable `image <../uploads/opirv2-sdcard.img>`_ is available from the course repository.
+A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/opirv2-sdcard.img>`_ is available from the course repository.
 
 You can write it to your SD card using the ``dd`` command:
 
@@ -275,7 +276,7 @@ You may mount the partition to inspect or modify its contents if needed.
     Prepare your SD card for booting OrangePi RV2.
 
 Interact with OrangePi RV2
-##################
+##########################
 
 
 After setting up your SD card and inserting it into the OrangePi RV2 board, 
@@ -344,7 +345,7 @@ You can now use GDB commands to inspect registers, memory, or step through instr
   Ensure the ``kernel.elf`` file includes debugging symbols (e.g., compiled with ``-g`` flag) for full functionality.
 
 Debug on Real OrangePi RV2
-##################
+##########################
 
 When working on real hardware, debugging options are more limited.
 You can insert serial print statements to trace control flow or variable values.

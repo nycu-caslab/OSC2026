@@ -539,7 +539,7 @@ the contents and layout of the resulting FIT image. This file must reference the
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>The required device tree file can be <a class="reference external" href="../uploads/x1_orangepi-rv2.dtb">downloaded</a> from the course resource page.</p>
+<p>The required device tree file can be <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/x1_orangepi-rv2.dtb">downloaded</a> from the course resource page.</p>
 <p>Once the required files and the <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code> configuration are prepared,
 use the following command to generate the final FIT image:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkimage</span> <span class="o">-</span><span class="n">f</span> <span class="n">src</span><span class="o">/</span><span class="n">kernel</span><span class="o">.</span><span class="n">its</span> <span class="n">kernel</span><span class="o">.</span><span class="n">fit</span>
@@ -555,7 +555,7 @@ use the following command to generate the final FIT image:</p>
 </ul>
 <p>There are two ways to prepare your SD card:</p>
 <p><strong>Test with Provided image</strong>
-A prebuilt bootable <a class="reference external" href="../uploads/opirv2-sdcard.img">image</a> is available from the course repository.</p>
+A prebuilt bootable <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/blob/gh-pages/_static/opirv2-sdcard.img">image</a> is available from the course repository.</p>
 <p>You can write it to your SD card using the <code class="docutils literal notranslate"><span class="pre">dd</span></code> command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">opirv2</span><span class="o">-</span><span class="n">sdcard</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span> <span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">M</span> <span class="n">status</span><span class="o">=</span><span class="n">progress</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
 </pre></div>
