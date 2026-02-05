@@ -44,8 +44,8 @@ you need a cross compiler if you develop on a non-RISC-V environment.
 
     Install the cross compiler ``gcc-riscv64-unknown-elf`` on your host computer. 
     
-    It is recommended to install it using a package managers like ``apt``. 
-    Alternatively, you can build it from source following the instructions provided by the `RISC-V GNU Toolchain project <https://github.com/riscv-collab/riscv-gnu-toolchain>`_ if needed.
+    .. It is recommended to install it using a package managers like ``apt``. 
+    .. Alternatively, you can build it from source following the instructions provided by the `RISC-V GNU Toolchain project <https://github.com/riscv-collab/riscv-gnu-toolchain>`_ if needed.
 
   
 Linker
@@ -59,16 +59,19 @@ In bare-metal programming, you are responsible for defining the memory layout ma
 The following is a linker script template.
 You will extend it in a future lab.
 
-.. code-block:: 
+.. admonition:: Todo
+  
+Save the following linker script as ``linker.ld`` on your host computer.
+  .. code-block:: 
 
-  SECTIONS
-  {
-      . = 0x80200000;
-      .text : { *(.text) }
-      .rodata : { *(.rodata) }
-      .data : { *(.data) }
-      .bss : { *(.sbss) *(.bss) }
-  }
+    SECTIONS
+    {
+        . = 0x80200000;
+        .text : { *(.text) }
+        .rodata : { *(.rodata) }
+        .data : { *(.data) }
+        .bss : { *(.sbss) *(.bss) }
+    }
 
 
 QEMU
@@ -101,16 +104,24 @@ From Source Code to Object Files
 ################################
 
 Source code is converted to object files by a cross compiler.
-After saving the following assembly as ``a.S``,
-you can convert it to an object file by ``riscv64-unknown-elf-gcc -c a.S``.
 
-.. code-block::
+.. admonition:: Todo
 
-  .section ".text"
-  _start:
-    wfi
-    j _start
+  Save the following assembly code as ``a.S`` on your host computer.
 
+  .. code-block::
+
+    .section ".text"
+    _start:
+      wfi
+      j _start
+
+  Then, compile the assembly code to an object file with the following command:
+
+  .. code-block::
+
+    riscv64-unknown-elf-gcc -c a.S
+  
 From Object Files to ELF
 ########################
 
@@ -119,13 +130,16 @@ An ELF file can be loaded and executed by program loaders.
 Program loaders are usually provided by the operating system in a regular development environment.
 In bare-metal programming, ELF can be loaded by some bootloaders.
 
+.. To convert the object file from the previous step to an ELF file,
+.. you can save the provided linker script as ``linker.ld``, and run the following command.
 
-To convert the object file from the previous step to an ELF file,
-you can save the provided linker script as ``linker.ld``, and run the following command.
+.. admonition:: Todo
 
-.. code-block::
+  Link the object file to an ELF file with the following command:
 
-  riscv64-unknown-elf-ld -T linker.ld -o kernel.elf a.o
+  .. code-block::
+
+    riscv64-unknown-elf-ld -T linker.ld -o kernel.elf a.o
 
 From ELF to Kernel Image
 ########################
@@ -134,9 +148,13 @@ The OS kernel is initially compiled as an ELF file.
 To make it suitable for booting, we typically convert it into a raw binary image using ``objcopy``.
 This binary image can then be included as part of a Flattened Image Tree (FIT) for use by the bootloader.
 
-.. code-block:: 
+.. admonition:: Todo
 
-  riscv64-unknown-elf-objcopy -O binary kernel.elf kernel.bin
+  Convert the ELF file to a raw binary kernel image with the following command:
+
+  .. code-block:: 
+
+    riscv64-unknown-elf-objcopy -O binary kernel.elf kernel.bin
 
 Check on QEMU
 #############
@@ -220,29 +238,47 @@ Below is a minimal example of a valid ``kernel.its`` file that includes only the
 
 
 
-The required device tree file can be `downloaded <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/x1_orangepi-rv2.dtb>`_ from the course resource page.
+The required device tree file can be download here `x1_orangepi-rv2.dtb <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/x1_orangepi-rv2.dtb>`_
 
-Once the required files and the ``kernel.its`` configuration are prepared,
-use the following command to generate the final FIT image:
+.. Once the required files and the ``kernel.its`` configuration are prepared,
+.. use the following command to generate the final FIT image:
 
-.. code-block::
+.. .. code-block::
 
-  mkimage -f src/kernel.its kernel.fit
+..   mkimage -f kernel.its kernel.fit
+
+
+.. admonition:: Todo
+  
+    Store ``kernel.its`` and ``x1_orangepi-rv2.dtb``  on your host computer and build ``kernel.fit`` with following instruction:
+
+    .. code-block::
+      
+      mkimage -f kernel.its kernel.fit
 
 Flash Bootable Image to SD Card
 ###############################
 
-To boot your OrangePi RV2 board, you need to write a properly configured bootable image to an SD card.
+.. To boot your OrangePi RV2 board, you need to write a properly configured bootable image to an SD card.
 
-At minimum, the SD card must contain a FAT16 or FAT32 partition with the following files:
+.. At minimum, the SD card must contain a FAT16 or FAT32 partition with the following files:
 
-* ``kernel.fit`` – the FIT image generated in the previous step
+.. * ``kernel.fit`` – the FIT image generated in the previous step
 
-There are two ways to prepare your SD card:
+.. There are two ways to prepare your SD card:
 
 .. **Method 1： Use a prebuilt image (recommended)**
-**Test with Provided image**
-A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_ is available from the course repository.
+.. **Test with Provided image**
+
+We have prepared a complete bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_  for this lab.
+
+.. A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_ is available from the course repository.
+
+.. note:: 
+  
+  You will not need to re-flash .img again. To update your kernel in the future, \
+  simply mount the SD card and replace the ``kernel.fit`` file with your new version.
+
 
 You can write it to your SD card using the ``dd`` command:
 
@@ -250,10 +286,10 @@ You can write it to your SD card using the ``dd`` command:
 
   sudo dd if=opirv2-sdcard.img of=/dev/sdX bs=4M status=progress conv=fsync
 
-.. note::
-  The additional parameters are included to improve the usability of the command,
-  such as speeding up write operations and showing progress.
-  For detailed explanations, please refer to the ``dd`` manual (``man dd``).
+.. .. note::
+..   The additional parameters are included to improve the usability of the command,
+..   such as speeding up write operations and showing progress.
+..   For detailed explanations, please refer to the ``dd`` manual (``man dd``).
 
 .. warning::
   Replace ``/dev/sdX`` with the actual device name of your SD card. 
@@ -271,7 +307,6 @@ You may mount the partition to inspect or modify its contents if needed.
 .. `<https://hackmd.io/@chiahsuantw/OrangePi RV2-sdcard>`_
 
 .. admonition:: Todo
-
     
     Prepare your SD card for booting OrangePi RV2.
 
@@ -304,9 +339,16 @@ Follow these steps to test the UART connection:
 4. Power on the OrangePi RV2. Once booted, try typing on your keyboard.
    You should see the characters echoed back in your serial console.
 
+.. admonition:: Todo
+  
+    Test the UART connection with your OrangePi RV2 board. Output should looks like this:
+
+    .. image:: /images/orangepi_rv2_sdcard_image.png
+
+
+
 .. note::
   If nothing appears on the console, double-check the wiring, baud rate, and whether the kernel image was placed correctly.
-
 *********
 Debugging
 *********
