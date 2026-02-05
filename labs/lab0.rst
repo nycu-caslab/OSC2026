@@ -270,14 +270,17 @@ Flash Bootable Image to SD Card
 .. **Method 1： Use a prebuilt image (recommended)**
 .. **Test with Provided image**
 
-We have prepared a complete bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_  for this lab.
+We have prepared a complete bootable `bootable image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_  for this lab.
 
 .. A prebuilt bootable `image <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img>`_ is available from the course repository.
 
 .. note:: 
+
+  The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.\
+  To update your kernel in the future, simply mount the SD card and replace the ``kernel.fit`` file with your new version. 
   
-  You will not need to re-flash .img again. To update your kernel in the future, \
-  simply mount the SD card and replace the ``kernel.fit`` file with your new version.
+  .. You will not need to re-flash img again. To update your kernel in the future, \
+  .. simply mount the SD card and replace the ``kernel.fit`` file with your new version.
 
 
 You can write it to your SD card using the ``dd`` command:
@@ -296,8 +299,6 @@ You can write it to your SD card using the ``dd`` command:
   You can check the device name using ``lsblk``.
   Writing to the wrong device may cause data loss.
 
-The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.
-You may mount the partition to inspect or modify its contents if needed.
 
 .. **Method 2: Manually create partitions and copy files**
 
@@ -317,7 +318,7 @@ Interact with OrangePi RV2
 After setting up your SD card and inserting it into the OrangePi RV2 board, 
 you can interact with the system via UART to verify that your setup is functioning correctly.
 
-The prebuilt kernel included in the image echoes back any characters you type through the serial console.
+.. The prebuilt kernel included in the image echoes back any characters you type through the serial console.
 
 Follow these steps to test the UART connection:
 
