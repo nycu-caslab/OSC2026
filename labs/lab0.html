@@ -563,10 +563,10 @@ the contents and layout of the resulting FIT image. This file must reference the
 </section>
 <section id="flash-bootable-image-to-sd-card">
 <h3>Flash Bootable Image to SD Card<a class="headerlink" href="#flash-bootable-image-to-sd-card" title="Link to this heading">#</a></h3>
-<p>We have prepared a complete bootable <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img">image</a>  for this lab.</p>
+<p>We have prepared a complete bootable <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img">bootable image</a>  for this lab.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You will not need to re-flash .img again. To update your kernel in the future, simply mount the SD card and replace the <code class="docutils literal notranslate"><span class="pre">kernel.fit</span></code> file with your new version.</p>
+<p>The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.To update your kernel in the future, simply mount the SD card and replace the <code class="docutils literal notranslate"><span class="pre">kernel.fit</span></code> file with your new version.</p>
 </div>
 <p>You can write it to your SD card using the <code class="docutils literal notranslate"><span class="pre">dd</span></code> command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">opirv2</span><span class="o">-</span><span class="n">sdcard</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span> <span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">M</span> <span class="n">status</span><span class="o">=</span><span class="n">progress</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
@@ -578,8 +578,6 @@ the contents and layout of the resulting FIT image. This file must reference the
 You can check the device name using <code class="docutils literal notranslate"><span class="pre">lsblk</span></code>.
 Writing to the wrong device may cause data loss.</p>
 </div>
-<p>The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.
-You may mount the partition to inspect or modify its contents if needed.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Prepare your SD card for booting OrangePi RV2.</p>
@@ -589,7 +587,6 @@ You may mount the partition to inspect or modify its contents if needed.</p>
 <h3>Interact with OrangePi RV2<a class="headerlink" href="#interact-with-orangepi-rv2" title="Link to this heading">#</a></h3>
 <p>After setting up your SD card and inserting it into the OrangePi RV2 board,
 you can interact with the system via UART to verify that your setup is functioning correctly.</p>
-<p>The prebuilt kernel included in the image echoes back any characters you type through the serial console.</p>
 <p>Follow these steps to test the UART connection:</p>
 <ol class="arabic simple">
 <li><p>Connect a UART-to-USB adapter to your host machine.</p></li>
