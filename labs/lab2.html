@@ -319,12 +319,20 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-uart-bootloader-30">Basic Exercise 1 - UART Bootloader - 30%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-initial-ramdisk-30">Basic Exercise 2 - Initial Ramdisk - 30%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-device-tree-30">Basic Exercise 3 - Device Tree - 30%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-devicetree-35">Basic Exercise 2 - Devicetree - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#format">Format</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parsing">Parsing</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-initial-ramdisk-35">Basic Exercise 3 - Initial Ramdisk - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#new-ascii-format-cpio-archive">New ASCII Format Cpio Archive</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-cpio-archive">Loading Cpio Archive</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-bootloader-self-relocation-20">Advanced Exercise - Bootloader Self-Relocation - 20%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-bootloader-self-relocation-10">Advanced Exercise - Bootloader Self-Relocation - 10%</a></li>
 </ul>
 </li>
 </ul>
@@ -338,117 +346,220 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This document is currently under construction and may be incomplete or subject to significant changes.
-Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
-</div>
-<section id="lab-2-booting">
+  <section id="lab-2-booting">
 <h1>Lab 2: Booting<a class="headerlink" href="#lab-2-booting" title="Link to this heading">#</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>Booting is the process of initializing the system environment to run various user programs after a computer reset. This includes loading the kernel, initializing subsystems, matching device drivers, and launching the initial user program to bring up remaining services in user space.</p>
-<p>In Lab 2, you’ll implement a bootloader for the VF2 board that loads kernel images through UART. Additionally, you’ll develop a simple allocator and gain an understanding of initial ramdisk and device trees.</p>
+<p>In Lab 2, you’ll implement a bootloader for the OrangePi RV2 that loads kernel images through UART. Additionally, you’ll gain an understanding of devicetrees and initial ramdisk.</p>
 </section>
 <section id="goals-of-this-lab">
 <h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Implement a bootloader that loads kernel images through UART.</p></li>
-<li><p>Implement a simple memory allocator.</p></li>
+<li><p>Understand the structure and purpose of devicetrees.</p></li>
 <li><p>Understand the concept and usage of initial ramdisk.</p></li>
-<li><p>Understand the structure and purpose of device trees.</p></li>
 </ul>
 </section>
 <section id="background">
 <h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
-<p>The boot process on the VF2 involves multiple stages, including the execution of the bootloader, loading of the kernel, and initialization of system components. Understanding this process is crucial for developing low-level system software.</p>
+<p>The boot process on the OrangePi RV2 involves multiple stages, including the execution of the bootloader, loading of the kernel, and initialization of system components. Understanding this process is crucial for developing low-level system software.</p>
 <p>In this lab, you’ll implement a bootloader that loads the actual kernel through UART, providing flexibility during development and debugging.</p>
 </section>
 <section id="basic-exercises">
 <h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
 <section id="basic-exercise-1-uart-bootloader-30">
 <h3>Basic Exercise 1 - UART Bootloader - 30%<a class="headerlink" href="#basic-exercise-1-uart-bootloader-30" title="Link to this heading">#</a></h3>
-<p>Loading the kernel image onto the VF2 board can be streamlined by implementing a bootloader that receives the kernel over UART. This eliminates the need to physically move storage media between the host and the VF2 during development.</p>
+<p>When loading the kernel image onto the OrangePi RV2, you might experience the process of moving the SD card between your host and the board very often during debugging. You can eliminate this by introducing another bootloader to load the kernel under debugging.</p>
+<p>To send the kernel binary through UART, you can devise a protocol to read raw data. It rarely drops data during transmission, so you can keep the protocol simple. Here is a simple example of what a protocol might look like.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;II&#39;</span><span class="p">,</span>
+    <span class="mh">0x544F4F42</span><span class="p">,</span>           <span class="c1"># &quot;BOOT&quot; in hex</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">kernel_data</span><span class="p">),</span>     <span class="c1"># size</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can send data from the host to the OrangePi RV2 by writing directly to the Linux serial device file (e.g., <code class="docutils literal notranslate"><span class="pre">/dev/ttyUSB0</span></code>) using a Python script.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/dev/ttyUSB0&#39;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">,</span> <span class="n">buffering</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">tty</span><span class="p">:</span>
+    <span class="n">tty</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">tty</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">kernel_data</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>You can implement a <code class="docutils literal notranslate"><span class="pre">load</span></code> command in your shell to receive the kernel image over UART, allowing your shell to act as a convenient interface for development.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Add <code class="docutils literal notranslate"><span class="pre">-serial</span> <span class="pre">pty</span></code> option to create a pseudo TTY device and test your bootloader through QEMU.</p>
+</div>
+<p>You may still want to load your actual kernel image at <code class="docutils literal notranslate"><span class="pre">0x00200000</span></code> (or <code class="docutils literal notranslate"><span class="pre">0x80200000</span></code> on QEMU), but it overlaps with your bootloader.</p>
+<p>To avoid overwriting itself, the bootloader should load the new kernel into a different memory address like <code class="docutils literal notranslate"><span class="pre">0x20000000</span></code> (or <code class="docutils literal notranslate"><span class="pre">0x82000000</span></code> on QEMU) and jump to it.
+A safe practice is to consult the devicetree (<code class="docutils literal notranslate"><span class="pre">/memory</span></code> node) to determine the available RAM layout. Also see <em>Basic Exercise 2: Devicetree</em> for more details.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Develop a bootloader that listens for a kernel image transmitted over UART and loads it into memory for execution. Design a simple protocol for data transmission to ensure reliability.</p>
 </div>
-<p>The bootloader is typically loaded and executed from address <code class="docutils literal notranslate"><span class="pre">0x40200000</span></code>, which corresponds to the on-chip SRAM on the VF2 board and is the standard entry point used by the SoC after reset.</p>
-<p>To avoid overwriting itself, the bootloader <strong>must not</strong> load the kernel into this same region. A common practice is to load the kernel into DDR memory, such as at address <code class="docutils literal notranslate"><span class="pre">0x80000000</span></code>, while keeping the bootloader resident in SRAM.
-A safe practice is to consult the device tree (<code class="docutils literal notranslate"><span class="pre">/memory</span></code> node) to determine the available RAM layout. Also see <em>Basic Exercise 3: Device Tree</em> for more details.</p>
-<p>Relocation is covered in <em>Advanced Exercise</em> and is optional. If you choose to implement self-relocation, the bootloader can move itself to another region (e.g., higher DRAM) before loading the kernel. Otherwise, you must ensure the kernel and initial ramdisk are loaded into memory regions that do not overlap with the bootloader’s footprint.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you have extended the shell from the previous lab, your bootloader may already support basic device tree parsing and provide a simple command interface. In that case, you can implement a <code class="docutils literal notranslate"><span class="pre">load_kernel</span></code> command to receive the kernel image over UART, allowing your shell to act as a convenient interface for development.</p>
-<p>This bootloader can then serve as a stable “fork point” from which both kernel development and system-level testing can proceed. Since the same shell is reused, you avoid duplicating early-stage code and can leverage its existing device tree parsing functionality.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Since you are loading the kernel to a different address, you must ensure your kernel is compiled and linked to run at that address, or that it is position-independent.
+See <a class="reference external" href="https://docs.kernel.org/arch/riscv/boot.html#pre-mmu-execution">Pre-MMU execution</a> for more details.</p>
 </div>
 </section>
-<section id="basic-exercise-2-initial-ramdisk-30">
-<h3>Basic Exercise 2 - Initial Ramdisk - 30%<a class="headerlink" href="#basic-exercise-2-initial-ramdisk-30" title="Link to this heading">#</a></h3>
-<p>An initial ramdisk (initrd) is a temporary root file system loaded into memory during the boot process. It provides essential files and drivers needed to mount the actual root file system.</p>
+<section id="basic-exercise-2-devicetree-35">
+<h3>Basic Exercise 2 - Devicetree - 35%<a class="headerlink" href="#basic-exercise-2-devicetree-35" title="Link to this heading">#</a></h3>
+<p>Hardcoding hardware addresses in the kernel (as done in Lab 1) makes the code non-portable. On systems with simple buses such as OrangePi RV2, the kernel cannot automatically discover connected devices.</p>
+<p>To solve this, a <strong>devicetree</strong> is used. It is a data structure that describes the hardware components, properties, and relationships. The kernel queries this tree to discover devices and load the appropriate drivers, rather than relying on hardcoded addresses.</p>
+<p>On most RISC-V platforms, the firmware (OpenSBI or U-Boot) loads the devicetree address in register <code class="docutils literal notranslate"><span class="pre">a1</span></code> before jumping to the kernel.</p>
+<section id="format">
+<h4>Format<a class="headerlink" href="#format" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p><strong>Devicetree source (.dts)</strong>: Describes devicetree in human-readable form.</p></li>
+<li><p><strong>Flattened devicetree (.dtb)</strong>: Compiled format for simpler and faster parsing in embedded systems.</p></li>
+</ul>
+</section>
+<section id="parsing">
+<h4>Parsing<a class="headerlink" href="#parsing" title="Link to this heading">#</a></h4>
+<p>You should parse the flattened devicetree and provide an interface to query the devicetree for device information. You can get the latest specification of devicetree <a class="reference external" href="https://www.devicetree.org/specifications">here</a>.</p>
+<p>The structure of the flattened devicetree (.dtb) file is illustrated below:</p>
+<a class="reference internal image-reference" href="../_images/devicetree.png"><img alt="../_images/devicetree.png" height="234" src="../_images/devicetree.png" width="259" />
+</a>
+<p>The structure is further divided into the FDT header, memory reservation block, structure block, and strings block. Here, we primarily utilize the structure block and strings block to obtain device information, which can be accessed through the header.</p>
+<p>The FDT header fields are as follows (<a class="reference external" href="https://devicetree-specification.readthedocs.io/en/stable/flattened-format.html#header">5.2. Header</a>):</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">fdt_header</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">magic</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">totalsize</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">off_dt_struct</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">off_dt_strings</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">off_mem_rsvmap</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">version</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">last_comp_version</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boot_cpuid_phys</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">size_dt_strings</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">size_dt_struct</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The structure block can be further divided into several tokens, each containing its specific data. For more implementation details, please refer to <a class="reference external" href="https://devicetree-specification.readthedocs.io/en/stable/flattened-format.html#structure-block">5.4. Structure Block</a>.</p>
+<p>As a practical code reference, you can consult the example <a class="reference external" href="https://github.com/dgibson/dtc/blob/main/libfdt/fdt_ro.c#L298">here</a>. You need to locate a device node by path and retrieve a property using:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">fdt_path_offset</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">fdt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">path</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">fdt_getprop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">fdt</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">nodeoffset</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">lenp</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In this part, you need to retrieve the RAM memory layout from the devicetree. The memory node path is <code class="docutils literal notranslate"><span class="pre">/memory&#64;0</span></code> on the OrangePi RV2 (or <code class="docutils literal notranslate"><span class="pre">/memory&#64;80000000</span></code> on QEMU).
+You also need to get the <code class="docutils literal notranslate"><span class="pre">reg</span></code> property to find out the available memory region.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Create an initial ramdisk containing necessary utilities and drivers for the VF2. Modify the bootloader to load this initrd into memory during the boot process.</p>
+<p>Parse the flattened devicetree to retrieve the memory region information. Use the parsed information to determine available RAM regions and print it out in the shell with <code class="docutils literal notranslate"><span class="pre">info</span></code> command.</p>
 </div>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">Modified <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code> with ramdisk section (simplified)</span><a class="headerlink" href="#id1" title="Link to this code">#</a></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QEMU will automatically generate a .dtb file, you can get it with the option <code class="docutils literal notranslate"><span class="pre">-machine</span> <span class="pre">virt,dumpdtb=qemu.dtb</span></code>. You can also run <code class="docutils literal notranslate"><span class="pre">dtc</span> <span class="pre">qemu.dtb</span> <span class="pre">-o</span> <span class="pre">qemu.dts</span></code> to get the .dts file for easier reading.</p>
+</div>
+</section>
+</section>
+<section id="basic-exercise-3-initial-ramdisk-35">
+<h3>Basic Exercise 3 - Initial Ramdisk - 35%<a class="headerlink" href="#basic-exercise-3-initial-ramdisk-35" title="Link to this heading">#</a></h3>
+<p>We haven’t implemented any filesystem and storage driver code yet, so we can’t load anything from the SD card using your kernel. Another approach is loading user programs through the initial ramdisk.</p>
+<p>An initial ramdisk (initrd) is a temporary root file system loaded into memory during the boot process. It provides essential files and drivers needed to mount the actual root file system.</p>
+<section id="new-ascii-format-cpio-archive">
+<h4>New ASCII Format Cpio Archive<a class="headerlink" href="#new-ascii-format-cpio-archive" title="Link to this heading">#</a></h4>
+<p>Cpio is a very simple archive format to pack directories and files. Each directory and file is recorded as a header followed by its pathname and content.</p>
+<p>Cpio archive: <strong>[ header ] → [ filename ] → [ file data ]</strong></p>
+<p>In Lab 2, you are going to use the New ASCII Format Cpio format to create a cpio archive. You can first create a <code class="docutils literal notranslate"><span class="pre">rootfs</span></code> directory and put all files you need inside it. Then, use the following commands to archive it.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>rootfs
+find<span class="w"> </span>.<span class="w"> </span><span class="p">|</span><span class="w"> </span>cpio<span class="w"> </span>-o<span class="w"> </span>-H<span class="w"> </span>newc<span class="w"> </span>&gt;<span class="w"> </span>../initramfs.cpio
+<span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p><a class="reference external" href="https://man.freebsd.org/cgi/man.cgi?query=cpio&amp;sektion=5">This website</a> has a detailed definition of how New ASCII Format Cpio Archive is structured. You should read it and implement a parser to read files in the archive. The New ASCII Format has its header format defined as follows:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">cpio_newc_header</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_magic</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_ino</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_mode</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_uid</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_gid</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_nlink</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_mtime</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_filesize</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_devmajor</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_devminor</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_rdevmajor</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_rdevminor</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_namesize</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c_check</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please note that a NULL byte is appended to the pathname to ensure that the combined size of the fixed header and the pathname is a multiple of 4. Similarly, file data is also padded to align with a 4-byte boundary.</p>
+</div>
+</section>
+<section id="loading-cpio-archive">
+<h4>Loading Cpio Archive<a class="headerlink" href="#loading-cpio-archive" title="Link to this heading">#</a></h4>
+<p><strong>QEMU</strong></p>
+<p>Add the argument <code class="docutils literal notranslate"><span class="pre">-initrd</span> <span class="pre">initramfs.cpio</span></code> to QEMU.</p>
+<p><strong>OrangePi RV2</strong></p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Modified <code class="docutils literal notranslate"><span class="pre">kernel.its</span></code> with ramdisk section (simplified)</span><a class="headerlink" href="#id2" title="Link to this code">#</a></div>
 <div class="highlight-dts notranslate"><div class="highlight"><pre><span></span><span class="cp">/dts-v1/</span><span class="p">;</span>
 
 <span class="nf">/</span><span class="cm"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;FIT Image with Kernel, Initrd, and DTB&quot;</span><span class="p">;</span>
 <span class="w">    </span><span class="nf">images</span><span class="cm"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nf">kernel</span><span class="cm"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span>
-<span class="w">        </span><span class="nf">fdt</span><span class="cm"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span>
-<span class="w">        </span><span class="nf">ramdisk</span><span class="cm"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cp">/incbin/(&quot;initramfs.cpio&quot;)</span><span class="p">;</span>
-<span class="w">            </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ramdisk&quot;</span><span class="p">;</span>
-<span class="w">            </span><span class="n">arch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;riscv&quot;</span><span class="p">;</span>
-<span class="w">            </span><span class="n">os</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;linux&quot;</span><span class="p">;</span>
-<span class="w">            </span><span class="n">compression</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;none&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="p">};</span>
-<span class="w">    </span><span class="p">};</span>
+<span class="w">         </span><span class="nf">kernel</span><span class="cm"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span>
+<span class="w">         </span><span class="nf">fdt</span><span class="cm"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span>
+<span class="w">         </span><span class="nf">ramdisk</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">             </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Initial Ramdisk&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cp">/incbin/(&quot;initramfs.cpio&quot;)</span><span class="p">;</span>
+<span class="w">             </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ramdisk&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">arch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;riscv&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">os</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;linux&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">compression</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;none&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x46100000</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">         </span><span class="p">};</span>
 
+<span class="w">    </span><span class="p">};</span>
 <span class="w">    </span><span class="nf">configurations</span><span class="cm"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;conf&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="nf">conf</span><span class="cm"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;kernel&quot;</span><span class="p">;</span>
-<span class="w">            </span><span class="n">fdt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;fdt&quot;</span><span class="p">;</span>
-<span class="w">            </span><span class="n">ramdisk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ramdisk&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="p">};</span>
+<span class="w">         </span><span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;conf&quot;</span><span class="p">;</span>
+<span class="w">         </span><span class="nf">conf</span><span class="cm"> </span><span class="p">{</span>
+<span class="w">             </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;kernel&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">fdt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;fdt&quot;</span><span class="p">;</span>
+<span class="w">             </span><span class="n">ramdisk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ramdisk&quot;</span><span class="p">;</span>
+<span class="w">         </span><span class="p">};</span>
 <span class="w">    </span><span class="p">};</span>
 <span class="p">};</span>
 </pre></div>
 </div>
 </div>
-</section>
-<section id="basic-exercise-3-device-tree-30">
-<h3>Basic Exercise 3 - Device Tree - 30%<a class="headerlink" href="#basic-exercise-3-device-tree-30" title="Link to this heading">#</a></h3>
-<p>A device tree is a data structure that describes the hardware components of a system. It provides the operating system with information about the available hardware without hardcoding details into the kernel.</p>
+<p>Initrd-related devicetree nodes and properties:</p>
+<ul class="simple">
+<li><p>Node: <code class="docutils literal notranslate"><span class="pre">/chosen</span></code></p></li>
+<li><p>Property: <code class="docutils literal notranslate"><span class="pre">linux,initrd-start</span></code>, <code class="docutils literal notranslate"><span class="pre">linux,initrd-end</span></code></p></li>
+</ul>
+<p>The result would be like this:</p>
+<a class="reference internal image-reference" href="../_images/ls_cat.png"><img alt="../_images/ls_cat.png" class="align-center" height="410" src="../_images/ls_cat.png" width="706" />
+</a>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Integrate device tree support into your bootloader. Parse the device tree to initialize hardware components appropriately during the boot process.</p>
+<p>Retrieve the initial ramdisk address with your devicetree in Basic Exercise 2. You must use the address to access the cpio archive dynamically. Hardcoded address is <strong>NOT</strong> allowed.
+Also, implement <code class="docutils literal notranslate"><span class="pre">ls</span></code> and <code class="docutils literal notranslate"><span class="pre">cat</span></code> commands in your shell to list and display the content of files in the loaded cpio archive.</p>
 </div>
+</section>
 </section>
 </section>
 <section id="advanced-exercise">
 <h2>Advanced Exercise<a class="headerlink" href="#advanced-exercise" title="Link to this heading">#</a></h2>
-<section id="advanced-exercise-bootloader-self-relocation-20">
-<h3>Advanced Exercise - Bootloader Self-Relocation - 20%<a class="headerlink" href="#advanced-exercise-bootloader-self-relocation-20" title="Link to this heading">#</a></h3>
-<p>To accommodate different memory layouts and ensure compatibility, a bootloader may need to relocate itself during execution.</p>
+<section id="advanced-exercise-bootloader-self-relocation-10">
+<h3>Advanced Exercise - Bootloader Self-Relocation - 10%<a class="headerlink" href="#advanced-exercise-bootloader-self-relocation-10" title="Link to this heading">#</a></h3>
+<p>In Basic Exercise 1, we loaded the kernel to a high address to avoid overwriting the bootloader.
+A more robust approach is for the bootloader to <strong>relocate itself</strong> to the top of the memory, freeing up the standard entry point for the kernel.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Modify the bootloader to support self-relocation, allowing it to move to a different memory region
-according to the memory layout obtained from the devicetree.</p>
+<p>Modify the bootloader to support self-relocation, moving it to the top of the memory according to the memory layout obtained from Basic Exercise 2.
+Then load the kernel to the standard entry point (<code class="docutils literal notranslate"><span class="pre">0x00200000</span></code> on OrangePi RV2 / <code class="docutils literal notranslate"><span class="pre">0x80200000</span></code> on QEMU).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When relocating the bootloader, make sure the destination region does not overlap with
-the currently loaded kernel or the initrd image.
-A typical memory layout might consider the addresses and sizes of
-<cite>Bootloader</cite>, <cite>Kernel Image</cite> to be loaded,
-<cite>Device Tree Blob</cite> (DTB) and <cite>Initial Ramdisk</cite> (<code class="docutils literal notranslate"><span class="pre">initrd</span></code>).
-You need to consult the devicetree to decide the memory layout and adjust the linker script
-to properly decide the relocation process, especially if the <code class="docutils literal notranslate"><span class="pre">initramfs.cpio</span></code> you prepared is very large.</p>
+<p>When relocating the bootloader, ensure the destination region does not overlap with the devicetree or the initrd.
+You might need to adjust the linker script to handle the relocation process.</p>
 </div>
 </section>
 </section>
@@ -504,12 +615,20 @@ to properly decide the relocation process, especially if the <code class="docuti
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-uart-bootloader-30">Basic Exercise 1 - UART Bootloader - 30%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-initial-ramdisk-30">Basic Exercise 2 - Initial Ramdisk - 30%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-device-tree-30">Basic Exercise 3 - Device Tree - 30%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-devicetree-35">Basic Exercise 2 - Devicetree - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#format">Format</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parsing">Parsing</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-initial-ramdisk-35">Basic Exercise 3 - Initial Ramdisk - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#new-ascii-format-cpio-archive">New ASCII Format Cpio Archive</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-cpio-archive">Loading Cpio Archive</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-bootloader-self-relocation-20">Advanced Exercise - Bootloader Self-Relocation - 20%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-bootloader-self-relocation-10">Advanced Exercise - Bootloader Self-Relocation - 10%</a></li>
 </ul>
 </li>
 </ul>
