@@ -160,6 +160,15 @@ or use your existing UART output routine with manual formatting.
 ``info`` will serve as your first system-level introspection tool 
 and should include both SBI-based results and DTB-based results if available.
 
+The result would be like :
+
+.. image:: /images/lab1-SBI-1.png
+   :width: 600
+   :align: center
+
+.. image:: /images/lab1-SBI-2.png
+   :width: 600
+   :align: center
 .. ********************
 .. Advanced Exercise
 .. ********************
