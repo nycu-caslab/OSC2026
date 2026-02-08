@@ -377,16 +377,11 @@ Skipping them may result in difficulties later on.</p>
 <h2>Cross-Platform Development<a class="headerlink" href="#cross-platform-development" title="Link to this heading">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This lab is designed and tested primarily on Linux-based systems.
-While it may be possible to perform the tasks on other platforms (e.g., macOS or Windows with WSL),
-such environments are not officially supported for now and may introduce unexpected issues.
-Please proceed with caution if you choose to use a non-Linux environment, and be aware that TA assistance may be limited in such cases.</p>
+<p>This lab is designed and tested primarily on Linux. While you may attempt the tasks on macOS or Windows (via WSL), these environments are unsupported and may trigger unexpected issues. Please proceed with caution, as TA assistance is limited.</p>
 </div>
 <section id="cross-compiler">
 <h3>Cross Compiler<a class="headerlink" href="#cross-compiler" title="Link to this heading">#</a></h3>
-<p>The Orange Pi RV2 is powered by the Ky X1 System-on-Chip (SoC), featuring an octa-core 64-bit RISC-V processor.
-To compile your source code to 64-bit RISC-V machine code,
-you need a cross compiler if you develop on a non-RISC-V environment.</p>
+<p>The Orange Pi RV2 uses the Ky X1 SoC with an octa-core 64-bit RISC-V processor. To develop on non-RISC-V systems, you must use a cross-compiler to generate the required 64-bit RISC-V machine code.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Install the cross compiler <code class="docutils literal notranslate"><span class="pre">gcc-riscv64-unknown-elf</span></code> on your host computer.</p>
@@ -394,14 +389,13 @@ you need a cross compiler if you develop on a non-RISC-V environment.</p>
 </section>
 <section id="linker">
 <h3>Linker<a class="headerlink" href="#linker" title="Link to this heading">#</a></h3>
-<p>You might not have explicitly encountered linkers in previous development experiences.
-This is because most compilers automatically apply a default linker script
-during the build process. (Use <code class="docutils literal notranslate"><span class="pre">ld</span> <span class="pre">--verbose</span></code> to inspect the default script.)
-In bare-metal programming, you are responsible for defining the memory layout manually.</p>
+<p>Linkers are often invisible because compilers use default scripts automatically (run <code class="docutils literal notranslate"><span class="pre">ld</span> <span class="pre">--verbose</span></code> to view yours). However, in bare-metal programming, you must manually define the memory layout yourself.</p>
 <p>The following is a linker script template.
 You will extend it in a future lab.</p>
-<dl>
-<dt>Save the following linker script as <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> on your host computer.</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECTIONS</span>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Save the following linker script as <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> on your host computer.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECTIONS</span>
 <span class="p">{</span>
     <span class="o">.</span> <span class="o">=</span> <span class="mh">0x80200000</span><span class="p">;</span>
     <span class="o">.</span><span class="n">text</span> <span class="p">:</span> <span class="p">{</span> <span class="o">*</span><span class="p">(</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="p">}</span>
@@ -411,8 +405,7 @@ You will extend it in a future lab.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</dd>
-</dl>
+</div>
 </section>
 <section id="qemu">
 <h3>QEMU<a class="headerlink" href="#qemu" title="Link to this heading">#</a></h3>
@@ -484,17 +477,16 @@ This binary image can then be included as part of a Flattened Image Tree (FIT) f
 <section id="check-on-qemu">
 <h3>Check on QEMU<a class="headerlink" href="#check-on-qemu" title="Link to this heading">#</a></h3>
 <p>After building, you can use QEMU to see the dumped assembly.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Build your first kernel image, and check it on QEMU with</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qemu</span><span class="o">-</span><span class="n">system</span><span class="o">-</span><span class="n">riscv64</span> <span class="o">-</span><span class="n">M</span> <span class="n">virt</span> <span class="o">-</span><span class="n">kernel</span> <span class="n">kernel</span><span class="o">.</span><span class="n">bin</span> <span class="o">-</span><span class="n">display</span> <span class="n">none</span> <span class="o">-</span><span class="n">d</span> <span class="n">in_asm</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Build your first kernel image, and check it on QEMU.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although QEMU is convenient for early-stage testing, it does not emulate many OrangePi RV2-specific devices.
-Do not assume success in QEMU guarantees correct behavior on hardware.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>While QEMU is useful for early testing, it lacks emulation for many Orange Pi RV2-specific devices. Success in QEMU does not guarantee correct behavior on physical hardware.</p>
 </div>
 </section>
 </section>
@@ -566,7 +558,7 @@ the contents and layout of the resulting FIT image. This file must reference the
 <p>We have prepared a complete bootable <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/opirv2-sdcard.img">bootable image</a>  for this lab.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.To update your kernel in the future, simply mount the SD card and replace the <code class="docutils literal notranslate"><span class="pre">kernel.fit</span></code> file with your new version.</p>
+<p>The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem. To update your kernel in the future, simply mount the SD card and replace the <code class="docutils literal notranslate"><span class="pre">kernel.fit</span></code> file with your new version.</p>
 </div>
 <p>You can write it to your SD card using the <code class="docutils literal notranslate"><span class="pre">dd</span></code> command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">opirv2</span><span class="o">-</span><span class="n">sdcard</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span> <span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">M</span> <span class="n">status</span><span class="o">=</span><span class="n">progress</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
