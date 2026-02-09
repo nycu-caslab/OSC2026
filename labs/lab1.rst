@@ -53,16 +53,15 @@ Basic Exercise 2 - UART Setup - 25%
 For all labs in this course, UART will be the primary interface for communication between the OrangePi RV2 and your host computer.
 You will use it to read input, print output, and interact with the system while debugging.
 
-In this exercise, you will configure the UART peripheral by directly writing to its memory-mapped registers.
-This includes setting the baud rate, data format, and enabling both the transmitter and receiver.
+In this exercise, you will operate the UART peripheral by directly accessing its memory-mapped registers.
+This includes polling the status flags, reading received data, and writing data to the transmitter.
 
 Refer to the OrangePi RV2's hardware documentation for details on the base address and layout of the UART registers.
 
 .. admonition:: Todo
 
-    Set up the UART interface on OrangePi RV2.
-    This includes configuring the UART registers to initialize the baud rate, data bits, stop bits,
-    and enabling both the transmitter and receiver.
+    Implement the UART I/O functions on OrangePi RV2.
+    This includes accessing the UART registers to poll the line status, retrieve input characters, and transmit output characters.
 
 Basic Exercise 3 - Simple Shell - 25%
 ######################################
