@@ -27,18 +27,15 @@ Cross-Platform Development
 ***************************
 
 .. note::
-  This lab is designed and tested primarily on Linux-based systems.
-  While it may be possible to perform the tasks on other platforms (e.g., macOS or Windows with WSL),
-  such environments are not officially supported for now and may introduce unexpected issues.
-  Please proceed with caution if you choose to use a non-Linux environment, and be aware that TA assistance may be limited in such cases.
-
+  This lab is designed and tested primarily on Linux. While you may attempt the tasks on macOS or Windows (via WSL), \ 
+  these environments are unsupported and may trigger unexpected issues. Please proceed with caution, \
+  as TA assistance is limited.
 
 Cross Compiler
 ##############
 
-The Orange Pi RV2 is powered by the Ky X1 System-on-Chip (SoC), featuring an octa-core 64-bit RISC-V processor. 
-To compile your source code to 64-bit RISC-V machine code, 
-you need a cross compiler if you develop on a non-RISC-V environment.
+The Orange Pi RV2 uses the Ky X1 SoC with an octa-core 64-bit RISC-V processor. \
+To develop on non-RISC-V systems, you must use a cross-compiler to generate the required 64-bit RISC-V machine code.
 
 .. admonition:: Todo
 
@@ -51,27 +48,26 @@ you need a cross compiler if you develop on a non-RISC-V environment.
 Linker
 ######
 
-You might not have explicitly encountered linkers in previous development experiences.
-This is because most compilers automatically apply a default linker script 
-during the build process. (Use ``ld --verbose`` to inspect the default script.)
-In bare-metal programming, you are responsible for defining the memory layout manually.
+Linkers are often invisible because compilers use default scripts automatically (run ``ld --verbose`` to view yours). \
+However, in bare-metal programming, you must manually define the memory layout yourself.
 
 The following is a linker script template.
 You will extend it in a future lab.
 
 .. admonition:: Todo
-  
-Save the following linker script as ``linker.ld`` on your host computer.
-  .. code-block:: 
 
-    SECTIONS
-    {
-        . = 0x80200000;
-        .text : { *(.text) }
-        .rodata : { *(.rodata) }
-        .data : { *(.data) }
-        .bss : { *(.sbss) *(.bss) }
-    }
+    Save the following linker script as ``linker.ld`` on your host computer.
+
+    .. code-block:: 
+
+      SECTIONS
+      {
+          . = 0x80200000;
+          .text : { *(.text) }
+          .rodata : { *(.rodata) }
+          .data : { *(.data) }
+          .bss : { *(.sbss) *(.bss) }
+      }
 
 
 QEMU
@@ -98,7 +94,6 @@ From Source Code to Kernel Image
 
 At this point, you should have a basic understanding of the cross-platform toolchain. 
 The following steps will guide you through using these tools in practice.
-
 
 From Source Code to Object Files
 ################################
@@ -161,18 +156,22 @@ Check on QEMU
 
 After building, you can use QEMU to see the dumped assembly.
 
-.. code-block::
-
-  qemu-system-riscv64 -M virt -kernel kernel.bin -display none -d in_asm
-
 .. admonition:: Todo
 
-    Build your first kernel image, and check it on QEMU.
+    Build your first kernel image, and check it on QEMU with
 
-.. note::
-   Although QEMU is convenient for early-stage testing, it does not emulate many OrangePi RV2-specific devices.
-   Do not assume success in QEMU guarantees correct behavior on hardware.
+    .. code-block::
 
+      qemu-system-riscv64 -M virt -kernel kernel.bin -display none -d in_asm
+
+    .. Partial of outcome belike:
+
+    .. .. image:: /images/lab0_qemu_asm_dump.png
+
+.. warning::
+
+  While QEMU is useful for early testing, it lacks emulation for many Orange Pi RV2-specific devices. \
+  Success in QEMU does not guarantee correct behavior on physical hardware.
 
 **********************
 Deploy to OrangePi RV2
@@ -276,7 +275,7 @@ We have prepared a complete bootable `bootable image <https://github.com/nycu-ca
 
 .. note:: 
 
-  The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem.\
+  The image is already partitioned, contains the boot firmware, and includes a FAT32 filesystem. \
   To update your kernel in the future, simply mount the SD card and replace the ``kernel.fit`` file with your new version. 
   
   .. You will not need to re-flash img again. To update your kernel in the future, \
