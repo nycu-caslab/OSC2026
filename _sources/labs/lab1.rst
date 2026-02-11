@@ -63,6 +63,9 @@ Refer to the OrangePi RV2's hardware documentation for details on the base addre
     Implement the UART I/O functions on OrangePi RV2.
     This includes accessing the UART registers to poll the line status, retrieve input characters, and transmit output characters.
 
+.. note::
+    For details regarding the Orange Pi RV2's UART address and layout of the UART registers, please refer to `SoC User Manual <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`(specifically sections 6.2 and 16.3).
+
 Basic Exercise 3 - Simple Shell - 25%
 ######################################
 
@@ -77,6 +80,11 @@ At minimum, it must support the following commands:
 
 You may implement a simple command parser that reads input character by character,
 identifies complete commands, and prints the corresponding output.
+
+The expected result is shown below:
+.. image:: /images/lab1_3.png
+    :align: center
+    :alt: Expected result of the simple shell
 
 .. important::
 
@@ -141,10 +149,6 @@ see ``sbi_ecall`` in the `Linux 6.6 source <https://elixir.bootlin.com/linux/v6.
     - Function ID ``0x0``: ``sbi_get_spec_version()``: returns OpenSBI version
     - Function ID ``0x1``: ``sbi_get_impl_id()``: returns implementation ID
     - Function ID ``0x2``: ``sbi_get_impl_version()``: returns implementation version
-    
-    .. and Extension ID ``0x53525354`` (SBI_EXT_SRST), 
-
-    .. - Function ID ``0x0``: ``sbi_system_reset(...)``: performs a system reset
 
 After implementing ``sbi_ecall(...)``, use it to support a new shell command ``info``
 that displays the following information on the OrangePi RV2 board:
@@ -156,8 +160,12 @@ that displays the following information on the OrangePi RV2 board:
 To print formatted results in your shell, you may implement a minimal ``printf``-like function,
 or use your existing UART output routine with manual formatting.
 
-``info`` will serve as your first system-level introspection tool 
-and should include both SBI-based results and DTB-based results if available.
+``info`` will serve as your first system-level introspection tool and should include both SBI-based results.
+
+The expected output of the `info` command is shown below:
+.. image:: /images/lab1_4.png
+    :align: center
+    :alt: Expected output of the info command
 
 .. note::
     For more detail of RISC-V SBI, please refer to `RISC-V SBI Reference <https://github.com/nycu-caslab/OSC2026/raw/main/references/riscv-sbi.pdf>`_
