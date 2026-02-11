@@ -64,7 +64,7 @@ Refer to the OrangePi RV2's hardware documentation for details on the base addre
     This includes accessing the UART registers to poll the line status, retrieve input characters, and transmit output characters.
 
 .. note::
-    For details regarding the Orange Pi RV2's UART address and layout of the UART registers, please refer to `SoC User Manual <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_(specifically sections 6.2 and 16.3).
+    For details regarding the OrangePi RV2’s UART address and layout of the UART registers, please refer to `SoC User Manual <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_ (specifically sections 6.2 and 16.3).
 
 Basic Exercise 3 - Simple Shell - 25%
 ######################################
@@ -161,7 +161,7 @@ that displays the following information on the OrangePi RV2 board:
 To print formatted results in your shell, you may implement a minimal ``printf``-like function,
 or use your existing UART output routine with manual formatting.
 
-``info`` will serve as your first system-level introspection tool and should include both SBI-based results.
+``info`` will serve as your first system-level introspection tool and should include SBI-based results.
 
 The expected output of the ``info`` command is shown below:
 
