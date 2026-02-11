@@ -3,11 +3,21 @@ External Resourses
 
 .. These are some great websites you can refer to.
 
-**CPU User Manual**
+**SOC User Manual**
 
-`K1 User Manual <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_ 
+`Key Stone® K1 User Manual V6.1 <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_ 
 
+**OrangePi RV2 User Manual**
 
+`OrangePi Wiki <http://www.orangepi.org/orangepiwiki/index.php/Orange_Pi_RV2>`_
+
+**RISC-V SBI**
+
+`RISC-V SBI Reference <https://github.com/nycu-caslab/OSC2026/raw/main/references/riscv-sbi.pdf>`_
+
+**RISC-V PLIC**
+
+`RISC-V PLIC Reference <https://github.com/nycu-caslab/OSC2026/raw/main/references/riscv-plic.pdf>`_
 
 .. **Bare metal tutorials in C**
 

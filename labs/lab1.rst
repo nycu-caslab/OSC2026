@@ -159,6 +159,10 @@ or use your existing UART output routine with manual formatting.
 ``info`` will serve as your first system-level introspection tool 
 and should include both SBI-based results and DTB-based results if available.
 
+.. note::
+    For more detail of RISC-V SBI, please refer to `RISC-V SBI Reference <https://github.com/nycu-caslab/OSC2026/raw/main/references/riscv-sbi.pdf>`_
+
+
 .. ********************
 .. Advanced Exercise
 .. ********************

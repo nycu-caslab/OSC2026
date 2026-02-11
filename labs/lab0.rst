@@ -21,7 +21,13 @@ Goals of this lab
   It is not graded, but completing all the ``Todo`` parts is essential 
   to ensure smooth progress in subsequent labs.
   Skipping them may result in difficulties later on.
-  
+
+.. note::
+  The `Key Stone® K1 User Manual V6.1 <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_ 
+  is the authoritative reference required for driver implementation and system configuration. 
+  For board setup, consult the `official preparation guide <http://www.orangepi.org/orangepiwiki/index.php/Orange_Pi_RV2#Introduction_to_using_the_development_board?>`_. 
+  See `External References <https://nycu-caslab.github.io/OSC2026/references/external_resources.html>`_ for additional resources.
+
 ***************************
 Cross-Platform Development
 ***************************
