@@ -1,34 +1,40 @@
 External Resourses
 ==================
 
-These are some great websites you can refer to.
+.. These are some great websites you can refer to.
 
-**Bare metal tutorials in C**
+**CPU User Manual**
 
-https://github.com/bztsrc/raspi3-tutorial
+`K1 User Manual <https://github.com/nycu-caslab/OSC2026/raw/main/references/K1_User_Manual_(V6.1_2025.08.06).pdf>`_ 
 
-**Operating system tutorials in C**
 
-https://github.com/s-matyukevich/raspberry-pi-os
 
-**Operating system tutorials in rust**
+.. **Bare metal tutorials in C**
 
-https://github.com/rust-embedded/rust-raspi3-OS-tutorials
+.. https://github.com/bztsrc/raspi3-tutorial
 
-**Raspberry pi officical github**
+.. **Operating system tutorials in C**
 
-https://github.com/raspberrypi/
+.. https://github.com/s-matyukevich/raspberry-pi-os
 
-**Embedded linux wiki page for Raspberry pi**
+.. **Operating system tutorials in rust**
 
-https://elinux.org/RPi_Hub
+.. https://github.com/rust-embedded/rust-raspi3-OS-tutorials
 
-**Course videos**
+.. **Raspberry pi officical github**
 
-https://shorturl.at/imzZ4
+.. https://github.com/raspberrypi/
 
-**Course slides**
+.. **Embedded linux wiki page for Raspberry pi**
 
-https://drive.google.com/drive/folders/1Vp43bgPHMs2DbwCBs1Jgiv7QUZrfdE0X?usp=sharing
-https://drive.google.com/drive/folders/1PuUwEFG2az-Ay1qG9DsvKMY30eGaViVm?usp=sharing
+.. https://elinux.org/RPi_Hub
+
+.. **Course videos**
+
+.. https://shorturl.at/imzZ4
+
+.. **Course slides**
+
+.. https://drive.google.com/drive/folders/1Vp43bgPHMs2DbwCBs1Jgiv7QUZrfdE0X?usp=sharing
+.. https://drive.google.com/drive/folders/1PuUwEFG2az-Ay1qG9DsvKMY30eGaViVm?usp=sharing
 

@@ -49,10 +49,7 @@ Lecture and Office Hours
     :maxdepth: 2
     :caption: Labs:
 
-    labs/overview.rst
     labs/*
-    labs/hardware/index.rst
-
 .. toctree::
     :hidden:
     :glob:
