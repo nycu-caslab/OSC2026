@@ -326,12 +326,12 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-exception-30">Basic Exercise 1 - Exception  - 30%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-switch-m-mode-to-u-mode">Mode Switch: M-mode to U-mode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-switch-s-mode-to-u-mode">Mode Switch: S-mode to U-mode</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trap-handling-from-u-mode">Trap Handling from U-mode</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-core-timer-interrupt-10">Basic Exercise 2 - Core Timer Interrupt - 10%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-vf2-uart0-interrupt-30">Basic Exercise 3 - VF2 UART0 Interrupt - 30%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-orangepi-rv2-uart0-interrupt-30">Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
@@ -371,7 +371,7 @@ With the exception mechanism, an operating system can</p>
 <h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Understand the exception mechanism in RISC-V.</p></li>
-<li><p>Understand how interrupt delegation works in the VF2 platform.</p></li>
+<li><p>Understand how interrupt delegation works in the OrangePi RV2 platform.</p></li>
 <li><p>Configure and handle timer interrupts using the CLINT.</p></li>
 <li><p>Understand and handle UART interrupts via the PLIC.</p></li>
 <li><p>Learn how to multiplex timers and schedule asynchronous tasks.</p></li>
@@ -389,9 +389,9 @@ With the exception mechanism, an operating system can</p>
 <section id="exception-levels-privilege-modes">
 <h3>Exception Levels (Privilege Modes)<a class="headerlink" href="#exception-levels-privilege-modes" title="Link to this heading">#</a></h3>
 <p>RISC-V defines four privilege modes: User, Supervisor, Hypervisor (optional), and Machine mode.
-For simplicity, VF2 boots in <strong>Machine mode (M-mode)</strong>, and most bare-metal kernels are executed in M-mode.</p>
-<p>In this lab, you will run both kernel and user-mode programs, using <cite>mret</cite> to switch from M-mode to U-mode,
-and configuring trap handling via <cite>mtvec</cite>, <cite>mscratch</cite>, <cite>mepc</cite>, <cite>mcause</cite>, <cite>mstatus</cite>, and <cite>medeleg</cite>/<cite>mideleg</cite>.</p>
+For the OrangePi RV2, the bootloader starts in Machine mode (M-mode) to run OpenSBI. Afterward, it hands over control to our kernel, which executes in <strong>Supervisor mode (S-mode)</strong>.</p>
+<p>In this lab, you will run both kernel and user-mode programs, using <cite>sret</cite> to switch from S-mode to U-mode,
+and configuring trap handling via <cite>stvec</cite>, <cite>sscratch</cite>, <cite>sepc</cite>, <cite>scause</cite> and <cite>sstatus</cite>.</p>
 </section>
 <section id="interrupts-and-the-clint">
 <h3>Interrupts and the CLINT<a class="headerlink" href="#interrupts-and-the-clint" title="Link to this heading">#</a></h3>
@@ -405,67 +405,67 @@ and configuring trap handling via <cite>mtvec</cite>, <cite>mscratch</cite>, <ci
 </section>
 <section id="interrupt-controllers-plic">
 <h3>Interrupt Controllers - PLIC<a class="headerlink" href="#interrupt-controllers-plic" title="Link to this heading">#</a></h3>
-<p>VF2 uses the <strong>Platform-Level Interrupt Controller (PLIC)</strong> to handle external interrupts from devices such as UART.</p>
+<p>OrangePi RV2 uses the <strong>Platform-Level Interrupt Controller (PLIC)</strong> to handle external interrupts from devices such as UART.</p>
 <p>Key facts:</p>
 <ul class="simple">
 <li><p>Each device interrupt has an ID (e.g., UART0 is usually ID 10).</p></li>
 <li><p>PLIC routes interrupt requests to CPU cores with a priority mechanism.</p></li>
 <li><p>Each hart has context-specific registers to claim/complete interrupts.</p></li>
 </ul>
-<p>See JH7110 documentation or DTB for actual interrupt IDs and PLIC base addresses.</p>
+<p>See documentation or DTB for actual interrupt IDs and PLIC base addresses.</p>
 </section>
 <section id="critical-sections">
 <h3>Critical Sections<a class="headerlink" href="#critical-sections" title="Link to this heading">#</a></h3>
 <p>As in all interrupt-driven systems, shared data must be protected from concurrent access during interrupt handling.
-In RISC-V, this can be done by disabling interrupts via <cite>csrci mstatus, MSTATUS_MIE</cite> and re-enabling via <cite>csrsi</cite>.</p>
+In RISC-V, this can be done by disabling interrupts via <cite>csrci sstatus, SSTATUS_MIE</cite> and re-enabling via <cite>csrsi</cite>.</p>
 </section>
 </section>
 <section id="basic-exercises">
 <h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
 <section id="basic-exercise-1-exception-30">
 <h3>Basic Exercise 1 - Exception  - 30%<a class="headerlink" href="#basic-exercise-1-exception-30" title="Link to this heading">#</a></h3>
-<section id="mode-switch-m-mode-to-u-mode">
-<h4>Mode Switch: M-mode to U-mode<a class="headerlink" href="#mode-switch-m-mode-to-u-mode" title="Link to this heading">#</a></h4>
-<p>After booting in M-mode, configure registers to switch to U-mode and run user-level programs.
+<section id="mode-switch-s-mode-to-u-mode">
+<h4>Mode Switch: S-mode to U-mode<a class="headerlink" href="#mode-switch-s-mode-to-u-mode" title="Link to this heading">#</a></h4>
+<p>After booting in S-mode, configure registers to switch to U-mode and run user-level programs.
 Setup includes:</p>
 <ol class="arabic simple">
-<li><p>Writing user program address to <cite>mepc</cite></p></li>
-<li><p>Setting <cite>mstatus</cite> to enable interrupts and select U-mode</p></li>
-<li><p>Using <cite>mret</cite> to jump to U-mode</p></li>
+<li><p>Writing user program address to <cite>sepc</cite></p></li>
+<li><p>Setting <cite>sstatus</cite> to enable interrupts and select U-mode</p></li>
+<li><p>Using <cite>sret</cite> to jump to U-mode</p></li>
 </ol>
 </section>
 <section id="trap-handling-from-u-mode">
 <h4>Trap Handling from U-mode<a class="headerlink" href="#trap-handling-from-u-mode" title="Link to this heading">#</a></h4>
-<p>When the user program executes an <cite>ecall</cite>, it traps to the M-mode handler.
+<p>When the user program executes an <cite>ecall</cite>, it traps to the S-mode handler.
 You need to:</p>
 <ul class="simple">
-<li><p>Set the trap vector address in <cite>mtvec</cite></p></li>
-<li><p>Save user context (<cite>x1-x31</cite>, <cite>mepc</cite>, <cite>mstatus</cite>)</p></li>
-<li><p>Print diagnostic info from <cite>mcause</cite>, <cite>mepc</cite>, <cite>mtval</cite></p></li>
-<li><p>Restore context and return to user using <cite>mret</cite></p></li>
+<li><p>Set the trap vector address in <cite>stvec</cite></p></li>
+<li><p>Save user context (<cite>x1-x31</cite>, <cite>sepc</cite>, <cite>sstatus</cite>)</p></li>
+<li><p>Print diagnostic info from <cite>scause</cite>, <cite>sepc</cite>, <cite>stval</cite></p></li>
+<li><p>Restore context and return to user using <cite>sret</cite></p></li>
 </ul>
 </section>
 </section>
 <section id="basic-exercise-2-core-timer-interrupt-10">
 <h3>Basic Exercise 2 - Core Timer Interrupt - 10%<a class="headerlink" href="#basic-exercise-2-core-timer-interrupt-10" title="Link to this heading">#</a></h3>
-<p>Enable <cite>mtimecmp</cite> to raise a timer interrupt after a specified period.
+<p>Enable a supervisor timer interrupt after a specified period using SBI.
 Steps:</p>
 <ul class="simple">
-<li><p>Read <cite>mtime</cite></p></li>
+<li><p>Read the current time using <cite>rdtime</cite></p></li>
 <li><p>Add time delta (e.g., equivalent of 1 second)</p></li>
-<li><p>Write to <cite>mtimecmp</cite></p></li>
-<li><p>Enable <cite>MIE</cite> in <cite>mstatus</cite> and <cite>MTIE</cite> in <cite>mie</cite></p></li>
-<li><p>In the interrupt handler, acknowledge and reprogram <cite>mtimecmp</cite></p></li>
+<li><p>Program the next timer event using an SBI call (e.g., <cite>sbi_set_timer</cite>)</p></li>
+<li><p>Enable <cite>SIE</cite> in <cite>sstatus</cite> and <cite>STIE</cite> in <cite>sie</cite></p></li>
+<li><p>In the interrupt handler, acknowledge and reprogram the next timer event via the SBI call</p></li>
 </ul>
 <p>Print boot-time seconds in the handler.</p>
 </section>
-<section id="basic-exercise-3-vf2-uart0-interrupt-30">
-<h3>Basic Exercise 3 - VF2 UART0 Interrupt - 30%<a class="headerlink" href="#basic-exercise-3-vf2-uart0-interrupt-30" title="Link to this heading">#</a></h3>
+<section id="basic-exercise-3-orangepi-rv2-uart0-interrupt-30">
+<h3>Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%<a class="headerlink" href="#basic-exercise-3-orangepi-rv2-uart0-interrupt-30" title="Link to this heading">#</a></h3>
 <p>Enable UART0 interrupt via:</p>
 <ul class="simple">
-<li><p>UART interrupt enable register (check VF2 SoC manual or DTS; likely <cite>UART0.IER</cite>)</p></li>
+<li><p>UART interrupt enable register (check OrangePi RV2 SoC manual or DTS; likely <cite>UART0.IER</cite>)</p></li>
 <li><p>Enable UART interrupt ID (e.g., 10) in the PLIC</p></li>
-<li><p>Set <cite>mie.MEIE</cite> and enable external interrupts globally</p></li>
+<li><p>Set <cite>sie.SEIE</cite> and enable external interrupts globally</p></li>
 </ul>
 <p>Steps:</p>
 <ol class="arabic simple">
@@ -482,7 +482,7 @@ Steps:</p>
 <section id="advanced-exercise-1-timer-multiplexing-20">
 <h3>Advanced Exercise 1 - Timer Multiplexing - 20%<a class="headerlink" href="#advanced-exercise-1-timer-multiplexing-20" title="Link to this heading">#</a></h3>
 <p>Use <cite>add_timer(callback, duration)</cite> API to schedule deferred tasks.
-Use a software-managed priority queue (e.g., min-heap or sorted list) to keep track of expiration time and reprogram <cite>mtimecmp</cite> accordingly.</p>
+Use a software-managed priority queue (e.g., min-heap or sorted list) to keep track of expiration time and reprogram the next timer event using an SBI call accordingly.</p>
 </section>
 <section id="advanced-exercise-2-concurrent-i-o-devices-handling-20">
 <h3>Advanced Exercise 2 - Concurrent I/O Devices Handling 20%<a class="headerlink" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20" title="Link to this heading">#</a></h3>
@@ -490,7 +490,7 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 <ul class="simple">
 <li><p>ISR enqueues tasks to be handled outside critical path</p></li>
 <li><p>Enable nesting and priority-based dispatch</p></li>
-<li><p>Protect shared state using interrupt masking (<cite>mstatus</cite>)</p></li>
+<li><p>Protect shared state using interrupt masking (<cite>sstatus</cite>)</p></li>
 <li><p>Before returning from handler, process pending tasks with interrupts re-enabled</p></li>
 </ul>
 <p>Preemption can be implemented by checking the event queue for higher-priority tasks before final return from trap.</p>
@@ -559,12 +559,12 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-exception-30">Basic Exercise 1 - Exception  - 30%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-switch-m-mode-to-u-mode">Mode Switch: M-mode to U-mode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-switch-s-mode-to-u-mode">Mode Switch: S-mode to U-mode</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trap-handling-from-u-mode">Trap Handling from U-mode</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-core-timer-interrupt-10">Basic Exercise 2 - Core Timer Interrupt - 10%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-vf2-uart0-interrupt-30">Basic Exercise 3 - VF2 UART0 Interrupt - 30%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-orangepi-rv2-uart0-interrupt-30">Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
