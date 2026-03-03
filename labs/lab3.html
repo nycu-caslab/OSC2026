@@ -685,7 +685,7 @@ You may use only the first one.</p>
 Use the values you parse directly to reserve:</p>
 <ol class="arabic simple">
 <li><p>DTB Blob: use the <code class="docutils literal notranslate"><span class="pre">fdt_ptr</span></code> and <code class="docutils literal notranslate"><span class="pre">fdt_header.totalsize</span></code> to obtain start and size.</p></li>
-<li><p>Kernel Image: use linker symbols (e.g., <code class="docutils literal notranslate"><span class="pre">&amp;_phys_start</span></code> and <code class="docutils literal notranslate"><span class="pre">&amp;_phys_end</span></code>) to obtain its physical range.</p></li>
+<li><p>Kernel Image: obtain its physical memory boundaries via symbols defined in the linker script.</p></li>
 <li><p>Initramfs: use <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> properties <code class="docutils literal notranslate"><span class="pre">linux,initrd-start</span></code> and <code class="docutils literal notranslate"><span class="pre">linux,initrd-end</span></code> to obtain its range. (already done in Lab 2)</p></li>
 <li><p>Any additional reserved regions (if have, e.g., spin tables, DMA buffers, platform-specific). You may retrieve via <code class="docutils literal notranslate"><span class="pre">/reserved-memory</span></code> node in the device tree.</p></li>
 </ol>
