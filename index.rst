@@ -29,7 +29,7 @@ Lecture and Office Hours
 
 .. important::
   Check the `lecture website`_ for the schedule and the lecture slides!
-.. _lecture website: https://people.cs.nycu.edu.tw/~ttyeh/course/2025_Spring/IOC5226/outline.html
+.. _lecture website: https://people.cs.nycu.edu.tw/~ttyeh/course/2026_Spring/IOC5226/outline.html
 
 
 .. important::
