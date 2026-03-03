@@ -372,7 +372,7 @@ Furthermore, as previously noted in the background, when OrangePi RV2 is booted,
 Use the values you parse directly to reserve:
 
 1. DTB Blob: use the ``fdt_ptr`` and ``fdt_header.totalsize`` to obtain start and size.
-2. Kernel Image: use linker symbols (e.g., ``&_phys_start`` and ``&_phys_end``) to obtain its physical range.
+2. Kernel Image: obtain its physical memory boundaries via symbols defined in the linker script.
 3. Initramfs: use ``/chosen`` properties ``linux,initrd-start`` and ``linux,initrd-end`` to obtain its range. (already done in Lab 2)
 4. Any additional reserved regions (if have, e.g., spin tables, DMA buffers, platform-specific). You may retrieve via ``/reserved-memory`` node in the device tree.
 
