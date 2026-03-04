@@ -360,7 +360,15 @@ document.write(`
 </section>
 <section id="background">
 <h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
-<p>The boot process on the OrangePi RV2 involves multiple stages, including the execution of the bootloader, loading of the kernel, and initialization of system components. Understanding this process is crucial for developing low-level system software.</p>
+<p>The boot flow of a RISC-V system involves multiple stages:</p>
+<ol class="arabic simple">
+<li><p><strong>Boot ROM (Read-Only Memory)</strong>: Initializes basic hardware and loads the next stage.</p></li>
+<li><p><strong>U-Boot SPL (Secondary Program Loader)</strong>: Initializes the main memory and loads the larger bootloader.</p></li>
+<li><p><strong>OpenSBI (Supervisor Binary Interface)</strong>: Handles low-level Machine-mode (M-mode) operations.</p></li>
+<li><p><strong>U-Boot (Universal Bootloader)</strong>: Loads the actual operating system kernel and boots it.</p></li>
+<li><p><strong>Kernel</strong>: Manages hardware and provides services to user programs.</p></li>
+</ol>
+<p>Understanding the process is crucial for developing low-level system software.</p>
 <p>In this lab, you’ll implement a bootloader that loads the actual kernel through UART, providing flexibility during development and debugging.</p>
 </section>
 <section id="basic-exercises">
@@ -388,8 +396,8 @@ document.write(`
 <p>Add <code class="docutils literal notranslate"><span class="pre">-serial</span> <span class="pre">pty</span></code> option to create a pseudo TTY device and test your bootloader through QEMU.</p>
 </div>
 <p>You may still want to load your actual kernel image at <code class="docutils literal notranslate"><span class="pre">0x00200000</span></code> (or <code class="docutils literal notranslate"><span class="pre">0x80200000</span></code> on QEMU), but it overlaps with your bootloader.</p>
-<p>To avoid overwriting itself, the bootloader should load the new kernel into a different memory address like <code class="docutils literal notranslate"><span class="pre">0x20000000</span></code> (or <code class="docutils literal notranslate"><span class="pre">0x82000000</span></code> on QEMU) and jump to it.
-A safe practice is to consult the devicetree (<code class="docutils literal notranslate"><span class="pre">/memory</span></code> node) to determine the available RAM layout. Also see <em>Basic Exercise 2: Devicetree</em> for more details.</p>
+<p>To avoid overwriting itself, the bootloader should load the new kernel into a different memory address like <code class="docutils literal notranslate"><span class="pre">0x20000000</span></code> (or <code class="docutils literal notranslate"><span class="pre">0x82000000</span></code> on QEMU) and jump to it.</p>
+<p>Optionally, a safer practice is to consult <code class="docutils literal notranslate"><span class="pre">&lt;memory&gt;</span></code> node in the devicetree to determine the available memory region. See <em>Basic Exercise 2: Devicetree</em> for more details.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Develop a bootloader that listens for a kernel image transmitted over UART and loads it into memory for execution. Design a simple protocol for data transmission to ensure reliability.</p>
@@ -440,11 +448,10 @@ See <a class="reference external" href="https://docs.kernel.org/arch/riscv/boot.
 <span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">fdt_getprop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">fdt</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">nodeoffset</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">lenp</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>In this part, you need to retrieve the RAM memory layout from the devicetree. The memory node path is <code class="docutils literal notranslate"><span class="pre">/memory&#64;0</span></code> on the OrangePi RV2 (or <code class="docutils literal notranslate"><span class="pre">/memory&#64;80000000</span></code> on QEMU).
-You also need to get the <code class="docutils literal notranslate"><span class="pre">reg</span></code> property to find out the available memory region.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Parse the flattened devicetree to retrieve the memory region information. Use the parsed information to determine available RAM regions and print it out in the shell with <code class="docutils literal notranslate"><span class="pre">info</span></code> command.</p>
+<p>In this part, you need to get <code class="docutils literal notranslate"><span class="pre">stdout-path</span></code> property in <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> node from the devicetree.
+Print it out in the shell with <code class="docutils literal notranslate"><span class="pre">info</span></code> command.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
