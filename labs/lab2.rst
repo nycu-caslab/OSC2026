@@ -22,7 +22,15 @@ Goals of this lab
 Background
 ************
 
-The boot process on the OrangePi RV2 involves multiple stages, including the execution of the bootloader, loading of the kernel, and initialization of system components. Understanding this process is crucial for developing low-level system software.
+The boot flow of a RISC-V system involves multiple stages:
+
+1. **Boot ROM (Read-Only Memory)**: Initializes basic hardware and loads the next stage.
+2. **U-Boot SPL (Secondary Program Loader)**: Initializes the main memory and loads the larger bootloader.
+3. **OpenSBI (Supervisor Binary Interface)**: Handles low-level Machine-mode (M-mode) operations.
+4. **U-Boot (Universal Bootloader)**: Loads the actual operating system kernel and boots it.
+5. **Kernel**: Manages hardware and provides services to user programs.
+
+Understanding the process is crucial for developing low-level system software.
 
 In this lab, you'll implement a bootloader that loads the actual kernel through UART, providing flexibility during development and debugging.
 
@@ -62,7 +70,8 @@ You can implement a ``load`` command in your shell to receive the kernel image o
 You may still want to load your actual kernel image at ``0x00200000`` (or ``0x80200000`` on QEMU), but it overlaps with your bootloader.
 
 To avoid overwriting itself, the bootloader should load the new kernel into a different memory address like ``0x20000000`` (or ``0x82000000`` on QEMU) and jump to it.
-A safe practice is to consult the devicetree (``/memory`` node) to determine the available RAM layout. Also see *Basic Exercise 2: Devicetree* for more details.
+
+Optionally, a safer practice is to consult ``<memory>`` node in the devicetree to determine the available memory region. See *Basic Exercise 2: Devicetree* for more details.
 
 .. admonition:: Todo
 
@@ -124,12 +133,10 @@ As a practical code reference, you can consult the example `here <https://github
     int fdt_path_offset(const void *fdt, const char *path);
     const void *fdt_getprop(const void *fdt, int nodeoffset, const char *name, int *lenp);
 
-In this part, you need to retrieve the RAM memory layout from the devicetree. The memory node path is ``/memory@0`` on the OrangePi RV2 (or ``/memory@80000000`` on QEMU).
-You also need to get the ``reg`` property to find out the available memory region.
-
 .. admonition:: Todo
 
-    Parse the flattened devicetree to retrieve the memory region information. Use the parsed information to determine available RAM regions and print it out in the shell with ``info`` command.
+    In this part, you need to get ``stdout-path`` property in ``/chosen`` node from the devicetree. 
+    Print it out in the shell with ``info`` command.
 
 .. note::
 
