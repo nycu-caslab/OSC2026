@@ -316,7 +316,8 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#official-reference">Official Reference</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exception-levels-privilege-modes">Exception Levels (Privilege Modes)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interrupts-and-the-clint">Interrupts and the CLINT</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#supervisor-control-and-status-registers-csrs">Supervisor Control and Status Registers (CSRs)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-timer-and-sbi">Core Timer and SBI</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interrupt-controllers-plic">Interrupt Controllers - PLIC</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#critical-sections">Critical Sections</a></li>
 </ul>
@@ -369,7 +370,7 @@ With the exception mechanism, an operating system can</p>
 <ul class="simple">
 <li><p>Understand the exception mechanism in RISC-V.</p></li>
 <li><p>Understand how interrupt delegation works in the OrangePi RV2 platform.</p></li>
-<li><p>Configure and handle timer interrupts using the CLINT.</p></li>
+<li><p>Configure and handle core timer interrupts using the SBI Timer Extension.</p></li>
 <li><p>Understand and handle UART interrupts via the PLIC.</p></li>
 <li><p>Learn how to multiplex timers and schedule asynchronous tasks.</p></li>
 </ul>
@@ -385,20 +386,32 @@ With the exception mechanism, an operating system can</p>
 </section>
 <section id="exception-levels-privilege-modes">
 <h3>Exception Levels (Privilege Modes)<a class="headerlink" href="#exception-levels-privilege-modes" title="Link to this heading">#</a></h3>
-<p>RISC-V defines four privilege modes: User, Supervisor, Hypervisor (optional), and Machine mode.
-For the OrangePi RV2, the bootloader starts in Machine mode (M-mode) to run OpenSBI. Afterward, it hands over control to our kernel, which executes in <strong>Supervisor mode (S-mode)</strong>.</p>
-<p>In this lab, you will run both kernel and user-mode programs, using <cite>sret</cite> to switch from S-mode to U-mode,
-and configuring trap handling via <cite>stvec</cite>, <cite>sscratch</cite>, <cite>sepc</cite>, <cite>scause</cite> and <cite>sstatus</cite>.</p>
+<p>RISC-V defines privilege modes to isolate different system components.
+In our OS design, the kernel executes in <strong>Supervisor mode (S-mode)</strong>, while user applications execute in <strong>User mode (U-mode)</strong>.</p>
+<img alt="../_images/RISC_privilege.png" src="../_images/RISC_privilege.png" />
+<p>In this lab, you will run both kernel and user-mode programs, using <cite>sret</cite> to switch from S-mode to U-mode, and configuring trap handling via the following CSRs: <cite>stvec</cite>, <cite>sscratch</cite>, <cite>sepc</cite>, <cite>scause</cite>, and <cite>sstatus</cite>.</p>
 </section>
-<section id="interrupts-and-the-clint">
-<h3>Interrupts and the CLINT<a class="headerlink" href="#interrupts-and-the-clint" title="Link to this heading">#</a></h3>
-<p>The Core Local Interruptor (CLINT) is responsible for managing timer and software interrupts for each core.</p>
-<p>Registers include:</p>
+<section id="supervisor-control-and-status-registers-csrs">
+<h3>Supervisor Control and Status Registers (CSRs)<a class="headerlink" href="#supervisor-control-and-status-registers-csrs" title="Link to this heading">#</a></h3>
+<p>RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you must understand and manipulate the following key registers:</p>
 <ul class="simple">
-<li><p><cite>mtime</cite>: a 64-bit timer that increments at a fixed frequency.</p></li>
-<li><p><cite>mtimecmp[h]</cite>: a 64-bit comparator register that triggers an interrupt when <cite>mtime &gt;= mtimecmp</cite>.</p></li>
+<li><p><cite>sstatus</cite> (Supervisor Status): Keeps track of the processor’s current operating state. Key bits include <cite>SIE</cite> (Supervisor Interrupt Enable) for global interrupt control, <cite>SPIE</cite> (Previous <cite>SIE</cite>) to save the interrupt state prior to the trap, and <cite>SPP</cite> (Previous Privilege mode) to record whether the trap originated from U-mode or S-mode.</p></li>
+<li><p><cite>stvec</cite> (Supervisor Trap Vector Base Address): Holds the base address of your kernel’s trap handler function. When a trap occurs, the CPU automatically jumps to the address specified here.</p></li>
+<li><p><cite>sepc</cite> (Supervisor Exception Program Counter): When a trap is taken, the hardware automatically saves the memory address of the interrupted instruction (or the instruction that caused the exception) into this register. The <cite>sret</cite> instruction later uses <cite>sepc</cite> to return to the correct execution point.</p></li>
+<li><p><cite>scause</cite> (Supervisor Cause): Contains a code indicating the exact reason for the trap (e.g., timer interrupt, <cite>ecall</cite> from U-mode, or memory fault). The highest bit indicates whether the event is an asynchronous interrupt (1) or a synchronous exception (0).</p></li>
+<li><p><cite>stval</cite> (Supervisor Trap Value): Provides additional, trap-specific information. For instance, if a page fault or memory access error occurs, <cite>stval</cite> will hold the faulting memory address.</p></li>
+<li><p><cite>sscratch</cite> (Supervisor Scratch): A temporary register typically used to safely swap the user stack pointer with the kernel context pointer at the very beginning of a trap handler, before any general-purpose registers are modified.</p></li>
+<li><p><cite>sie</cite> (Supervisor Interrupt Enable): Used for fine-grained control and observation of specific S-mode interrupts. They contain bits for Software (<cite>SSIE</cite>/<cite>SSIP</cite>), Timer (<cite>STIE</cite>/<cite>STIP</cite>), and External (<cite>SEIE</cite>/<cite>SEIP</cite>) interrupts.</p></li>
 </ul>
-<p>Each hart (hardware thread) has its own <cite>mtimecmp</cite> register.</p>
+</section>
+<section id="core-timer-and-sbi">
+<h3>Core Timer and SBI<a class="headerlink" href="#core-timer-and-sbi" title="Link to this heading">#</a></h3>
+<p>In S-mode, the kernel relies on the Supervisor Binary Interface (SBI) to manage timer interrupts.</p>
+<p>Key concepts for S-mode timers:</p>
+<ul class="simple">
+<li><p><cite>time</cite> CSR: A 64-bit read-only register that reflects the current timer value (accessible via the <cite>rdtime</cite> instruction).</p></li>
+<li><p>SBI Timer Extension: To schedule a timer interrupt, the S-mode kernel must call <cite>sbi_set_timer(uint64_t stime_value)</cite>. The SBI implementation will configure the underlying hardware and trigger a timer interrupt to S-mode when the specified time is reached.</p></li>
+</ul>
 </section>
 <section id="interrupt-controllers-plic">
 <h3>Interrupt Controllers - PLIC<a class="headerlink" href="#interrupt-controllers-plic" title="Link to this heading">#</a></h3>
@@ -407,14 +420,14 @@ and configuring trap handling via <cite>stvec</cite>, <cite>sscratch</cite>, <ci
 <ul class="simple">
 <li><p>Each device interrupt has an ID (e.g., UART0 is usually ID 10).</p></li>
 <li><p>PLIC routes interrupt requests to CPU cores with a priority mechanism.</p></li>
-<li><p>Each hart has context-specific registers to claim/complete interrupts.</p></li>
+<li><p>Supervisor Context: Because the kernel runs in S-mode, you must configure and access the PLIC using the registers specific to the S-mode context (Claim/Complete registers, Priority Threshold registers, etc.).</p></li>
 </ul>
 <p>See documentation or DTB for actual interrupt IDs and PLIC base addresses.</p>
 </section>
 <section id="critical-sections">
 <h3>Critical Sections<a class="headerlink" href="#critical-sections" title="Link to this heading">#</a></h3>
 <p>As in all interrupt-driven systems, shared data must be protected from concurrent access during interrupt handling.
-In RISC-V, this can be done by disabling interrupts via <cite>csrci sstatus, SSTATUS_MIE</cite> and re-enabling via <cite>csrsi</cite>.</p>
+In RISC-V, this can be done by disabling interrupts via <cite>csrci sstatus, SSTATUS_SIE</cite> and re-enabling via <cite>csrsi</cite>.</p>
 </section>
 </section>
 <section id="basic-exercises">
@@ -430,6 +443,10 @@ Setup includes:</p>
 <li><p>Setting <cite>sstatus</cite> to enable interrupts and select U-mode</p></li>
 <li><p>Using <cite>sret</cite> to jump to U-mode</p></li>
 </ol>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Add a command that can load a user program in the initramfs. Then, run it in U-mode by steps mentioned above.</p>
+</div>
 </section>
 <section id="trap-handling-from-u-mode">
 <h4>Trap Handling from U-mode<a class="headerlink" href="#trap-handling-from-u-mode" title="Link to this heading">#</a></h4>
@@ -441,6 +458,10 @@ You need to:</p>
 <li><p>Print diagnostic info from <cite>scause</cite>, <cite>sepc</cite>, <cite>stval</cite></p></li>
 <li><p>Restore context and return to user using <cite>sret</cite></p></li>
 </ul>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Set the vector table and implement the exception handler.</p>
+</div>
 </section>
 </section>
 <section id="basic-exercise-2-core-timer-interrupt-10">
@@ -449,12 +470,15 @@ You need to:</p>
 Steps:</p>
 <ul class="simple">
 <li><p>Read the current time using <cite>rdtime</cite></p></li>
-<li><p>Add time delta (e.g., equivalent of 1 second)</p></li>
+<li><p>Add time delta (e.g., equivalent of 1 second based on the CPU’s timebase frequency)</p></li>
 <li><p>Program the next timer event using an SBI call (e.g., <cite>sbi_set_timer</cite>)</p></li>
 <li><p>Enable <cite>SIE</cite> in <cite>sstatus</cite> and <cite>STIE</cite> in <cite>sie</cite></p></li>
 <li><p>In the interrupt handler, acknowledge and reprogram the next timer event via the SBI call</p></li>
 </ul>
-<p>Print boot-time seconds in the handler.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.</p>
+</div>
 </section>
 <section id="basic-exercise-3-orangepi-rv2-uart0-interrupt-30">
 <h3>Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%<a class="headerlink" href="#basic-exercise-3-orangepi-rv2-uart0-interrupt-30" title="Link to this heading">#</a></h3>
@@ -470,8 +494,12 @@ Steps:</p>
 <li><p>Implement ISR for UART RX and TX.</p></li>
 <li><p>In RX, place incoming bytes in buffer.</p></li>
 <li><p>In TX, send data from buffer when ready.</p></li>
+<li><p>In the PLIC, read the Claim register to get the IRQ number, handle it, and write the IRQ number back to the Complete register.</p></li>
 </ol>
-<p>Make shell non-blocking by using buffer for input/output.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the asynchronous UART read/write by interrupt handlers.</p>
+</div>
 </section>
 </section>
 <section id="advanced-exercises">
@@ -487,7 +515,7 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 <ul class="simple">
 <li><p>ISR enqueues tasks to be handled outside critical path</p></li>
 <li><p>Enable nesting and priority-based dispatch</p></li>
-<li><p>Protect shared state using interrupt masking (<cite>sstatus</cite>)</p></li>
+<li><p>Protect shared state using interrupt masking (<cite>sstatus.SIE</cite>)</p></li>
 <li><p>Before returning from handler, process pending tasks with interrupts re-enabled</p></li>
 </ul>
 <p>Preemption can be implemented by checking the event queue for higher-priority tasks before final return from trap.</p>
@@ -531,7 +559,8 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#official-reference">Official Reference</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exception-levels-privilege-modes">Exception Levels (Privilege Modes)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interrupts-and-the-clint">Interrupts and the CLINT</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#supervisor-control-and-status-registers-csrs">Supervisor Control and Status Registers (CSRs)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-timer-and-sbi">Core Timer and SBI</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interrupt-controllers-plic">Interrupt Controllers - PLIC</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#critical-sections">Critical Sections</a></li>
 </ul>

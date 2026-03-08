@@ -24,7 +24,7 @@ Goals of this lab
 
 * Understand the exception mechanism in RISC-V.
 * Understand how interrupt delegation works in the OrangePi RV2 platform.
-* Configure and handle timer interrupts using the CLINT.
+* Configure and handle core timer interrupts using the SBI Timer Extension.
 * Understand and handle UART interrupts via the PLIC.
 * Learn how to multiplex timers and schedule asynchronous tasks.
 
@@ -42,23 +42,36 @@ Exceptions and interrupts in RISC-V are defined in the official privileged speci
 Exception Levels (Privilege Modes)
 ==================================
 
-RISC-V defines four privilege modes: User, Supervisor, Hypervisor (optional), and Machine mode.
-For the OrangePi RV2, the bootloader starts in Machine mode (M-mode) to run OpenSBI. Afterward, it hands over control to our kernel, which executes in **Supervisor mode (S-mode)**.
+RISC-V defines privilege modes to isolate different system components.
+In our OS design, the kernel executes in **Supervisor mode (S-mode)**, while user applications execute in **User mode (U-mode)**.
 
-In this lab, you will run both kernel and user-mode programs, using `sret` to switch from S-mode to U-mode,
-and configuring trap handling via `stvec`, `sscratch`, `sepc`, `scause` and `sstatus`.
+.. image:: /images/RISC_privilege.png
+.. :align: left
 
-Interrupts and the CLINT
-========================
+In this lab, you will run both kernel and user-mode programs, using `sret` to switch from S-mode to U-mode, and configuring trap handling via the following CSRs: `stvec`, `sscratch`, `sepc`, `scause`, and `sstatus`.
 
-The Core Local Interruptor (CLINT) is responsible for managing timer and software interrupts for each core.
+Supervisor Control and Status Registers (CSRs)
+==============================================
 
-Registers include:
+RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you must understand and manipulate the following key registers:
 
-- `mtime`: a 64-bit timer that increments at a fixed frequency.
-- `mtimecmp[h]`: a 64-bit comparator register that triggers an interrupt when `mtime >= mtimecmp`.
+- `sstatus` (Supervisor Status): Keeps track of the processor's current operating state. Key bits include `SIE` (Supervisor Interrupt Enable) for global interrupt control, `SPIE` (Previous `SIE`) to save the interrupt state prior to the trap, and `SPP` (Previous Privilege mode) to record whether the trap originated from U-mode or S-mode.
+- `stvec` (Supervisor Trap Vector Base Address): Holds the base address of your kernel's trap handler function. When a trap occurs, the CPU automatically jumps to the address specified here.
+- `sepc` (Supervisor Exception Program Counter): When a trap is taken, the hardware automatically saves the memory address of the interrupted instruction (or the instruction that caused the exception) into this register. The `sret` instruction later uses `sepc` to return to the correct execution point.
+- `scause` (Supervisor Cause): Contains a code indicating the exact reason for the trap (e.g., timer interrupt, `ecall` from U-mode, or memory fault). The highest bit indicates whether the event is an asynchronous interrupt (1) or a synchronous exception (0).
+- `stval` (Supervisor Trap Value): Provides additional, trap-specific information. For instance, if a page fault or memory access error occurs, `stval` will hold the faulting memory address.
+- `sscratch` (Supervisor Scratch): A temporary register typically used to safely swap the user stack pointer with the kernel context pointer at the very beginning of a trap handler, before any general-purpose registers are modified.
+- `sie` (Supervisor Interrupt Enable): Used for fine-grained control and observation of specific S-mode interrupts. They contain bits for Software (`SSIE`/`SSIP`), Timer (`STIE`/`STIP`), and External (`SEIE`/`SEIP`) interrupts.
 
-Each hart (hardware thread) has its own `mtimecmp` register.
+Core Timer and SBI
+==================
+
+In S-mode, the kernel relies on the Supervisor Binary Interface (SBI) to manage timer interrupts.
+
+Key concepts for S-mode timers:
+
+- `time` CSR: A 64-bit read-only register that reflects the current timer value (accessible via the `rdtime` instruction).
+- SBI Timer Extension: To schedule a timer interrupt, the S-mode kernel must call `sbi_set_timer(uint64_t stime_value)`. The SBI implementation will configure the underlying hardware and trigger a timer interrupt to S-mode when the specified time is reached.
 
 Interrupt Controllers - PLIC
 ============================
@@ -69,7 +82,7 @@ Key facts:
 
 - Each device interrupt has an ID (e.g., UART0 is usually ID 10).
 - PLIC routes interrupt requests to CPU cores with a priority mechanism.
-- Each hart has context-specific registers to claim/complete interrupts.
+- Supervisor Context: Because the kernel runs in S-mode, you must configure and access the PLIC using the registers specific to the S-mode context (Claim/Complete registers, Priority Threshold registers, etc.).
 
 See documentation or DTB for actual interrupt IDs and PLIC base addresses.
 
@@ -77,7 +90,7 @@ Critical Sections
 =================
 
 As in all interrupt-driven systems, shared data must be protected from concurrent access during interrupt handling.
-In RISC-V, this can be done by disabling interrupts via `csrci sstatus, SSTATUS_MIE` and re-enabling via `csrsi`.
+In RISC-V, this can be done by disabling interrupts via `csrci sstatus, SSTATUS_SIE` and re-enabling via `csrsi`.
 
 ###############
 Basic Exercises
@@ -96,6 +109,10 @@ Setup includes:
 2. Setting `sstatus` to enable interrupts and select U-mode
 3. Using `sret` to jump to U-mode
 
+.. admonition:: Todo
+
+   Add a command that can load a user program in the initramfs. Then, run it in U-mode by steps mentioned above.
+
 Trap Handling from U-mode
 -------------------------
 
@@ -107,6 +124,10 @@ You need to:
 - Print diagnostic info from `scause`, `sepc`, `stval`
 - Restore context and return to user using `sret`
 
+.. admonition:: Todo
+
+   Set the vector table and implement the exception handler.
+
 Basic Exercise 2 - Core Timer Interrupt - 10%
 =============================================
 
@@ -114,12 +135,16 @@ Enable a supervisor timer interrupt after a specified period using SBI.
 Steps:
 
 - Read the current time using `rdtime`
-- Add time delta (e.g., equivalent of 1 second)
+- Add time delta (e.g., equivalent of 1 second based on the CPU's timebase frequency)
 - Program the next timer event using an SBI call (e.g., `sbi_set_timer`)
 - Enable `SIE` in `sstatus` and `STIE` in `sie`
 - In the interrupt handler, acknowledge and reprogram the next timer event via the SBI call
 
-Print boot-time seconds in the handler.
+.. Print boot-time seconds in the handler.
+
+.. admonition:: Todo
+
+   Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.
 
 Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%
 =============================================
@@ -136,8 +161,13 @@ Steps:
 2. Implement ISR for UART RX and TX.
 3. In RX, place incoming bytes in buffer.
 4. In TX, send data from buffer when ready.
+5. In the PLIC, read the Claim register to get the IRQ number, handle it, and write the IRQ number back to the Complete register.
 
-Make shell non-blocking by using buffer for input/output.
+.. Make shell non-blocking by using buffer for input/output.
+
+.. admonition:: Todo
+
+   Implement the asynchronous UART read/write by interrupt handlers.
 
 ##################
 Advanced Exercises
@@ -156,12 +186,12 @@ Replace blocking UART logic with event queue mechanism:
 
 - ISR enqueues tasks to be handled outside critical path
 - Enable nesting and priority-based dispatch
-- Protect shared state using interrupt masking (`sstatus`)
+- Protect shared state using interrupt masking (`sstatus.SIE`)
 - Before returning from handler, process pending tasks with interrupts re-enabled
 
 Preemption can be implemented by checking the event queue for higher-priority tasks before final return from trap.
 
 .. note::
 
-    Use nested interrupt handling and task prioritization to support fair and responsive device scheduling.
+   Use nested interrupt handling and task prioritization to support fair and responsive device scheduling.
 
