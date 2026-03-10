@@ -437,8 +437,8 @@ See <a class="reference external" href="https://docs.kernel.org/arch/riscv/boot.
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>In this part, you need to get <code class="docutils literal notranslate"><span class="pre">stdout-path</span></code> property in <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> node from the devicetree.
-Print it out in the shell with <code class="docutils literal notranslate"><span class="pre">info</span></code> command.</p>
+<p>In this part, you need to obtain the UART base address from the devicetree and use it to replace the hardcoded value used in Lab 1.
+The base address can be found in the <code class="docutils literal notranslate"><span class="pre">reg</span></code> property of the <code class="docutils literal notranslate"><span class="pre">&lt;serial&gt;</span></code> node at the path  <code class="docutils literal notranslate"><span class="pre">/soc/serial</span></code>.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

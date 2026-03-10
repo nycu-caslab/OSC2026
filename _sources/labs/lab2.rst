@@ -135,8 +135,8 @@ As a practical code reference, you can consult the example `here <https://github
 
 .. admonition:: Todo
 
-    In this part, you need to get ``stdout-path`` property in ``/chosen`` node from the devicetree. 
-    Print it out in the shell with ``info`` command.
+    In this part, you need to obtain the UART base address from the devicetree and use it to replace the hardcoded value used in Lab 1.
+    The base address can be found in the ``reg`` property of the ``<serial>`` node at the path  ``/soc/serial``.
 
 .. note::
 
