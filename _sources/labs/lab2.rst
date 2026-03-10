@@ -252,11 +252,11 @@ Advanced Exercise - Bootloader Self-Relocation - 10%
 #######################################################
 
 In Basic Exercise 1, we loaded the kernel to a high address to avoid overwriting the bootloader.
-A more robust approach is for the bootloader to **relocate itself** to the top of the memory, freeing up the standard entry point for the kernel.
+A more robust approach is for the bootloader to **relocate itself** to an available region in memory, freeing up the standard entry point for the kernel.
 
 .. admonition:: Todo
 
-    Modify the bootloader to support self-relocation, moving it to the top of the memory according to the memory layout obtained from Basic Exercise 2.
+    Modify the bootloader to support self-relocation, moving it to an available region in memory.
     Then load the kernel to the standard entry point (``0x00200000`` on OrangePi RV2 / ``0x80200000`` on QEMU).
     
 .. note::
