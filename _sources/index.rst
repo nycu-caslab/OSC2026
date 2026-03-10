@@ -55,6 +55,7 @@ Lecture and Office Hours
     labs/lab1.rst
     labs/lab2.rst
     labs/lab3.rst
+    labs/lab4.rst
 
 .. toctree::
     :hidden:
