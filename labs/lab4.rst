@@ -53,15 +53,10 @@ In this lab, you will run both kernel and user-mode programs, using `sret` to sw
 Supervisor Control and Status Registers (CSRs)
 ==============================================
 
-RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you must understand and manipulate the following key registers:
+RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you are expected to independently consult the RISC-V Privileged Specification to understand the precise roles and hardware behaviors of the following key registers: `sstatus`, `stvec`, `sepc`, `scause`, `stval`, `sscratch`, and `sie`.
 
-- `sstatus` (Supervisor Status): Keeps track of the processor's current operating state. Key bits include `SIE` (Supervisor Interrupt Enable) for global interrupt control, `SPIE` (Previous `SIE`) to save the interrupt state prior to the trap, and `SPP` (Previous Privilege mode) to record whether the trap originated from U-mode or S-mode.
-- `stvec` (Supervisor Trap Vector Base Address): Holds the base address of your kernel's trap handler function. When a trap occurs, the CPU automatically jumps to the address specified here.
-- `sepc` (Supervisor Exception Program Counter): When a trap is taken, the hardware automatically saves the memory address of the interrupted instruction (or the instruction that caused the exception) into this register. The `sret` instruction later uses `sepc` to return to the correct execution point.
-- `scause` (Supervisor Cause): Contains a code indicating the exact reason for the trap (e.g., timer interrupt, `ecall` from U-mode, or memory fault). The highest bit indicates whether the event is an asynchronous interrupt (1) or a synchronous exception (0).
-- `stval` (Supervisor Trap Value): Provides additional, trap-specific information. For instance, if a page fault or memory access error occurs, `stval` will hold the faulting memory address.
-- `sscratch` (Supervisor Scratch): A temporary register typically used to safely swap the user stack pointer with the kernel context pointer at the very beginning of a trap handler, before any general-purpose registers are modified.
-- `sie` (Supervisor Interrupt Enable): Used for fine-grained control and observation of specific S-mode interrupts. They contain bits for Software (`SSIE`/`SSIP`), Timer (`STIE`/`STIP`), and External (`SEIE`/`SEIP`) interrupts.
+.. hint::
+   Before diving into the code, ensure you clearly understand what information the hardware automatically writes to these registers when a trap occurs, and which registers are read by the hardware when the `sret` instruction is executed.
 
 Core Timer and SBI
 ==================
@@ -99,6 +94,8 @@ Basic Exercises
 Basic Exercise 1 - Exception  - 30%
 ===================================
 
+To run a user program safely, your kernel must set up an environment that allows jumping into U-mode and successfully catching the exception when the user program wants to return or execute a system call.
+
 Mode Switch: S-mode to U-mode
 -----------------------------
 
@@ -119,10 +116,10 @@ Trap Handling from U-mode
 When the user program executes an `ecall`, it traps to the S-mode handler.
 You need to:
 
-- Set the trap vector address in `stvec`
-- Save user context (`x1-x31`, `sepc`, `sstatus`)
-- Print diagnostic info from `scause`, `sepc`, `stval`
-- Restore context and return to user using `sret`
+- Before entering U-mode, ensure ``stvec`` is pointing to your trap handler assembly routine.
+- Save user context (``x1-x31``, ``sepc``, ``sstatus``)
+- Print diagnostic info from ``scause``, ``sepc``, ``stval``
+- Restore context and return to user using ``sret``
 
 .. admonition:: Todo
 
@@ -131,14 +128,15 @@ You need to:
 Basic Exercise 2 - Core Timer Interrupt - 10%
 =============================================
 
-Enable a supervisor timer interrupt after a specified period using SBI.
-Steps:
+Timer interrupts are essential for OS scheduling. You will use the Supervisor Binary Interface (SBI) to program the timer.
 
-- Read the current time using `rdtime`
-- Add time delta (e.g., equivalent of 1 second based on the CPU's timebase frequency)
-- Program the next timer event using an SBI call (e.g., `sbi_set_timer`)
-- Enable `SIE` in `sstatus` and `STIE` in `sie`
-- In the interrupt handler, acknowledge and reprogram the next timer event via the SBI call
+1. Read the current time using the ``rdtime`` instruction.
+2. Calculate the target time by adding the CPU's frequency to the current time (this represents 1 second).
+3. Call ``sbi_set_timer(target_time)`` to schedule the interrupt.
+4. Set the ``STIE`` bit in the ``sie`` register to enable timer interrupts.
+5. Set the ``SIE`` bit in ``sstatus`` to enable global interrupts.
+6. When the interrupt triggers (checked via ``scause``), print the number of seconds passed since boot.
+7. Reprogram the timer for the next 2 seconds using the SBI call again.
 
 .. Print boot-time seconds in the handler.
 
@@ -148,6 +146,8 @@ Steps:
 
 Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%
 =============================================
+
+Currently, your ``uart_getc`` and ``uart_puts`` are likely blocking (busy-waiting). You must make them asynchronous using PLIC interrupts and ring buffers.
 
 Enable UART0 interrupt via:
 
@@ -182,14 +182,12 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 Advanced Exercise 2 - Concurrent I/O Devices Handling 20%
 =========================================================
 
-Replace blocking UART logic with event queue mechanism:
+Currently, interrupts are disabled while executing an Interrupt Service Routine (ISR). If a slow device (like UART printing a long string) triggers an interrupt, crucial events like Timer ticks might be dropped.
+Implement an Event Task Queue:
 
-- ISR enqueues tasks to be handled outside critical path
-- Enable nesting and priority-based dispatch
-- Protect shared state using interrupt masking (`sstatus.SIE`)
-- Before returning from handler, process pending tasks with interrupts re-enabled
-
-Preemption can be implemented by checking the event queue for higher-priority tasks before final return from trap.
+1. The hardware ISR merely acknowledges the hardware, masks that specific interrupt, and enqueues a "Task" into a software queue.
+2. Before returning from the trap (``sret``), the kernel re-enables global interrupts (``sstatus.SIE``) and starts processing the Task queue.
+3. This allows nested interrupts: a high-priority Timer interrupt can now preempt a low-priority UART task currently being processed.
 
 .. note::
 
