@@ -380,16 +380,11 @@ In our OS design, the kernel executes in <strong>Supervisor mode (S-mode)</stron
 </section>
 <section id="supervisor-control-and-status-registers-csrs">
 <h3>Supervisor Control and Status Registers (CSRs)<a class="headerlink" href="#supervisor-control-and-status-registers-csrs" title="Link to this heading">#</a></h3>
-<p>RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you must understand and manipulate the following key registers:</p>
-<ul class="simple">
-<li><p><cite>sstatus</cite> (Supervisor Status): Keeps track of the processor’s current operating state. Key bits include <cite>SIE</cite> (Supervisor Interrupt Enable) for global interrupt control, <cite>SPIE</cite> (Previous <cite>SIE</cite>) to save the interrupt state prior to the trap, and <cite>SPP</cite> (Previous Privilege mode) to record whether the trap originated from U-mode or S-mode.</p></li>
-<li><p><cite>stvec</cite> (Supervisor Trap Vector Base Address): Holds the base address of your kernel’s trap handler function. When a trap occurs, the CPU automatically jumps to the address specified here.</p></li>
-<li><p><cite>sepc</cite> (Supervisor Exception Program Counter): When a trap is taken, the hardware automatically saves the memory address of the interrupted instruction (or the instruction that caused the exception) into this register. The <cite>sret</cite> instruction later uses <cite>sepc</cite> to return to the correct execution point.</p></li>
-<li><p><cite>scause</cite> (Supervisor Cause): Contains a code indicating the exact reason for the trap (e.g., timer interrupt, <cite>ecall</cite> from U-mode, or memory fault). The highest bit indicates whether the event is an asynchronous interrupt (1) or a synchronous exception (0).</p></li>
-<li><p><cite>stval</cite> (Supervisor Trap Value): Provides additional, trap-specific information. For instance, if a page fault or memory access error occurs, <cite>stval</cite> will hold the faulting memory address.</p></li>
-<li><p><cite>sscratch</cite> (Supervisor Scratch): A temporary register typically used to safely swap the user stack pointer with the kernel context pointer at the very beginning of a trap handler, before any general-purpose registers are modified.</p></li>
-<li><p><cite>sie</cite> (Supervisor Interrupt Enable): Used for fine-grained control and observation of specific S-mode interrupts. They contain bits for Software (<cite>SSIE</cite>/<cite>SSIP</cite>), Timer (<cite>STIE</cite>/<cite>STIP</cite>), and External (<cite>SEIE</cite>/<cite>SEIP</cite>) interrupts.</p></li>
-</ul>
+<p>RISC-V provides dedicated CSRs to manage and observe the state of traps (exceptions and interrupts). To implement a robust trap handler in S-mode, you are expected to independently consult the RISC-V Privileged Specification to understand the precise roles and hardware behaviors of the following key registers: <cite>sstatus</cite>, <cite>stvec</cite>, <cite>sepc</cite>, <cite>scause</cite>, <cite>stval</cite>, <cite>sscratch</cite>, and <cite>sie</cite>.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Before diving into the code, ensure you clearly understand what information the hardware automatically writes to these registers when a trap occurs, and which registers are read by the hardware when the <cite>sret</cite> instruction is executed.</p>
+</div>
 </section>
 <section id="core-timer-and-sbi">
 <h3>Core Timer and SBI<a class="headerlink" href="#core-timer-and-sbi" title="Link to this heading">#</a></h3>
@@ -421,6 +416,7 @@ In RISC-V, this can be done by disabling interrupts via <cite>csrci sstatus, SST
 <h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
 <section id="basic-exercise-1-exception-30">
 <h3>Basic Exercise 1 - Exception  - 30%<a class="headerlink" href="#basic-exercise-1-exception-30" title="Link to this heading">#</a></h3>
+<p>To run a user program safely, your kernel must set up an environment that allows jumping into U-mode and successfully catching the exception when the user program wants to return or execute a system call.</p>
 <section id="mode-switch-s-mode-to-u-mode">
 <h4>Mode Switch: S-mode to U-mode<a class="headerlink" href="#mode-switch-s-mode-to-u-mode" title="Link to this heading">#</a></h4>
 <p>After booting in S-mode, configure registers to switch to U-mode and run user-level programs.
@@ -440,10 +436,10 @@ Setup includes:</p>
 <p>When the user program executes an <cite>ecall</cite>, it traps to the S-mode handler.
 You need to:</p>
 <ul class="simple">
-<li><p>Set the trap vector address in <cite>stvec</cite></p></li>
-<li><p>Save user context (<cite>x1-x31</cite>, <cite>sepc</cite>, <cite>sstatus</cite>)</p></li>
-<li><p>Print diagnostic info from <cite>scause</cite>, <cite>sepc</cite>, <cite>stval</cite></p></li>
-<li><p>Restore context and return to user using <cite>sret</cite></p></li>
+<li><p>Before entering U-mode, ensure <code class="docutils literal notranslate"><span class="pre">stvec</span></code> is pointing to your trap handler assembly routine.</p></li>
+<li><p>Save user context (<code class="docutils literal notranslate"><span class="pre">x1-x31</span></code>, <code class="docutils literal notranslate"><span class="pre">sepc</span></code>, <code class="docutils literal notranslate"><span class="pre">sstatus</span></code>)</p></li>
+<li><p>Print diagnostic info from <code class="docutils literal notranslate"><span class="pre">scause</span></code>, <code class="docutils literal notranslate"><span class="pre">sepc</span></code>, <code class="docutils literal notranslate"><span class="pre">stval</span></code></p></li>
+<li><p>Restore context and return to user using <code class="docutils literal notranslate"><span class="pre">sret</span></code></p></li>
 </ul>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
@@ -453,15 +449,16 @@ You need to:</p>
 </section>
 <section id="basic-exercise-2-core-timer-interrupt-10">
 <h3>Basic Exercise 2 - Core Timer Interrupt - 10%<a class="headerlink" href="#basic-exercise-2-core-timer-interrupt-10" title="Link to this heading">#</a></h3>
-<p>Enable a supervisor timer interrupt after a specified period using SBI.
-Steps:</p>
-<ul class="simple">
-<li><p>Read the current time using <cite>rdtime</cite></p></li>
-<li><p>Add time delta (e.g., equivalent of 1 second based on the CPU’s timebase frequency)</p></li>
-<li><p>Program the next timer event using an SBI call (e.g., <cite>sbi_set_timer</cite>)</p></li>
-<li><p>Enable <cite>SIE</cite> in <cite>sstatus</cite> and <cite>STIE</cite> in <cite>sie</cite></p></li>
-<li><p>In the interrupt handler, acknowledge and reprogram the next timer event via the SBI call</p></li>
-</ul>
+<p>Timer interrupts are essential for OS scheduling. You will use the Supervisor Binary Interface (SBI) to program the timer.</p>
+<ol class="arabic simple">
+<li><p>Read the current time using the <code class="docutils literal notranslate"><span class="pre">rdtime</span></code> instruction.</p></li>
+<li><p>Calculate the target time by adding the CPU’s frequency to the current time (this represents 1 second).</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">sbi_set_timer(target_time)</span></code> to schedule the interrupt.</p></li>
+<li><p>Set the <code class="docutils literal notranslate"><span class="pre">STIE</span></code> bit in the <code class="docutils literal notranslate"><span class="pre">sie</span></code> register to enable timer interrupts.</p></li>
+<li><p>Set the <code class="docutils literal notranslate"><span class="pre">SIE</span></code> bit in <code class="docutils literal notranslate"><span class="pre">sstatus</span></code> to enable global interrupts.</p></li>
+<li><p>When the interrupt triggers (checked via <code class="docutils literal notranslate"><span class="pre">scause</span></code>), print the number of seconds passed since boot.</p></li>
+<li><p>Reprogram the timer for the next 2 seconds using the SBI call again.</p></li>
+</ol>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.</p>
@@ -469,6 +466,7 @@ Steps:</p>
 </section>
 <section id="basic-exercise-3-orangepi-rv2-uart0-interrupt-30">
 <h3>Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%<a class="headerlink" href="#basic-exercise-3-orangepi-rv2-uart0-interrupt-30" title="Link to this heading">#</a></h3>
+<p>Currently, your <code class="docutils literal notranslate"><span class="pre">uart_getc</span></code> and <code class="docutils literal notranslate"><span class="pre">uart_puts</span></code> are likely blocking (busy-waiting). You must make them asynchronous using PLIC interrupts and ring buffers.</p>
 <p>Enable UART0 interrupt via:</p>
 <ul class="simple">
 <li><p>UART interrupt enable register (check OrangePi RV2 SoC manual or DTS; likely <cite>UART0.IER</cite>)</p></li>
@@ -498,14 +496,13 @@ Use a software-managed priority queue (e.g., min-heap or sorted list) to keep tr
 </section>
 <section id="advanced-exercise-2-concurrent-i-o-devices-handling-20">
 <h3>Advanced Exercise 2 - Concurrent I/O Devices Handling 20%<a class="headerlink" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20" title="Link to this heading">#</a></h3>
-<p>Replace blocking UART logic with event queue mechanism:</p>
-<ul class="simple">
-<li><p>ISR enqueues tasks to be handled outside critical path</p></li>
-<li><p>Enable nesting and priority-based dispatch</p></li>
-<li><p>Protect shared state using interrupt masking (<cite>sstatus.SIE</cite>)</p></li>
-<li><p>Before returning from handler, process pending tasks with interrupts re-enabled</p></li>
-</ul>
-<p>Preemption can be implemented by checking the event queue for higher-priority tasks before final return from trap.</p>
+<p>Currently, interrupts are disabled while executing an Interrupt Service Routine (ISR). If a slow device (like UART printing a long string) triggers an interrupt, crucial events like Timer ticks might be dropped.
+Implement an Event Task Queue:</p>
+<ol class="arabic simple">
+<li><p>The hardware ISR merely acknowledges the hardware, masks that specific interrupt, and enqueues a “Task” into a software queue.</p></li>
+<li><p>Before returning from the trap (<code class="docutils literal notranslate"><span class="pre">sret</span></code>), the kernel re-enables global interrupts (<code class="docutils literal notranslate"><span class="pre">sstatus.SIE</span></code>) and starts processing the Task queue.</p></li>
+<li><p>This allows nested interrupts: a high-priority Timer interrupt can now preempt a low-priority UART task currently being processed.</p></li>
+</ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Use nested interrupt handling and task prioritization to support fair and responsive device scheduling.</p>
