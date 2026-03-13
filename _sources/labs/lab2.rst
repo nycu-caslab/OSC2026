@@ -136,7 +136,7 @@ As a practical code reference, you can consult the example `here <https://github
 .. admonition:: Todo
 
     In this part, you need to obtain the UART base address from the devicetree and use it to replace the hardcoded value used in Lab 1.
-    The base address can be found in the ``reg`` property of the ``<serial>`` node at the path  ``/soc/serial``.
+    The base address can be found in the ``reg`` property at the path ``/soc/serial`` for OrangePi RV2 and ``/soc/uart`` for QEMU.
 
 .. note::
 
