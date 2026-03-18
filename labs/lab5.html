@@ -46,6 +46,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab5';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="External Resourses" href="../references/external_resources.html" />
+    <link rel="prev" title="Lab 4: Exception and Interrupt" href="lab4.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -97,8 +99,6 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
@@ -142,12 +142,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1: Hello World</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3: Memory Allocator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lab 5: Thread and User Process</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
 <ul class="nav bd-sidenav">
@@ -302,11 +303,8 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#threads">Threads</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-process">User Process</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mmu-less">MMU-less</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-queue-and-wait-queue">Run Queue and Wait Queue</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-process">User Process</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-queue-and-scheduling">Run Queue and Scheduling</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#yield-and-preemption">Yield and Preemption</a></li>
 </ul>
 </li>
@@ -322,8 +320,8 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-user-process-and-system-call-30">Basic Exercise 2 - User Process and System Call - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trap-frame">Trap Frame</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls">System Calls</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-convention">System Call Convention</a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#required-system-calls">Required System Calls</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-format-in-video-player-s-test-program">System Call Format in Video Player’s Test Program</a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#kernel-preemption">Kernel Preemption</a></li>
@@ -332,7 +330,13 @@
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#timer">Timer</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-program">User Program</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#framebuffer">Framebuffer</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#orange-pi-rv2">Orange Pi RV2</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Required System Calls</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">User Program</a></li>
 </ul>
 </li>
 </ul>
@@ -340,6 +344,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-posix-signal-30">Advanced Exercise 1 - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
 </ul>
 </li>
 </ul>
@@ -384,208 +389,143 @@ Moreover, you’ll learn how a user program becomes a user process and accesses 
 <p>In the previous lab, you already learned how to implement multitasking with a single stack.
 However, in the case of single stack multitasking, the CPU thread can’t switch between two tasks at any time.
 Otherwise, a task may corrupt another task’s context stored on the stack.</p>
-<p>As you know that the context of a CPU thread is determined by the values of its register set.
-Therefore, we can create different copies of register sets stored in the memory to represent different threads.
-When we want a CPU thread to run a specific thread, we let the CPU thread loads the corresponding register set in the memory to its registers.
-Then, from a macro point of view, there are multiple CPU threads running tasks independently at the same time.
-Moreover, these register sets can be loaded by any other CPU thread to achieve true parallelism.</p>
+<p>A better approach is to give each thread its own register set and stack.
+The scheduler can then save the current thread’s register set, load another thread’s, and resume execution.
+From the thread’s perspective, it was never interrupted.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In this documentation, a thread means a software thread.
+<p>In this spec, a thread means a software thread.
 For processing elements containing their hardware register sets are called CPU threads.</p>
 </div>
 </section>
 <section id="user-process">
 <h3>User Process<a class="headerlink" href="#user-process" title="Link to this heading">#</a></h3>
-<p>When a user wants to run an application,
-the operating system loads the user program into memory and runs it with one or multiple threads.
-However, users want to run multiple programs or multiple copies of the same program.
-Moreover, they want each executing program to be isolated and has its identity, capabilities, and resource.
-To achieve this, the operating system maintains multiple isolated execution instances called processes.
-A process can only access the resource it owns.
-If it needs additional resources, it invokes the corresponding system calls.
-The kernel then checks the capabilities of the process and only provides the resource if the process has the access rights.</p>
-<section id="mmu-less">
-<h4>MMU-less<a class="headerlink" href="#mmu-less" title="Link to this heading">#</a></h4>
-<p>In general, programs that directly run machine code on the CPU are isolated by virtual memory.
-However, we won’t enable the MMU in this lab,
-so we can’t prevent illegal memory access and we can’t use the same virtual address for different processes.
-If you want to execute multiple programs, please use different linker scripts for different programs
-and load them to different addresses to prevent overlapping.
-If your program calls fork, the program shouldn’t use global variables, dynamic allocation, indirect storage, etc, since the storage will be corrupted.</p>
+<p>A user process is a program loaded into memory and executed in U-mode.
+The kernel manages multiple processes, each with its own execution context and stack.
+When a process needs kernel services, it invokes system calls.
+The kernel handles the request and returns the result to the process.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>MMU is not enabled in this lab. Each process has its own user stack, but code and global variables remain at fixed physical addresses.
+Running multiple copies of the same program simultaneously will cause overlap.</p>
+</div>
 </section>
-</section>
-<section id="run-queue-and-wait-queue">
-<h3>Run Queue and Wait Queue<a class="headerlink" href="#run-queue-and-wait-queue" title="Link to this heading">#</a></h3>
-<p>One CPU thread can run one thread at a time, but there may be multiple runnable threads at the same time.
-Those runnable threads are put in the run queue.
-When the current thread relinquishes control of the CPU thread, it calls the scheduler to pick the next thread.
-Then, a piece of code saves the CPU thread’s register set and loads the next thread’s register set.</p>
-<p>During a thread’s execution, it may need to wait for a certain resource(e.g. a locked mutex or a non-ready IO device).
-Instead of busy waiting, a more efficient way is to yield the CPU thread so other threads can do meaningful jobs.
-Yet, yielding CPU is not enough because the thread may be scheduled again and waste CPU time.
-Therefore, when a thread needs to wait for a long time, it removes itself from the run queue, puts itself in a wait queue,
-and waits for others to wake it up.</p>
-<p>In general, each resource has its own wait queue.
-When the resource is ready, one or many waiting threads in the wait queue will be put back to the run queue.
-The awakened thread is eventually scheduled and runs.
-Then, it can get the resource if the resource is still available.</p>
+<section id="run-queue-and-scheduling">
+<h3>Run Queue and Scheduling<a class="headerlink" href="#run-queue-and-scheduling" title="Link to this heading">#</a></h3>
+<p>Multiple threads may be runnable at the same time, but a single CPU can only run one thread at a time.
+Runnable threads are kept in a run queue.
+When the current thread yields the CPU, the scheduler picks the next thread from the run queue and performs a context switch.</p>
+<p>When a thread needs to wait for a resource (e.g., I/O), it should yield the CPU rather than busy-waiting so other threads can make progress.
+A common approach is to remove the waiting thread from the run queue and only add it back when the resource becomes available.</p>
 </section>
 <section id="yield-and-preemption">
 <h3>Yield and Preemption<a class="headerlink" href="#yield-and-preemption" title="Link to this heading">#</a></h3>
-<p>As mentioned above, a thread can voluntarily yield the CPU thread to others.
-Yet, we can’t rely on a voluntary yield, because once a thread never yields,
-a high-priority thread can’t run even when it’s runnable.
-Hence, the kernel should be able to force the current thread to yield the CPU thread(i.e. preemption).</p>
-<p>The implementation of preemption is simple.
-Once a thread relinquishes control of the CPU thread during its execution,
-there is a chance for another piece of code to call the scheduler and switch to another thread.
-For example, when a thread in kernel mode is interrupted, the control is handed over to the interrupt handler.
-Before returning to the original execution, the kernel can call the scheduler to do a context switch to achieve kernel preemption.
-When a user process takes exceptions(system calls, interrupts, etc.), the control is handed over to the exception handler.
-Before returning to the original execution, the kernel can call the scheduler to do a context switch to achieve user preemption.</p>
-<p>The tricky part of preemption is the protection of critical sections because code executions are arbitrally interleaving now.
-Fortunately, user programs protect their critical sections themselves.
-Even the user program doesn’t protect the critical sections well, it’s the user program’s developer’s fault, and no one will blame the operating system.
-Also, it’s not possible to break other isolated processes.
-Therefore, the kernel developers don’t need to worry about problems caused by enabling user preemption.</p>
-<p>On the contrary, there are multiple shared resources in the kernel.
-Meanwhile, a data race in the kernel can break the entire system.
-If the kernel’s developers need to enable fine-grained preemption in kernel mode,
-They need to be aware of all possible shared resource accesses and adopt the right methods to protect them,
-hence it’s more complex to enable kernel preemption.</p>
+<p>A thread can voluntarily yield the CPU to others. However, a thread that never yields will starve other threads from running.
+Therefore, the kernel should be able to force the current thread to give up the CPU.
+This is called preemption.</p>
+<p>Preemption is typically triggered by an interrupt.
+When an interrupt occurs, control is passed to the exception handler.
+Before returning, the kernel can switch to another thread.</p>
 </section>
 </section>
 <section id="basic-exercises">
 <h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>You won’t need to demonstrate the test component in Basic 1 and 2 if you can execute the test program successfully in Video Player.</p>
-</div>
 <section id="basic-exercise-1-thread-10">
 <h3>Basic Exercise 1 - Thread - 10%<a class="headerlink" href="#basic-exercise-1-thread-10" title="Link to this heading">#</a></h3>
-<p>In this part, you need to implement the creation, switch, and recycling of threads.</p>
+<p>In this part, you need to implement thread creation, context switching, and thread recycling.</p>
 <section id="creating-a-thread">
 <h4>Creating a Thread<a class="headerlink" href="#creating-a-thread" title="Link to this heading">#</a></h4>
 <p>Implement a thread-creating API.
-Users can pass a function(task) to the API, and the function is run in a newly created thread.
-To make the thread schedulable and runnable, you should create a data structure and a stack for it.
-Then, put it into the run queue.</p>
-<p>The example API is listed below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">foo</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="n">t</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+A function is passed to the API and runs in the newly created thread.
+The thread should have its own kernel stack and be added to the run queue.</p>
+<p>The example API is shown below:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="kr">thread</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread_create</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="scheduler-and-context-switch">
 <h4>Scheduler and Context Switch<a class="headerlink" href="#scheduler-and-context-switch" title="Link to this heading">#</a></h4>
 <p>Implement the <code class="docutils literal notranslate"><span class="pre">schedule()</span></code> API.
-When the current thread calls this API, the scheduler picks the next thread from the run queue.
-In this lab, your scheduler should at least be able to schedule the threads of the same priority in a <strong>round-robin</strong> manner.</p>
-<p>After the next thread is picked, the kernel can save the current thread’s register set and load the next thread’s.</p>
+When called, the scheduler picks the next runnable thread from the run queue and performs a context switch using <code class="docutils literal notranslate"><span class="pre">switch_to(prev,</span> <span class="pre">next)</span></code>.
+Your scheduler should support <strong>round-robin</strong> scheduling.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">switch_to</span></code> function saves the current thread’s callee-saved registers into its thread data structure, then loads the next thread’s registers.
+The <code class="docutils literal notranslate"><span class="pre">tp</span></code> register is updated to point to the next thread’s data structure. You can use it to track the current thread.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="n">global</span><span class="w"> </span><span class="n">switch_to</span>
 <span class="nl">switch_to</span><span class="p">:</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">2</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w">  </span><span class="mi">3</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w">  </span><span class="mi">4</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s3</span><span class="p">,</span><span class="w">  </span><span class="mi">5</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s4</span><span class="p">,</span><span class="w">  </span><span class="mi">6</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s5</span><span class="p">,</span><span class="w">  </span><span class="mi">7</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s6</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s7</span><span class="p">,</span><span class="w">  </span><span class="mi">9</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s9</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s10</span><span class="p">,</span><span class="mi">12</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="mi">13</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
+<span class="w">    </span><span class="cm">/* Save context into prev-&gt;context */</span>
+<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">0</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">1</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">2</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">13</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">2</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w">  </span><span class="mi">3</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w">  </span><span class="mi">4</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s3</span><span class="p">,</span><span class="w">  </span><span class="mi">5</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s4</span><span class="p">,</span><span class="w">  </span><span class="mi">6</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s5</span><span class="p">,</span><span class="w">  </span><span class="mi">7</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s6</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s7</span><span class="p">,</span><span class="w">  </span><span class="mi">9</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s9</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s10</span><span class="p">,</span><span class="mi">12</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="mi">13</span><span class="o">*</span><span class="mi">8</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+<span class="w">    </span><span class="cm">/* Restore context from next-&gt;context */</span>
+<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">0</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">1</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">2</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">13</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">csrw</span><span class="w"> </span><span class="n">sscratch</span><span class="p">,</span><span class="w"> </span><span class="n">a1</span>
-<span class="w">    </span><span class="n">ret</span>
-
-<span class="p">.</span><span class="n">global</span><span class="w"> </span><span class="n">get_current</span>
-<span class="nl">get_current</span><span class="p">:</span>
-<span class="w">    </span><span class="n">csrr</span><span class="w"> </span><span class="n">a0</span><span class="p">,</span><span class="w"> </span><span class="n">sscratch</span>
+<span class="w">    </span><span class="n">move</span><span class="w"> </span><span class="n">tp</span><span class="p">,</span><span class="w"> </span><span class="n">a1</span>
 <span class="w">    </span><span class="n">ret</span>
 </pre></div>
 </div>
-<p>The above example gets the current thread’s data structure from the CSR register <code class="docutils literal notranslate"><span class="pre">sscratch</span></code>.
-Then it passes the current thread and the next thread to the <code class="docutils literal notranslate"><span class="pre">switch_to(prev,</span> <span class="pre">next)</span></code> function.
-Next, the CPU thread’s register set is saved on the current thread’s data structure,
-and the next thread’s register set is loaded.
-After switching the stack pointer and the <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> register, the CPU thread is in the context of the next thread.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You only need to save <a class="reference external" href="https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf">callee-saved registers</a>,
-because other registers are already on the stack.</p>
+<p>Only callee-saved registers and <code class="docutils literal notranslate"><span class="pre">ra</span></code> need to be saved here.
+<code class="docutils literal notranslate"><span class="pre">ra</span></code> must be saved explicitly because it holds the return address for the thread to resume from.
+All other caller-saved registers are saved by the compiler before calling <code class="docutils literal notranslate"><span class="pre">switch_to</span></code>,
+following the <a class="reference external" href="https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf">RISC-V calling convention</a>.</p>
 </div>
 </section>
 <section id="the-idle-thread">
 <h4>The Idle Thread<a class="headerlink" href="#the-idle-thread" title="Link to this heading">#</a></h4>
-<p>The idle thread is a thread that is always runnable.
+<p>The idle thread is always runnable.
 When there are no other runnable threads,
-the scheduler should pick it to guarantee that the CPU thread always can fetch and execute the next instruction.</p>
+the scheduler picks it to guarantee the CPU always executes the next instruction.</p>
 </section>
 <section id="end-of-a-thread">
 <h4>End of a Thread<a class="headerlink" href="#end-of-a-thread" title="Link to this heading">#</a></h4>
-<p>When a thread finishes its jobs, it needs to explicitly or implicitly call(return and let the caller call) <code class="docutils literal notranslate"><span class="pre">exit()</span></code>
-to indicate it’s terminated.</p>
-<p>In general, the thread can’t recycle all its resources.
-It’s because memory deallocation is a function call, and a thread shouldn’t free its stack while still using it.
-Therefore, the finished thread only removes itself from the run queue,
-releases freeable resources, sets its state to be dead,
-and waits for someone to recycle the remaining stuff.</p>
-<p>In UNIX-like operating systems, the parent thread is accountable for recycling its zombie child.
-The parent can also get the status code from the zombie child’s data structure as useful information.
-In this lab, you can let the idle thread do the jobs to simplify the implementation.
-When the idle thread is scheduled, it checks if there is any zombie thread.
-If yes, it recycles them as follows.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">idle</span><span class="p">():</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">kill_zombies</span><span class="p">()</span> <span class="c1"># reclaim threads marked as DEAD</span>
-        <span class="n">schedule</span><span class="p">()</span> <span class="c1"># switch to any other runnable thread</span>
+<p>When a thread finishes, it should call an exit function to mark itself as terminated.
+A thread cannot free its own stack while still using it, so the remaining resources must be recycled by someone else.</p>
+<p>In UNIX-like operating systems, the parent is responsible for recycling its zombie children.
+In this lab, you can simplify this by letting the idle thread handle recycling instead.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">idle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">kill_zombies</span><span class="p">();</span><span class="w"> </span><span class="c1">// recycle zombie threads</span>
+<span class="w">        </span><span class="n">schedule</span><span class="p">();</span><span class="w">     </span><span class="c1">// switch to any other runnable thread</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="test">
 <h4>Test<a class="headerlink" href="#test" title="Link to this heading">#</a></h4>
 <p>Please test your implementation with the following code or equivalent logic code in the demo.</p>
-<p>Expected result: multiple threads print the content interleaved.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">(){</span>
-<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Thread id: %d %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">current_thread</span><span class="p">().</span><span class="n">id</span><span class="p">(),</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
-<span class="w">        </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000000</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;Thread id: %d %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_current</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100000000</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">);</span>
 <span class="w">        </span><span class="n">schedule</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">thread_exit</span><span class="p">();</span>
 <span class="p">}</span>
 
-<span class="kt">void</span><span class="w"> </span><span class="nf">kernel_main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// ...</span>
 <span class="w">    </span><span class="c1">// boot setup</span>
 <span class="w">    </span><span class="c1">// ...</span>
-<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// N should &gt; 2</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">thread_create</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="n">idle</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Expected result:</strong> Multiple threads print the content interleaved.</p>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
@@ -598,156 +538,169 @@ If yes, it recycles them as follows.</p>
 <p>In this part, you need to implement the basic user process mechanism such as system calls and user preemption.</p>
 <section id="trap-frame">
 <h4>Trap Frame<a class="headerlink" href="#trap-frame" title="Link to this heading">#</a></h4>
-<p>The registers are saved at the top of the kernel stack when a user process throws an exception and enters kernel mode. The registers are loaded before returning to user mode. The trap frame is the name given to the saved material.
-The kernel will not affect the trap frame in normal exception handling (e.g., page fault, interrupt), so the user process will not be aware that it has entered kernel mode. When it comes to system calls, however, the user software expects the kernel to take care of it.
-The program uses the general-purpose registers to set the arguments and receive the return value, just like conventional function calls. The kernel can then read the trap frame to acquire the user’s parameters and write it to set the return value and error code.</p>
+<p>When a user process takes an exception and enters kernel mode, all registers are saved onto the kernel stack.
+This saved context is called the trap frame.
+Before returning to user mode, the registers are restored from the trap frame, so the user process is unaware that it ever entered kernel mode.</p>
+<p>For system calls, the user process sets its arguments in registers before executing <code class="docutils literal notranslate"><span class="pre">ecall</span></code>.
+The kernel reads the arguments from the trap frame, performs the requested operation,
+and writes the return value back into the trap frame before returning to user mode.</p>
 </section>
 <section id="system-calls">
 <h4>System Calls<a class="headerlink" href="#system-calls" title="Link to this heading">#</a></h4>
-<p>In the previous lab, the <cite>ecall</cite> instruction allowed your user program to trap to the kernel. In this lab, you’ll learn how arguments and return values are transmitted between user and kernel modes. In order to develop simple user programs, you’ll also need to implement some fundamental system calls.</p>
+<p>In the previous lab, you used <code class="docutils literal notranslate"><span class="pre">ecall</span></code> to trap into the kernel.
+In this lab, you’ll learn how arguments and return values are passed between user and kernel mode,
+and implement the system calls needed to run user programs.</p>
+<section id="system-call-convention">
+<h5>System Call Convention<a class="headerlink" href="#system-call-convention" title="Link to this heading">#</a></h5>
+<p>When making a system call:</p>
+<ul class="simple">
+<li><p>Arguments are passed in <code class="docutils literal notranslate"><span class="pre">a0</span></code>, <code class="docutils literal notranslate"><span class="pre">a1</span></code>, <code class="docutils literal notranslate"><span class="pre">a2</span></code>, …</p></li>
+<li><p>The system call number is stored in <code class="docutils literal notranslate"><span class="pre">a7</span></code>.</p></li>
+<li><p>The return value is written back to <code class="docutils literal notranslate"><span class="pre">a0</span></code>.</p></li>
+</ul>
+</section>
 <section id="required-system-calls">
 <h5>Required System Calls<a class="headerlink" href="#required-system-calls" title="Link to this heading">#</a></h5>
-<p>You need to implement the following system calls for user programs.</p>
+<p>You need to implement the following system calls and their corresponding numbers for user programs.</p>
 <dl class="simple">
-<dt>int getpid()</dt><dd><p>Get current process’s id.</p>
+<dt>0: long getpid()</dt><dd><p>Return the current process’s pid.</p>
 </dd>
-<dt>size_t uart_read(char buf[], size_t size)</dt><dd><p>Return the number of bytes read by reading size byte into the user-supplied buffer buf.</p>
+<dt>1: long uart_read(char *buf, long count)</dt><dd><p>Read <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes into <code class="docutils literal notranslate"><span class="pre">buf</span></code>. Return the number of bytes read.</p>
 </dd>
-<dt>size_t uart_write(const char buf[], size_t size)</dt><dd><p>Return the number of bytes written after writing size byte from the user-supplied buffer buf.</p>
+<dt>2: long uart_write(const char *buf, long count)</dt><dd><p>Write <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes from <code class="docutils literal notranslate"><span class="pre">buf</span></code>. Return the number of bytes written.</p>
 </dd>
-<dt>int exec(const char* name, char *const argv[])</dt><dd><p>Run the program with parameters.</p>
+<dt>3: int exec(const char *path)</dt><dd><p>Load and execute the program specified by <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p>
+</dd>
+<dt>4: long fork()</dt><dd><p>Duplicate the current process.
+Return the child’s pid to the parent, and 0 to the child.</p>
+</dd>
+<dt>5: void exit(int status)</dt><dd><p>Terminate the current process.</p>
+</dd>
+<dt>6: int stop(long pid)</dt><dd><p>Terminate the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>.</p>
 </dd>
 </dl>
-<div class="admonition-note admonition">
-<p class="admonition-title">Note</p>
-<p>In this lab, you won’t have to deal with argument passing, but you can still use it.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>To execute the test program in Video Player, make sure your system calls match the system call numbers.</p>
 </div>
-<dl class="simple">
-<dt>int fork()</dt><dd><p>The standard method of duplicating the current process in UNIX-like operating systems is to use fork(). Following the call to fork(), two processes run the same code. Set the parent process’s return value to the child’s id and the child process’s return value to 0 to distinguish them.</p>
-</dd>
-<dt>void exit()</dt><dd><p>Terminate the current process.</p>
-</dd>
-<dt>int mbox_call(unsigned char ch, unsigned int *mbox)</dt><dd><p>Get the hardware’s information by mailbox</p>
-</dd>
-<dt>void kill(int pid)</dt><dd><p>Other processes identified by pid should be terminated.</p>
-</dd>
-</dl>
-<div class="admonition-note admonition">
-<p class="admonition-title">Note</p>
-<p>You don’t need to implement this system call if you prefer to kill a process using the POSIX Signal stated in Advanced Exercise 1.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>To execute the test program in Video Player, make sure your system calls match the guidelines below.</p>
-</div>
-</section>
-<section id="system-call-format-in-video-player-s-test-program">
-<h5>System Call Format in Video Player’s Test Program<a class="headerlink" href="#system-call-format-in-video-player-s-test-program" title="Link to this heading">#</a></h5>
-<ul class="simple">
-<li><p>The ecall function will be used to make a system call.</p></li>
-<li><dl class="simple">
-<dt>When calling the ecall function</dt><dd><ul>
-<li><p>The arguments would be stored in a0, a1, a2, …</p></li>
-<li><p>Return value would be stored in a0</p></li>
-<li><dl class="simple">
-<dt>The system call numbers given below would be stored in a7</dt><dd><ul>
-<li><p>0: int getpid()</p></li>
-<li><p>1: size_t uartread(char buf[], size_t size)</p></li>
-<li><p>2: size_t uartwrite(const char buf[], size_t size)</p></li>
-<li><p>3: int exec(const char *name, char *const argv[])</p></li>
-<li><p>4: int fork()</p></li>
-<li><p>5: void exit(int status)</p></li>
-<li><p>6: int mbox_call(unsigned char ch, unsigned int *mbox)</p></li>
-<li><p>7: void kill(int pid)</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
 </section>
 </section>
 <section id="kernel-preemption">
 <h4>Kernel Preemption<a class="headerlink" href="#kernel-preemption" title="Link to this heading">#</a></h4>
-<p>It’s worth noting that you can only disable preemption or interrupts when absolutely essential. Your kernel should always be preemptible at other times.</p>
+<p>Disable interrupts or preemption only when absolutely necessary. Your kernel should remain preemptible at all other times.</p>
 </section>
 <section id="id1">
 <h4>Test<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Please test your implementation using the code below or equivalent logic code, but you <strong>must output the stack pointer</strong>. This test should work in user mode.</p>
-</div>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">(){</span>
-<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Fork Test, pid %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_pid</span><span class="p">());</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// child</span>
-<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">;</span>
-<span class="w">        </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;first child pid: %d, cnt: %d, ptr: %x, sp : %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_pid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
-<span class="w">        </span><span class="o">++</span><span class="n">cnt</span><span class="p">;</span>
+<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin">user program</a> to your kernel and execute it.
+Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the shell to run the test.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kt">long</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">;</span>
+<span class="w">      </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
+<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">      </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span>
-<span class="w">            </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;first child pid: %d, cnt: %d, ptr: %x, sp : %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_pid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">        </span><span class="k">else</span><span class="p">{</span>
-<span class="w">            </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">cnt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;second child pid: %d, cnt: %d, ptr: %x, sp : %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_pid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
-<span class="w">                </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000000</span><span class="p">);</span>
-<span class="w">                </span><span class="o">++</span><span class="n">cnt</span><span class="p">;</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">        </span><span class="n">exit</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;parent here, pid %d, child %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_pid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
+<span class="w">          </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">cnt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
+<span class="w">              </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child2: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">              </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000000000</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">);</span>
+<span class="w">              </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;parent: pid = %d, child pid = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement system calls.</p>
 </div>
 </section>
 </section>
 <section id="video-player-40">
 <h3>Video Player - 40%<a class="headerlink" href="#video-player-40" title="Link to this heading">#</a></h3>
-<p>In order to test the correctness of your previous implementation, we create a user program that runs only if your kernel behaves as expected.</p>
+<p>In this part, you will run the provided user program to verify your previous implementation.
+The program requires a working scheduler, system calls, and framebuffer output.</p>
 <section id="timer">
 <h4>Timer<a class="headerlink" href="#timer" title="Link to this heading">#</a></h4>
-<p>Enable the timer interrupt. Schedule the pending threads when the timer interrupts.</p>
-<div class="admonition-note admonition">
+<p>Enable the timer interrupt and schedule the pending threads when the timer interrupts.
+Set the timer to expire every <strong>1/32 second</strong> so that the shell and video can run concurrently.</p>
+</section>
+<section id="framebuffer">
+<h4>Framebuffer<a class="headerlink" href="#framebuffer" title="Link to this heading">#</a></h4>
+<p>A framebuffer is a region of memory that holds pixel data for display output.
+The display hardware reads from this memory and outputs it to the screen.
+To display an image, simply write pixel data to the framebuffer address.</p>
+<section id="qemu">
+<h5>QEMU<a class="headerlink" href="#qemu" title="Link to this heading">#</a></h5>
+<p>Add <code class="docutils literal notranslate"><span class="pre">-device</span> <span class="pre">ramfb</span></code> and remove <code class="docutils literal notranslate"><span class="pre">-display</span> <span class="pre">none</span></code> from your QEMU command to enable the framebuffer.
+Before use, the framebuffer base address must be registered with QEMU via the <code class="docutils literal notranslate"><span class="pre">fw_cfg</span></code> interface.
+You can either hardcode an available memory address or dynamically allocate a region.</p>
+<div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Set the expired time appropriately according to the <cite>mtime</cite> and <cite>mtimecmp</cite> registers in the VF2 system.</p>
+<p><code class="docutils literal notranslate"><span class="pre">fw_cfg</span></code> setup is not the focus of this lab.
+You can just use the <a class="reference external" href="https://github.com/nycu-caslab/OSC-2026-Exercise/blob/main/ex52/video.c">exercise code</a>
+as a reference for the implementation.
+Related questions will not be asked during the demo.</p>
 </div>
 </section>
-<section id="user-program">
-<h4>User Program<a class="headerlink" href="#user-program" title="Link to this heading">#</a></h4>
-<p>Load the <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
-<p>This test program will access the timer registers, so make sure your timer initialization includes code to enable reading and writing <cite>mtime</cite> and <cite>mtimecmp</cite>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="o">*</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="p">)(</span><span class="n">CLINT_BASE</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x4000</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">next_expired_time</span><span class="p">;</span>
+<section id="orange-pi-rv2">
+<h5>Orange Pi RV2<a class="headerlink" href="#orange-pi-rv2" title="Link to this heading">#</a></h5>
+<p>Connect the HDMI output to a monitor.
+The framebuffer is initialized by U-Boot at physical address <code class="docutils literal notranslate"><span class="pre">0x7f700000</span></code>, so no additional initialization is needed.</p>
+<p>After writing to the framebuffer, the CPU cache must be flushed using <code class="docutils literal notranslate"><span class="pre">cbo.flush</span></code>
+to ensure the display hardware reads the latest data from DRAM rather than stale cache.
+If your toolchain supports <code class="docutils literal notranslate"><span class="pre">-march=rv64gc_zicbom</span></code>, you can use the instruction directly.
+Otherwise, use the raw instruction encoding instead:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define cbo_flush(start)                \</span>
+<span class="cp">    ({                                  \</span>
+<span class="cp">        asm volatile(&quot;mv a0, %0\n\t&quot;    \</span>
+<span class="cp">                     &quot;.word 0x0025200F&quot; \</span>
+<span class="cp">                     :                  \</span>
+<span class="cp">                     : &quot;r&quot;(start)       \</span>
+<span class="cp">                     : &quot;memory&quot;, &quot;a0&quot;); \</span>
+<span class="cp">    })</span>
 </pre></div>
 </div>
+</section>
+</section>
+<section id="id2">
+<h4>Required System Calls<a class="headerlink" href="#id2" title="Link to this heading">#</a></h4>
+<dl class="simple">
+<dt>7: void display(unsigned int *bmp_image, unsigned int width, unsigned int height)</dt><dd><p>Display the video.</p>
+</dd>
+<dt>8: int usleep(unsigned int usec)</dt><dd><p>Sleep for a specified number of microseconds.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h4>User Program<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
+<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Obviously, the user program should run in user mode (U-mode).</p>
-</div>
-<div class="admonition-note admonition">
-<p class="admonition-title">Note</p>
-<p>The user application requires a display output. If you’re using QEMU, ensure the framebuffer is enabled. On physical VisionFive 2 hardware, connect the HDMI output to a monitor.</p>
-<p>If everything goes well, you’ll enter a shell generated by the user program and you could type <cite>fork</cite> to start a child thread.</p>
+<p>The user program must run in U-mode.</p>
 </div>
 <p>A snapshot of the user program:</p>
 <img alt="../_images/lab5_help.png" src="../_images/lab5_help.png" />
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>You should be able to switch back and forth between shell and the child thread every time the timer interrupts, enabling you to type commands while the child thread continues to perform its work.</p>
-</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Only if you can run our test program fluently will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.</p>
+<p>You should be able to type commands in the shell while the video plays simultaneously.
+You can receive all the points only if you can run our test program fluently.
+Otherwise, even though you implemented the system call correctly, you will receive <strong>no points</strong> in this section.</p>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the video player.</p>
 </div>
 </section>
 </section>
@@ -756,43 +709,58 @@ The program uses the general-purpose registers to set the arguments and receive 
 <h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
 <section id="advanced-exercise-1-posix-signal-30">
 <h3>Advanced Exercise 1 - POSIX Signal - 30%<a class="headerlink" href="#advanced-exercise-1-posix-signal-30" title="Link to this heading">#</a></h3>
-<p>The POSIX signal is an asynchronous method of inter-process communication. When a user process gets a signal, it calls a default or registered signal handler.</p>
+<p>POSIX signal is an asynchronous method of inter-process communication.
+When a process receives a signal, it executes a default or registered signal handler.</p>
 <section id="implementation">
 <h4>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h4>
-<p>One alternative method is for the kernel to check for outstanding signals before returning the process to user mode. If the answer is yes, the kernel executes the appropriate handler.</p>
-<p>The default signal handlers can be finished in kernel mode. The registered signal handlers, on the other hand, should be run in user mode. Furthermore, while performing the handler, the user process may enter kernel mode again owing to another system call or interrupt. As a result, before running the handler, you should save the original context. When the handler completes, the kernel restores the context so that the original execution can proceed.</p>
-<p>The process is still in user mode after the handler finishes and returns. The kernel can set the handler’s return address(ra) to a chunk of code containing the sigreturn() system call to force it into kernel mode and indicate that it has already completed. Following that, the kernel recognizes that the handler is complete and restores the prior context.</p>
-<p>Finally, during execution, the handler requires a user stack. The kernel should allocate a new stack for the handler and then recycle it after it completes. It’s also possible for the kernel to attach the process’s prior user context and sigreturn() to it.</p>
+<p>The kernel checks for pending signals before returning a process to user mode.
+If a signal is pending, the kernel redirects execution to the appropriate handler.</p>
+<p>Default signal handlers can be handled entirely in kernel mode.
+User-registered handlers, however, must run in user mode.
+Before jumping to the handler, the kernel saves the original user context
+so it can be restored after the handler completes.</p>
+<p>The handler needs its own user stack to avoid corrupting the original stack.
+The kernel allocates a new stack for the handler and recycles it after completion.</p>
+<p>When the handler returns, the process is still in user mode.
+To notify the kernel that the handler has finished,
+the kernel sets <code class="docutils literal notranslate"><span class="pre">ra</span></code> to a trampoline that calls the <code class="docutils literal notranslate"><span class="pre">sigreturn()</span></code> system call.
+The kernel then restores the saved context and resumes the original execution.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The case of nested registered signal handlers does not need to be handled.</p>
+<p>Nested signal handlers do not need to be handled.</p>
 </div>
+</section>
+<section id="id5">
+<h4>Required System Calls<a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
+<dl class="simple">
+<dt>9: long signal(int signum, void (*handler)())</dt><dd><p>Register a user-space handler for the given signal. The handler must run in U-mode.</p>
+</dd>
+<dt>10: int sigreturn()</dt><dd><p>Restore the original user context after a signal handler returns.
+This syscall is called automatically via a trampoline set by the kernel.
+The kernel also recycles the signal stack upon completion.</p>
+</dd>
+<dt>11: int kill(int pid, int signum)</dt><dd><p>Send a signal to the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>.
+If the process has a registered handler for the signal, the handler is executed.
+Otherwise, the process is terminated by default.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Signal handlers must be inherited by child processes on <code class="docutils literal notranslate"><span class="pre">fork</span></code>.</p>
+</div>
+<p>To test with the provided user program:</p>
+<ol class="arabic simple">
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">signal</span></code> in the shell to register a signal handler.</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">fork</span></code> to create a child process.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">kill</span> <span class="pre">[pid]</span></code> to send SIGTERM to the child process.</p></li>
+</ol>
+<p>p.s. SIGTERM = 15</p>
+<p>The child process should execute the registered handler instead of being terminated.
+Note that only processes forked after <code class="docutils literal notranslate"><span class="pre">signal</span></code> is called will inherit the handler.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement POSIX signal.</p>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<ul class="simple">
-<li><p>Your user-registered handler must be in user mode.</p></li>
-<li><p>Our test program could also apply to your POSIX signal implementation. You should test your implementation in this part with our user program, if your signal handler can only work in your own testcase, you will only receive at most half of the points of this part.</p></li>
-<li><p>You should copy the user-registered handler when program calls fork</p></li>
-</ul>
-</div>
-<p>To meet our standards, please follow the guidelines below :
-In order to let a process send transmit signals to any other process, you must implement the <cite>kill(pid, signal)</cite> system call. Meanwhile, you must implement the SIGKILL default signal handler (terminate the process). The signal(signal, handler) system call must then be implemented so that a user program can register its function as the signal’s handler.</p>
-<dl class="simple">
-<dt>signal(int SIGNAL, void (*handler)())</dt><dd><ul class="simple">
-<li><p>system call number: 8</p></li>
-</ul>
-</dd>
-<dt>kill(int pid, int SIGNAL)</dt><dd><ul class="simple">
-<li><p>system call number: 9</p></li>
-</ul>
-</dd>
-</dl>
-<p>SIGKILL = 9</p>
-<p>You can simply type <cite>register</cite> in shell to register a handler provided by us while running our test program. Similarly, you can use the command <cite>signal_kill {tid}</cite> to indicate which thread you want to terminate.</p>
 </section>
 </section>
 </section>
@@ -809,6 +777,24 @@ In order to let a process send transmit signals to any other process, you must i
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="lab4.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lab 4: Exception and Interrupt</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../references/external_resources.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">External Resourses</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               
@@ -831,11 +817,8 @@ In order to let a process send transmit signals to any other process, you must i
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#threads">Threads</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-process">User Process</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mmu-less">MMU-less</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-queue-and-wait-queue">Run Queue and Wait Queue</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-process">User Process</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-queue-and-scheduling">Run Queue and Scheduling</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#yield-and-preemption">Yield and Preemption</a></li>
 </ul>
 </li>
@@ -851,8 +834,8 @@ In order to let a process send transmit signals to any other process, you must i
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-user-process-and-system-call-30">Basic Exercise 2 - User Process and System Call - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trap-frame">Trap Frame</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls">System Calls</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-convention">System Call Convention</a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#required-system-calls">Required System Calls</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-format-in-video-player-s-test-program">System Call Format in Video Player’s Test Program</a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#kernel-preemption">Kernel Preemption</a></li>
@@ -861,7 +844,13 @@ In order to let a process send transmit signals to any other process, you must i
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#timer">Timer</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-program">User Program</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#framebuffer">Framebuffer</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#orange-pi-rv2">Orange Pi RV2</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Required System Calls</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">User Program</a></li>
 </ul>
 </li>
 </ul>
@@ -869,6 +858,7 @@ In order to let a process send transmit signals to any other process, you must i
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-posix-signal-30">Advanced Exercise 1 - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
 </ul>
 </li>
 </ul>
