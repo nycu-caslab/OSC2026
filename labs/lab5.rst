@@ -35,232 +35,163 @@ In the previous lab, you already learned how to implement multitasking with a si
 However, in the case of single stack multitasking, the CPU thread can't switch between two tasks at any time.
 Otherwise, a task may corrupt another task's context stored on the stack.
 
-As you know that the context of a CPU thread is determined by the values of its register set.
-Therefore, we can create different copies of register sets stored in the memory to represent different threads.
-When we want a CPU thread to run a specific thread, we let the CPU thread loads the corresponding register set in the memory to its registers.
-Then, from a macro point of view, there are multiple CPU threads running tasks independently at the same time.
-Moreover, these register sets can be loaded by any other CPU thread to achieve true parallelism.
+A better approach is to give each thread its own register set and stack.
+The scheduler can then save the current thread's register set, load another thread's, and resume execution.
+From the thread's perspective, it was never interrupted.
 
 .. note::
-    In this documentation, a thread means a software thread. 
+    In this spec, a thread means a software thread. 
     For processing elements containing their hardware register sets are called CPU threads.
 
 User Process
 ============
 
-When a user wants to run an application, 
-the operating system loads the user program into memory and runs it with one or multiple threads.
-However, users want to run multiple programs or multiple copies of the same program.
-Moreover, they want each executing program to be isolated and has its identity, capabilities, and resource.
-To achieve this, the operating system maintains multiple isolated execution instances called processes.
-A process can only access the resource it owns.
-If it needs additional resources, it invokes the corresponding system calls.
-The kernel then checks the capabilities of the process and only provides the resource if the process has the access rights.
+A user process is a program loaded into memory and executed in U-mode.
+The kernel manages multiple processes, each with its own execution context and stack.
+When a process needs kernel services, it invokes system calls.
+The kernel handles the request and returns the result to the process.
 
-MMU-less
---------
+.. warning::
 
-In general, programs that directly run machine code on the CPU are isolated by virtual memory.
-However, we won't enable the MMU in this lab, 
-so we can't prevent illegal memory access and we can't use the same virtual address for different processes.
-If you want to execute multiple programs, please use different linker scripts for different programs 
-and load them to different addresses to prevent overlapping.
-If your program calls fork, the program shouldn't use global variables, dynamic allocation, indirect storage, etc, since the storage will be corrupted.
+  MMU is not enabled in this lab. Each process has its own user stack, but code and global variables remain at fixed physical addresses.
+  Running multiple copies of the same program simultaneously will cause overlap.
 
-Run Queue and Wait Queue
+Run Queue and Scheduling
 ========================
 
-One CPU thread can run one thread at a time, but there may be multiple runnable threads at the same time.
-Those runnable threads are put in the run queue.
-When the current thread relinquishes control of the CPU thread, it calls the scheduler to pick the next thread.
-Then, a piece of code saves the CPU thread's register set and loads the next thread's register set.
+Multiple threads may be runnable at the same time, but a single CPU can only run one thread at a time.
+Runnable threads are kept in a run queue.
+When the current thread yields the CPU, the scheduler picks the next thread from the run queue and performs a context switch.
 
-During a thread's execution, it may need to wait for a certain resource(e.g. a locked mutex or a non-ready IO device).
-Instead of busy waiting, a more efficient way is to yield the CPU thread so other threads can do meaningful jobs.
-Yet, yielding CPU is not enough because the thread may be scheduled again and waste CPU time.
-Therefore, when a thread needs to wait for a long time, it removes itself from the run queue, puts itself in a wait queue,
-and waits for others to wake it up.
-
-In general, each resource has its own wait queue.
-When the resource is ready, one or many waiting threads in the wait queue will be put back to the run queue.
-The awakened thread is eventually scheduled and runs.
-Then, it can get the resource if the resource is still available.
+When a thread needs to wait for a resource (e.g., I/O), it should yield the CPU rather than busy-waiting so other threads can make progress.
+A common approach is to remove the waiting thread from the run queue and only add it back when the resource becomes available.
 
 Yield and Preemption
 ====================
-As mentioned above, a thread can voluntarily yield the CPU thread to others.
-Yet, we can't rely on a voluntary yield, because once a thread never yields, 
-a high-priority thread can't run even when it's runnable.
-Hence, the kernel should be able to force the current thread to yield the CPU thread(i.e. preemption).
 
-The implementation of preemption is simple.
-Once a thread relinquishes control of the CPU thread during its execution,
-there is a chance for another piece of code to call the scheduler and switch to another thread.
-For example, when a thread in kernel mode is interrupted, the control is handed over to the interrupt handler.
-Before returning to the original execution, the kernel can call the scheduler to do a context switch to achieve kernel preemption.
-When a user process takes exceptions(system calls, interrupts, etc.), the control is handed over to the exception handler.
-Before returning to the original execution, the kernel can call the scheduler to do a context switch to achieve user preemption.
+A thread can voluntarily yield the CPU to others. However, a thread that never yields will starve other threads from running.
+Therefore, the kernel should be able to force the current thread to give up the CPU.
+This is called preemption.
 
-The tricky part of preemption is the protection of critical sections because code executions are arbitrally interleaving now.
-Fortunately, user programs protect their critical sections themselves.
-Even the user program doesn't protect the critical sections well, it's the user program's developer's fault, and no one will blame the operating system.
-Also, it's not possible to break other isolated processes.
-Therefore, the kernel developers don't need to worry about problems caused by enabling user preemption.
-
-On the contrary, there are multiple shared resources in the kernel.
-Meanwhile, a data race in the kernel can break the entire system.
-If the kernel's developers need to enable fine-grained preemption in kernel mode,
-They need to be aware of all possible shared resource accesses and adopt the right methods to protect them,
-hence it's more complex to enable kernel preemption.
+Preemption is typically triggered by an interrupt.
+When an interrupt occurs, control is passed to the exception handler.
+Before returning, the kernel can switch to another thread.
 
 ###############
 Basic Exercises
 ###############
 
-.. warning::
-
-  You won't need to demonstrate the test component in Basic 1 and 2 if you can execute the test program successfully in Video Player.
-
 Basic Exercise 1 - Thread - 10%
 ===============================
 
-In this part, you need to implement the creation, switch, and recycling of threads.
+In this part, you need to implement thread creation, context switching, and thread recycling.
 
 Creating a Thread
 ------------------
 
 Implement a thread-creating API.
-Users can pass a function(task) to the API, and the function is run in a newly created thread.
-To make the thread schedulable and runnable, you should create a data structure and a stack for it.
-Then, put it into the run queue.
+A function is passed to the API and runs in the newly created thread.
+The thread should have its own kernel stack and be added to the run queue.
 
-The example API is listed below. 
+The example API is shown below:
 
-.. code:: python
+.. code-block:: c
 
-    def foo():
-        pass
-    
-    t = Thread(foo) 
+  void foo() { ... }
+  thread *t = thread_create(foo);
 
 Scheduler and Context Switch
 -----------------------------
 
 Implement the ``schedule()`` API.
-When the current thread calls this API, the scheduler picks the next thread from the run queue.
-In this lab, your scheduler should at least be able to schedule the threads of the same priority in a **round-robin** manner.
+When called, the scheduler picks the next runnable thread from the run queue and performs a context switch using ``switch_to(prev, next)``.
+Your scheduler should support **round-robin** scheduling.
 
-After the next thread is picked, the kernel can save the current thread's register set and load the next thread's.
+The ``switch_to`` function saves the current thread's callee-saved registers into its thread data structure, then loads the next thread's registers.
+The ``tp`` register is updated to point to the next thread's data structure. You can use it to track the current thread.
 
 .. code:: c
 
-    .global switch_to
-    switch_to:
-        sd ra,  0*8(a0)
-        sd sp,  1*8(a0)
-        sd s0,  2*8(a0)
-        sd s1,  3*8(a0)
-        sd s2,  4*8(a0)
-        sd s3,  5*8(a0)
-        sd s4,  6*8(a0)
-        sd s5,  7*8(a0)
-        sd s6,  8*8(a0)
-        sd s7,  9*8(a0)
-        sd s8, 10*8(a0)
-        sd s9, 11*8(a0)
-        sd s10,12*8(a0)
-        sd s11,13*8(a0)
+  .global switch_to
+  switch_to:
+      /* Save context into prev->context */
+      sd ra,  8 *  0(a0)
+      sd sp,  8 *  1(a0)
+      sd s0,  8 *  2(a0)
+      ...
+      sd s11, 8 * 13(a0)
 
-        ld ra,  0*8(a1)
-        ld sp,  1*8(a1)
-        ld s0,  2*8(a1)
-        ld s1,  3*8(a1)
-        ld s2,  4*8(a1)
-        ld s3,  5*8(a1)
-        ld s4,  6*8(a1)
-        ld s5,  7*8(a1)
-        ld s6,  8*8(a1)
-        ld s7,  9*8(a1)
-        ld s8, 10*8(a1)
-        ld s9, 11*8(a1)
-        ld s10,12*8(a1)
-        ld s11,13*8(a1)
+      /* Restore context from next->context */
+      ld ra,  8 *  0(a1)
+      ld sp,  8 *  1(a1)
+      ld s0,  8 *  2(a1)
+      ...
+      ld s11, 8 * 13(a1)
 
-        csrw sscratch, a1
-        ret
-
-    .global get_current
-    get_current:
-        csrr a0, sscratch
-        ret
-
-The above example gets the current thread's data structure from the CSR register ``sscratch``.
-Then it passes the current thread and the next thread to the ``switch_to(prev, next)`` function.
-Next, the CPU thread's register set is saved on the current thread's data structure, 
-and the next thread's register set is loaded.
-After switching the stack pointer and the ``sscratch`` register, the CPU thread is in the context of the next thread.
+      move tp, a1
+      ret
 
 .. note::
-    You only need to save `callee-saved registers <https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf>`_,
-    because other registers are already on the stack.
+
+  Only callee-saved registers and ``ra`` need to be saved here.
+  ``ra`` must be saved explicitly because it holds the return address for the thread to resume from.
+  All other caller-saved registers are saved by the compiler before calling ``switch_to``,
+  following the `RISC-V calling convention <https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf>`_.
 
 The Idle Thread
 ---------------
-The idle thread is a thread that is always runnable.
+
+The idle thread is always runnable.
 When there are no other runnable threads, 
-the scheduler should pick it to guarantee that the CPU thread always can fetch and execute the next instruction.
+the scheduler picks it to guarantee the CPU always executes the next instruction.
 
 End of a Thread
 ---------------
 
-When a thread finishes its jobs, it needs to explicitly or implicitly call(return and let the caller call) ``exit()``
-to indicate it's terminated.
+When a thread finishes, it should call an exit function to mark itself as terminated.
+A thread cannot free its own stack while still using it, so the remaining resources must be recycled by someone else.
 
-In general, the thread can't recycle all its resources.
-It's because memory deallocation is a function call, and a thread shouldn't free its stack while still using it.
-Therefore, the finished thread only removes itself from the run queue,
-releases freeable resources, sets its state to be dead,
-and waits for someone to recycle the remaining stuff.
+In UNIX-like operating systems, the parent is responsible for recycling its zombie children.
+In this lab, you can simplify this by letting the idle thread handle recycling instead.
 
-In UNIX-like operating systems, the parent thread is accountable for recycling its zombie child.
-The parent can also get the status code from the zombie child's data structure as useful information.
-In this lab, you can let the idle thread do the jobs to simplify the implementation.
-When the idle thread is scheduled, it checks if there is any zombie thread.
-If yes, it recycles them as follows.
+.. code-block:: c
 
-.. code:: python
-
-    def idle():
-        while True:
-            kill_zombies() # reclaim threads marked as DEAD
-            schedule() # switch to any other runnable thread
+  void idle() {
+      while (1) {
+          kill_zombies(); // recycle zombie threads
+          schedule();     // switch to any other runnable thread
+      }
+  }
 
 Test
 ----
 
 Please test your implementation with the following code or equivalent logic code in the demo.
 
-Expected result: multiple threads print the content interleaved.
-
 .. code:: c
 
-    void foo(){
-        for(int i = 0; i < 10; ++i) {
-            printf("Thread id: %d %d\n", current_thread().id(), i);
-            delay(1000000);
+    void foo() {
+        for (int i = 0; i < 5; i++) {
+            printk("Thread id: %d %d\n", get_current()->pid, i);
+            for (int j = 0; j < 100000000; j++);
             schedule();
         }
+        thread_exit();
     }
 
-    void kernel_main() {
+    void main() {
         // ...
         // boot setup
         // ...
-        for(int i = 0; i < N; ++i) { // N should > 2
+        for (int i = 0; i < 3; i++) {
             thread_create(foo);
         }
         idle();
     }
+
+.. note::
+
+  **Expected result:** Multiple threads print the content interleaved.
 
 .. admonition:: Todo
 
@@ -274,162 +205,191 @@ In this part, you need to implement the basic user process mechanism such as sys
 Trap Frame
 -----------
 
-The registers are saved at the top of the kernel stack when a user process throws an exception and enters kernel mode. The registers are loaded before returning to user mode. The trap frame is the name given to the saved material.
-The kernel will not affect the trap frame in normal exception handling (e.g., page fault, interrupt), so the user process will not be aware that it has entered kernel mode. When it comes to system calls, however, the user software expects the kernel to take care of it.
-The program uses the general-purpose registers to set the arguments and receive the return value, just like conventional function calls. The kernel can then read the trap frame to acquire the user's parameters and write it to set the return value and error code.
+When a user process takes an exception and enters kernel mode, all registers are saved onto the kernel stack.
+This saved context is called the trap frame.
+Before returning to user mode, the registers are restored from the trap frame, so the user process is unaware that it ever entered kernel mode.
+
+For system calls, the user process sets its arguments in registers before executing ``ecall``.
+The kernel reads the arguments from the trap frame, performs the requested operation,
+and writes the return value back into the trap frame before returning to user mode.
 
 System Calls
 -------------
-In the previous lab, the `ecall` instruction allowed your user program to trap to the kernel. In this lab, you'll learn how arguments and return values are transmitted between user and kernel modes. In order to develop simple user programs, you'll also need to implement some fundamental system calls.
+In the previous lab, you used ``ecall`` to trap into the kernel.
+In this lab, you'll learn how arguments and return values are passed between user and kernel mode,
+and implement the system calls needed to run user programs.
 
-Required System Calls
+System Call Convention
 ^^^^^^^^^^^^^^^^^^^^^^
 
-You need to implement the following system calls for user programs.
+When making a system call:
 
-int getpid()
-  Get current process's id.
+* Arguments are passed in ``a0``, ``a1``, ``a2``, ...
+* The system call number is stored in ``a7``.
+* The return value is written back to ``a0``.
 
-size_t uart_read(char buf[], size_t size)
-  Return the number of bytes read by reading size byte into the user-supplied buffer buf.
+Required System Calls
+^^^^^^^^^^^^^^^^^^^^^
 
-size_t uart_write(const char buf[], size_t size)
-  Return the number of bytes written after writing size byte from the user-supplied buffer buf.
+You need to implement the following system calls and their corresponding numbers for user programs.
 
-int exec(const char\* name, char \*const argv[])
-  Run the program with parameters.
+0: long getpid()
+  Return the current process's pid.
 
-.. admonition:: Note
+1: long uart_read(char \*buf, long count)
+  Read ``count`` bytes into ``buf``. Return the number of bytes read.
 
-  In this lab, you won't have to deal with argument passing, but you can still use it.
+2: long uart_write(const char \*buf, long count)
+  Write ``count`` bytes from ``buf``. Return the number of bytes written.
 
-int fork()
-  The standard method of duplicating the current process in UNIX-like operating systems is to use fork(). Following the call to fork(), two processes run the same code. Set the parent process's return value to the child's id and the child process's return value to 0 to distinguish them.
+3: int exec(const char \*path)
+  Load and execute the program specified by ``path``.
 
-void exit()
+4: long fork()
+  Duplicate the current process.
+  Return the child's pid to the parent, and 0 to the child.
+
+5: void exit(int status)
   Terminate the current process.
 
-int mbox_call(unsigned char ch, unsigned int \*mbox)
-  Get the hardware's information by mailbox
+6: int stop(long pid)
+  Terminate the process identified by ``pid``.
 
-void kill(int pid)
-  Other processes identified by pid should be terminated.
+.. important::
 
-.. admonition:: Note
-
-  You don't need to implement this system call if you prefer to kill a process using the POSIX Signal stated in Advanced Exercise 1.
-
-.. warning::
-
-  To execute the test program in Video Player, make sure your system calls match the guidelines below.
-
-System Call Format in Video Player's Test Program
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-* The ecall function will be used to make a system call.
-* When calling the ecall function
-    * The arguments would be stored in a0, a1, a2, ...
-    * Return value would be stored in a0
-    * The system call numbers given below would be stored in a7
-        * 0: int getpid()
-        * 1: size_t uartread(char buf[], size_t size)
-        * 2: size_t uartwrite(const char buf[], size_t size)
-        * 3: int exec(const char \*name, char \*const argv[])
-        * 4: int fork()
-        * 5: void exit(int status)
-        * 6: int mbox_call(unsigned char ch, unsigned int \*mbox)
-        * 7: void kill(int pid)
+  To execute the test program in Video Player, make sure your system calls match the system call numbers.
 
 Kernel Preemption
 -----------------
 
-It's worth noting that you can only disable preemption or interrupts when absolutely essential. Your kernel should always be preemptible at other times.
+Disable interrupts or preemption only when absolutely necessary. Your kernel should remain preemptible at all other times.
 
 Test
 ----
 
-.. warning::
-
-  Please test your implementation using the code below or equivalent logic code, but you **must output the stack pointer**. This test should work in user mode.
+Load the `user program <https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin>`_ to your kernel and execute it.
+Type ``fork_test`` in the shell to run the test.
 
 .. code:: c
 
-  void fork_test(){
-      printf("\nFork Test, pid %d\n", get_pid());
-      int cnt = 1;
-      int ret = 0;
-      if ((ret = fork()) == 0) { // child
-          long long cur_sp;
-          asm volatile("mv %0, sp" : "=r"(cur_sp));
-          printf("first child pid: %d, cnt: %d, ptr: %x, sp : %x\n", get_pid(), cnt, &cnt, cur_sp);
-          ++cnt;
-          
-          if ((ret = fork()) != 0){
-              asm volatile("mv %0, sp" : "=r"(cur_sp));
-              printf("first child pid: %d, cnt: %d, ptr: %x, sp : %x\n", get_pid(), cnt, &cnt, cur_sp);
-          }
-          else{
-              while (cnt < 5) {
-                  asm volatile("mv %0, sp" : "=r"(cur_sp));
-                  printf("second child pid: %d, cnt: %d, ptr: %x, sp : %x\n", get_pid(), cnt, &cnt, cur_sp);
-                  delay(1000000);
-                  ++cnt;
-              }
-          }
-          exit();
-      } 
-      else {
-          printf("parent here, pid %d, child %d\n", get_pid(), ret);
-      }
+  void fork_test() {
+    printf("Fork test (pid = %d)\n", getpid());
+    int cnt = 1;
+    int ret = 0;
+    if ((ret = fork()) == 0) {
+        long cur_sp;
+        asm volatile("mv %0, sp" : "=r"(cur_sp));
+        printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+        cnt++;
+
+        if ((ret = fork()) != 0) {
+            asm volatile("mv %0, sp" : "=r"(cur_sp));
+            printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+        } else {
+            while (cnt < 5) {
+                asm volatile("mv %0, sp" : "=r"(cur_sp));
+                printf("child2: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+                for (int i = 0; i < 1000000000; i++);
+                cnt++;
+            }
+        }
+    } else {
+        printf("parent: pid = %d, child pid = %d\n", getpid(), ret);
+    }
+    exit(0);
   }
+
+.. admonition:: Todo
+
+  Implement system calls.
 
 Video Player - 40%
 ==================
 
-In order to test the correctness of your previous implementation, we create a user program that runs only if your kernel behaves as expected.
+In this part, you will run the provided user program to verify your previous implementation.
+The program requires a working scheduler, system calls, and framebuffer output.
 
 Timer 
 -----
 
-Enable the timer interrupt. Schedule the pending threads when the timer interrupts.
+Enable the timer interrupt and schedule the pending threads when the timer interrupts.
+Set the timer to expire every **1/32 second** so that the shell and video can run concurrently.
 
-.. admonition:: Note
+Framebuffer
+-----------
 
-  Set the expired time appropriately according to the `mtime` and `mtimecmp` registers in the VF2 system.
+A framebuffer is a region of memory that holds pixel data for display output.
+The display hardware reads from this memory and outputs it to the screen.
+To display an image, simply write pixel data to the framebuffer address.
+
+QEMU
+^^^^
+
+Add ``-device ramfb`` and remove ``-display none`` from your QEMU command to enable the framebuffer.
+Before use, the framebuffer base address must be registered with QEMU via the ``fw_cfg`` interface.
+You can either hardcode an available memory address or dynamically allocate a region.
+
+.. note::
+
+  ``fw_cfg`` setup is not the focus of this lab.
+  You can just use the `exercise code <https://github.com/nycu-caslab/OSC-2026-Exercise/blob/main/ex52/video.c>`_
+  as a reference for the implementation.
+  Related questions will not be asked during the demo.
+
+Orange Pi RV2
+^^^^^^^^^^^^^
+
+Connect the HDMI output to a monitor.
+The framebuffer is initialized by U-Boot at physical address ``0x7f700000``, so no additional initialization is needed.
+
+After writing to the framebuffer, the CPU cache must be flushed using ``cbo.flush``
+to ensure the display hardware reads the latest data from DRAM rather than stale cache.
+If your toolchain supports ``-march=rv64gc_zicbom``, you can use the instruction directly.
+Otherwise, use the raw instruction encoding instead:
+
+.. code-block:: c
+
+  #define cbo_flush(start)                \
+      ({                                  \
+          asm volatile("mv a0, %0\n\t"    \
+                       ".word 0x0025200F" \
+                       :                  \
+                       : "r"(start)       \
+                       : "memory", "a0"); \
+      })
+
+Required System Calls
+---------------------
+
+7: void display(unsigned int \*bmp_image, unsigned int width, unsigned int height)
+  Display the video.
+
+8: int usleep(unsigned int usec)
+  Sleep for a specified number of microseconds.
 
 User Program
 ------------
 
-Load the :download:`user program <initramfs.cpio>` to your kernel and execute it. The system call you defined above would be used by the user program.
-
-This test program will access the timer registers, so make sure your timer initialization includes code to enable reading and writing `mtime` and `mtimecmp`.
-
-.. code-block:: c
-
-  *(volatile unsigned int*)(CLINT_BASE + 0x4000) = next_expired_time;
+Load the `user program <https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
 
 .. important::
 
-  Obviously, the user program should run in user mode (U-mode).
+  The user program must run in U-mode.
 
-.. admonition:: Note
-
-  The user application requires a display output. If you're using QEMU, ensure the framebuffer is enabled. On physical VisionFive 2 hardware, connect the HDMI output to a monitor.
-
-  If everything goes well, you'll enter a shell generated by the user program and you could type `fork` to start a child thread.
 
 A snapshot of the user program:
 
 .. image:: /images/lab5_help.png
 
-.. admonition:: Todo
-
-  You should be able to switch back and forth between shell and the child thread every time the timer interrupts, enabling you to type commands while the child thread continues to perform its work.
-
 .. warning::
 
-  Only if you can run our test program fluently will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.
+  You should be able to type commands in the shell while the video plays simultaneously.
+  You can receive all the points only if you can run our test program fluently.
+  Otherwise, even though you implemented the system call correctly, you will receive **no points** in this section.
 
+.. admonition:: Todo
+
+  Implement the video player.
 
 ##################
 Advanced Exercises
@@ -439,41 +399,62 @@ Advanced Exercises
 Advanced Exercise 1 - POSIX Signal - 30%
 ========================================
 
-The POSIX signal is an asynchronous method of inter-process communication. When a user process gets a signal, it calls a default or registered signal handler.
+POSIX signal is an asynchronous method of inter-process communication. 
+When a process receives a signal, it executes a default or registered signal handler.
 
 Implementation
 ----------------
 
-One alternative method is for the kernel to check for outstanding signals before returning the process to user mode. If the answer is yes, the kernel executes the appropriate handler.
+The kernel checks for pending signals before returning a process to user mode.
+If a signal is pending, the kernel redirects execution to the appropriate handler.
 
-The default signal handlers can be finished in kernel mode. The registered signal handlers, on the other hand, should be run in user mode. Furthermore, while performing the handler, the user process may enter kernel mode again owing to another system call or interrupt. As a result, before running the handler, you should save the original context. When the handler completes, the kernel restores the context so that the original execution can proceed.
+Default signal handlers can be handled entirely in kernel mode.
+User-registered handlers, however, must run in user mode.
+Before jumping to the handler, the kernel saves the original user context
+so it can be restored after the handler completes.
 
-The process is still in user mode after the handler finishes and returns. The kernel can set the handler's return address(ra) to a chunk of code containing the sigreturn() system call to force it into kernel mode and indicate that it has already completed. Following that, the kernel recognizes that the handler is complete and restores the prior context.
+The handler needs its own user stack to avoid corrupting the original stack.
+The kernel allocates a new stack for the handler and recycles it after completion.
 
-Finally, during execution, the handler requires a user stack. The kernel should allocate a new stack for the handler and then recycle it after it completes. It's also possible for the kernel to attach the process's prior user context and sigreturn() to it.
+When the handler returns, the process is still in user mode.
+To notify the kernel that the handler has finished,
+the kernel sets ``ra`` to a trampoline that calls the ``sigreturn()`` system call.
+The kernel then restores the saved context and resumes the original execution.
 
 .. note::
-  The case of nested registered signal handlers does not need to be handled.
+  Nested signal handlers do not need to be handled.
+
+Required System Calls
+---------------------
+
+9: long signal(int signum, void (\*handler)())
+  Register a user-space handler for the given signal. The handler must run in U-mode.
+
+10: int sigreturn()
+  Restore the original user context after a signal handler returns.
+  This syscall is called automatically via a trampoline set by the kernel.
+  The kernel also recycles the signal stack upon completion.
+
+11: int kill(int pid, int signum)
+  Send a signal to the process identified by ``pid``.
+  If the process has a registered handler for the signal, the handler is executed.
+  Otherwise, the process is terminated by default.
+
+.. note:: 
+
+  Signal handlers must be inherited by child processes on ``fork``.
+
+To test with the provided user program:
+
+1. Type ``signal`` in the shell to register a signal handler.
+2. Type ``fork`` to create a child process.
+3. Use ``kill [pid]`` to send SIGTERM to the child process.
+
+p.s. SIGTERM = 15
+
+The child process should execute the registered handler instead of being terminated.
+Note that only processes forked after ``signal`` is called will inherit the handler.
 
 .. admonition:: Todo
 
   Implement POSIX signal.
-
-.. warning:: 
-
-  * Your user-registered handler must be in user mode.
-  * Our test program could also apply to your POSIX signal implementation. You should test your implementation in this part with our user program, if your signal handler can only work in your own testcase, you will only receive at most half of the points of this part.
-  * You should copy the user-registered handler when program calls fork
-
-To meet our standards, please follow the guidelines below :
-In order to let a process send transmit signals to any other process, you must implement the `kill(pid, signal)` system call. Meanwhile, you must implement the SIGKILL default signal handler (terminate the process). The signal(signal, handler) system call must then be implemented so that a user program can register its function as the signal's handler.
-
-signal(int SIGNAL, void (\*handler)())
-  * system call number: 8
-
-kill(int pid, int SIGNAL)
-  * system call number: 9
-
-SIGKILL = 9
-
-You can simply type `register` in shell to register a handler provided by us while running our test program. Similarly, you can use the command `signal_kill {tid}` to indicate which thread you want to terminate.
