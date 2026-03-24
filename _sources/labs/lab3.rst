@@ -250,10 +250,10 @@ Here is an example of the test case.
 
   void test_alloc_1() {
       uart_puts("Testing memory allocation...\n");
-      char *ptr1 = (char *)alloc(4000);
-      char *ptr2 = (char *)alloc(8000);
-      char *ptr3 = (char *)alloc(4000);
-      char *ptr4 = (char *)alloc(4000);
+      char *ptr1 = (char *)allocate(4000);
+      char *ptr2 = (char *)allocate(8000);
+      char *ptr3 = (char *)allocate(4000);
+      char *ptr4 = (char *)allocate(4000);
 
       free(ptr1);
       free(ptr2);
@@ -262,18 +262,18 @@ Here is an example of the test case.
 
       /* Test kmalloc */
       uart_puts("Testing dynamic allocator...\n");
-      char *kmem_ptr1 = (char *)alloc(16);
-      char *kmem_ptr2 = (char *)alloc(32);
-      char *kmem_ptr3 = (char *)alloc(64);
-      char *kmem_ptr4 = (char *)alloc(128);
+      char *kmem_ptr1 = (char *)allocate(16);
+      char *kmem_ptr2 = (char *)allocate(32);
+      char *kmem_ptr3 = (char *)allocate(64);
+      char *kmem_ptr4 = (char *)allocate(128);
 
       free(kmem_ptr1);
       free(kmem_ptr2);
       free(kmem_ptr3);
       free(kmem_ptr4);
 
-      char *kmem_ptr5 = (char *)alloc(16);
-      char *kmem_ptr6 = (char *)alloc(32);
+      char *kmem_ptr5 = (char *)allocate(16);
+      char *kmem_ptr6 = (char *)allocate(32);
 
       free(kmem_ptr5);
       free(kmem_ptr6);
@@ -281,14 +281,14 @@ Here is an example of the test case.
       // Test allocate new page if the cache is not enough
       void *kmem_ptr[102];
       for (int i=0; i<100; i++) {
-          kmem_ptr[i] = (char *)alloc(128);
+          kmem_ptr[i] = (char *)allocate(128);
       }
       for (int i=0; i<100; i++) {
           free(kmem_ptr[i]);
       }
 
       // Test exceeding the maximum size
-      char *kmem_ptr7 = (char *)alloc(MAX_ALLOC_SIZE + 1);
+      char *kmem_ptr7 = (char *)allocate(MAX_ALLOC_SIZE + 1);
       if (kmem_ptr7 == NULL) {
           uart_puts("Allocation failed as expected for size > MAX_ALLOC_SIZE\n");
       }
@@ -363,7 +363,7 @@ you can directly reuse your implementation to parse the ``<memory>`` node and ge
   There may be many memory regions in the Device Tree. For example, OrangePi RV2 has two memory regions:
 
   - ``0x0000_0000_0000_0000`` - ``0x0000_0000_7FFF_FFFF`` (2 GiB)
-  - ``0x0000_0001_0000_0000`` - ``0x0000_0002_7FFF_FFFF`` (6 GiB)
+  - ``0x0000_0001_0000_0000`` - ``0x0000_0001_7FFF_FFFF`` (2 GiB)
 
   You don't have to handle all memory regions.
   You may use only the first one.
