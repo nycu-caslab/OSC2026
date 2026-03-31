@@ -267,7 +267,7 @@ Disable interrupts or preemption only when absolutely necessary. Your kernel sho
 Test
 ----
 
-Load the `user program <https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin>`_ to your kernel and execute it.
+Load the `user program <https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin>`_ to your kernel and execute it.
 Type ``fork_test`` in the shell to run the test.
 
 .. code:: c
@@ -370,7 +370,7 @@ Required System Calls
 User Program
 ------------
 
-Load the `user program <https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
+Load the `user program <https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
 
 .. important::
 

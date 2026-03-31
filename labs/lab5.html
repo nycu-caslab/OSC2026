@@ -591,7 +591,7 @@ Return the child’s pid to the parent, and 0 to the child.</p>
 </section>
 <section id="id1">
 <h4>Test<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
-<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin">user program</a> to your kernel and execute it.
+<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin">user program</a> to your kernel and execute it.
 Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the shell to run the test.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
@@ -685,7 +685,7 @@ Otherwise, use the raw instruction encoding instead:</p>
 </section>
 <section id="id3">
 <h4>User Program<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
-<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC-RISCV-Web/raw/refs/heads/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
+<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The user program must run in U-mode.</p>
