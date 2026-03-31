@@ -328,7 +328,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Test</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-video-player-40">Basic Exercise 3 - Video Player - 40%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#timer">Timer</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#framebuffer">Framebuffer</a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
@@ -336,13 +336,13 @@
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Required System Calls</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">User Program</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-program">User Program</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-posix-signal-30">Advanced Exercise 1 - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-posix-signal-30">Advanced Exercise - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
 </ul>
@@ -591,31 +591,31 @@ Return the child’s pid to the parent, and 0 to the child.</p>
 </section>
 <section id="id1">
 <h4>Test<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
-<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin">user program</a> to your kernel and execute it.
-Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the shell to run the test.</p>
+<p>You can pack the <a class="reference internal" href="#user-program"><span class="std std-ref">User Program</span></a> used in Video Player into your initrd and execute it.
+Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the user shell to run the test.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
+<span class="w">  </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="kt">long</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">;</span>
 <span class="w">      </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">      </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
 <span class="w">      </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
 
 <span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">          </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">          </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
 <span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">cnt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">              </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child2: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">              </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child2: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
 <span class="w">              </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000000000</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">);</span>
 <span class="w">              </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;parent: pid = %d, child pid = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
+<span class="w">      </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;parent: pid = %d, child pid = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="w">  </span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 <span class="p">}</span>
@@ -627,8 +627,8 @@ Type <code class="docutils literal notranslate"><span class="pre">fork_test</spa
 </div>
 </section>
 </section>
-<section id="video-player-40">
-<h3>Video Player - 40%<a class="headerlink" href="#video-player-40" title="Link to this heading">#</a></h3>
+<section id="basic-exercise-3-video-player-40">
+<h3>Basic Exercise 3 - Video Player - 40%<a class="headerlink" href="#basic-exercise-3-video-player-40" title="Link to this heading">#</a></h3>
 <p>In this part, you will run the provided user program to verify your previous implementation.
 The program requires a working scheduler, system calls, and framebuffer output.</p>
 <section id="timer">
@@ -683,9 +683,9 @@ Otherwise, use the raw instruction encoding instead:</p>
 </dd>
 </dl>
 </section>
-<section id="id3">
-<h4>User Program<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
-<p>Load the <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
+<section id="user-program">
+<span id="id3"></span><h4>User Program<a class="headerlink" href="#user-program" title="Link to this heading">#</a></h4>
+<p>Load this <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The user program must run in U-mode.</p>
@@ -705,10 +705,10 @@ Otherwise, even though you implemented the system call correctly, you will recei
 </section>
 </section>
 </section>
-<section id="advanced-exercises">
-<h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
-<section id="advanced-exercise-1-posix-signal-30">
-<h3>Advanced Exercise 1 - POSIX Signal - 30%<a class="headerlink" href="#advanced-exercise-1-posix-signal-30" title="Link to this heading">#</a></h3>
+<section id="advanced-exercise">
+<h2>Advanced Exercise<a class="headerlink" href="#advanced-exercise" title="Link to this heading">#</a></h2>
+<section id="advanced-exercise-posix-signal-30">
+<h3>Advanced Exercise - POSIX Signal - 30%<a class="headerlink" href="#advanced-exercise-posix-signal-30" title="Link to this heading">#</a></h3>
 <p>POSIX signal is an asynchronous method of inter-process communication.
 When a process receives a signal, it executes a default or registered signal handler.</p>
 <section id="implementation">
@@ -842,7 +842,7 @@ Note that only processes forked after <code class="docutils literal notranslate"
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Test</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-video-player-40">Basic Exercise 3 - Video Player - 40%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#timer">Timer</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#framebuffer">Framebuffer</a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#qemu">QEMU</a></li>
@@ -850,13 +850,13 @@ Note that only processes forked after <code class="docutils literal notranslate"
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Required System Calls</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">User Program</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-program">User Program</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-posix-signal-30">Advanced Exercise 1 - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-posix-signal-30">Advanced Exercise - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
 </ul>
