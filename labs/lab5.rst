@@ -267,34 +267,34 @@ Disable interrupts or preemption only when absolutely necessary. Your kernel sho
 Test
 ----
 
-Load the `user program <https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin>`_ to your kernel and execute it.
-Type ``fork_test`` in the shell to run the test.
+You can pack the :ref:`user_program` used in Video Player into your initrd and execute it.
+Type ``fork_test`` in the user shell to run the test.
 
 .. code:: c
 
   void fork_test() {
-    printf("Fork test (pid = %d)\n", getpid());
+    printk("Fork test (pid = %d)\n", getpid());
     int cnt = 1;
     int ret = 0;
     if ((ret = fork()) == 0) {
         long cur_sp;
         asm volatile("mv %0, sp" : "=r"(cur_sp));
-        printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+        printk("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
         cnt++;
 
         if ((ret = fork()) != 0) {
             asm volatile("mv %0, sp" : "=r"(cur_sp));
-            printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+            printk("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
         } else {
             while (cnt < 5) {
                 asm volatile("mv %0, sp" : "=r"(cur_sp));
-                printf("child2: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+                printk("child2: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
                 for (int i = 0; i < 1000000000; i++);
                 cnt++;
             }
         }
     } else {
-        printf("parent: pid = %d, child pid = %d\n", getpid(), ret);
+        printk("parent: pid = %d, child pid = %d\n", getpid(), ret);
     }
     exit(0);
   }
@@ -303,8 +303,8 @@ Type ``fork_test`` in the shell to run the test.
 
   Implement system calls.
 
-Video Player - 40%
-==================
+Basic Exercise 3 - Video Player - 40%
+=====================================
 
 In this part, you will run the provided user program to verify your previous implementation.
 The program requires a working scheduler, system calls, and framebuffer output.
@@ -367,10 +367,12 @@ Required System Calls
 8: int usleep(unsigned int usec)
   Sleep for a specified number of microseconds.
 
+.. _user_program:
+
 User Program
 ------------
 
-Load the `user program <https://github.com/nycu-caslab/OSC2026/tree/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
+Load this `user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
 
 .. important::
 
@@ -391,13 +393,13 @@ A snapshot of the user program:
 
   Implement the video player.
 
-##################
-Advanced Exercises
-##################
+#################
+Advanced Exercise
+#################
 
 
-Advanced Exercise 1 - POSIX Signal - 30%
-========================================
+Advanced Exercise - POSIX Signal - 30%
+======================================
 
 POSIX signal is an asynchronous method of inter-process communication. 
 When a process receives a signal, it executes a default or registered signal handler.
