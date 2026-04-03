@@ -137,7 +137,7 @@ Basic Exercise 2 - Core Timer Interrupt - 10%
 Timer interrupts are essential for OS scheduling. You will use the Supervisor Binary Interface (SBI) to program the timer.
 
 1. Read the current time using the ``rdtime`` instruction.
-2. Calculate the target time by adding the CPU's frequency to the current time (this represents 1 second).
+2. Calculate the target time by adding twice the CPU's frequency to the current time (this represents 2 seconds).
 3. Call ``sbi_set_timer(target_time)`` to schedule the interrupt.
 4. Set the ``STIE`` bit in the ``sie`` register to enable timer interrupts.
 5. Set the ``SIE`` bit in ``sstatus`` to enable global interrupts.
@@ -148,7 +148,7 @@ Timer interrupts are essential for OS scheduling. You will use the Supervisor Bi
 
 .. admonition:: Todo
 
-   Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.
+   Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting every 2 seconds and set the next timeout to 2 seconds later.
 
 The result would be like this:
 
@@ -240,14 +240,65 @@ This is an example:
 Advanced Exercise 2 - Concurrent I/O Devices Handling 20%
 =========================================================
 
-Currently, interrupts are disabled while executing an Interrupt Service Routine (ISR). If a slow device (like UART printing a long string) triggers an interrupt, crucial events like Timer ticks might be dropped.
-Implement an Event Task Queue:
+The kernel needs to handle a lot of I/O devices at the same time.
+For devices(e.g. UART) that have a short period of process time, 
+the kernel can finish their handlers immediately right after they're ready.
+However, for those devices(e.g. network interface controller) that require a longer time for the follow-up processing,
+the kernel needs to schedule the execution order.
 
-1. The hardware ISR merely acknowledges the hardware, masks that specific interrupt, and enqueues a "Task" into a software queue.
-2. Before returning from the trap (``sret``), the kernel re-enables global interrupts (``sstatus.SIE``) and starts processing the Task queue.
-3. This allows nested interrupts: a high-priority Timer interrupt can now preempt a low-priority UART task currently being processed.
+Usually, we want to use the first come first serve principle to prevent starvation.
+However, we may also want prioritized execution for some critical handlers.
+In this part, you need to know how to implement it using a single thread(i.e. a single stack).
 
-.. note::
+Decouple the Interrupt Handlers
+---------------------------------
 
-   Use nested interrupt handling and task prioritization to support fair and responsive device scheduling.
+A simpler way to implement an interrupt handler is processing all the device's data one at a time with interrupts disabled.
+However, a less critical interrupt handler can block a more critical one for a long time.
+Hence, we want to decouple the interrupt handler and the actual processing.
 
+This can be achieved by a task queue.
+In the interrupt handler, the kernel
+
+1. masks the device's interrupt line,
+2. move data from the device's buffer through DMA, or manually copy,
+3. enqueues the processing task to the event queue,
+4. do the tasks with interrupts enabled,
+5. unmasks the interrupt line to get the next interrupt at the end of the task.
+
+Those tasks in the queue can be processed when the system is idle.
+Also, the kernel can execute the task in any order such as FIFO or LIFO.
+
+.. admonition:: Todo
+
+    Implement a task queue mechanism, so interrupt handlers can add their processing tasks to it.
+
+Nested Interrupt
+------------------
+
+The tasks in the queue can be executed at any time, but we want them to be executed as soon as possible.
+It's because that a high-priority process may be waiting for the data.
+
+Therefore, before the interrupt handler return to the user program,
+it should execute the tasks in the interrupt context with interrupts enabled (otherwise, critical interrupts are blocked).
+Then, the interrupt handler may be nested.
+Hence, besides general-purpose registers, you should also save ``sstatus`` and ``sepc`` so the previously saved data are preserved. 
+
+.. admonition:: Todo
+
+    Execute the tasks in the queue before returning to the user program with interrupts enabled.
+
+Preemption
+-----------
+
+Now, any interrupt handler can preempt the task's execution, but the newly enqueued task still needs to wait for
+the currently running task's completion.
+It'd be better if the newly enqueued task with a higher priority can preempt the currently running task.
+
+To achieve the preemption,
+the kernel can check the last executing task's priority before returning to the previous interrupt handler. 
+If there are higher priority tasks, execute the highest priority task.
+
+.. admonition:: Todo
+
+    Implement the task queue's preemption mechanism.
