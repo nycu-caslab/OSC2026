@@ -363,7 +363,7 @@ you can directly reuse your implementation to parse the ``<memory>`` node and ge
   There may be many memory regions in the Device Tree. For example, OrangePi RV2 has two memory regions:
 
   - ``0x0000_0000_0000_0000`` - ``0x0000_0000_7FFF_FFFF`` (2 GiB)
-  - ``0x0000_0001_0000_0000`` - ``0x0000_0001_7FFF_FFFF`` (2 GiB)
+  - ``0x0000_0001_0000_0000`` - ``0x0000_0002_7FFF_FFFF`` (6 GiB)
 
   You don't have to handle all memory regions.
   You may use only the first one.
