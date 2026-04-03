@@ -108,7 +108,7 @@ Setup includes:
 
 .. admonition:: Todo
 
-   Add a command that can load a user program in the initramfs. Then, run it in U-mode by steps mentioned above.
+   Add command ``exec`` that can load the user program in the initramfs. Then, run it in U-mode by steps mentioned above.
 
 Trap Handling from U-mode
 -------------------------
@@ -124,6 +124,12 @@ You need to:
 .. admonition:: Todo
 
    Set the vector table and implement the exception handler.
+
+The result would be like this:
+
+.. image:: /images/lab4_b1.png
+
+
 
 Basic Exercise 2 - Core Timer Interrupt - 10%
 =============================================
@@ -143,6 +149,10 @@ Timer interrupts are essential for OS scheduling. You will use the Supervisor Bi
 .. admonition:: Todo
 
    Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.
+
+The result would be like this:
+
+.. image:: /images/lab4_b2.png
 
 Basic Exercise 3 - OrangePi RV2 UART0 Interrupt - 30%
 =============================================
@@ -176,8 +186,56 @@ Advanced Exercises
 Advanced Exercise 1 - Timer Multiplexing - 20%
 ==============================================
 
-Use `add_timer(callback, duration)` API to schedule deferred tasks.
-Use a software-managed priority queue (e.g., min-heap or sorted list) to keep track of expiration time and reprogram the next timer event using an SBI call accordingly.
+Timers can be used to do periodic jobs such as scheduling and journaling and one-shot executing such as sleeping and timeout.
+However, the number of hardware timers is limited.
+Therefore, the kernel needs a software mechanism to multiplex the timer.
+
+One simple way is using a periodic timer.
+The kernel can use the tick period as the time unit and calculate the corresponding timeout tick.
+For example, suppose the periodic timer's frequency is 1000HZ and a process sleeps for 1.5 seconds.
+The kernel can add a wake-up event at the moment that 1500 ticks after the current tick.
+
+However, when the tick frequency is too low, the timer has a bad resolution.
+Then, it can't be used for time-sensitive jobs.
+When the tick frequency is too high, it introduces a lot of overhead for redundant timer interrupt handling.
+
+Another way is using a one-shot timer.
+When someone needs a timeout event, a timer is inserted into a timer queue.
+If the timeout is earlier than the previous programed expired time, the kernel reprograms the hardware timer to the earlier one.
+In the timer interrupt handler, it executes the expired timer's callback function.
+
+In this advanced part, you need to implement the timer API that a user can register the callback function when the
+timeout using the one-shot timer(the core timer is a one-shot timer).
+The API and its use case should look like the below pseudo code. 
+
+.. code:: c
+
+    //An example API
+    void add_timer(void (*callback)(void*), void* arg, int sec){
+        ...
+    }
+
+    //An example use case
+    void sleep(int duration){
+        add_timer(wakeup, current_process, duration);
+    }
+
+To test the API, you need to implement the shell command ``setTimeout SECONDS MESSAGE``.
+It prints MESSAGE after SECONDS with the current time and the command executed time.
+
+.. admonition:: Todo
+
+    Implement the ``setTimeout`` command with the timer API.
+
+.. important::
+    ``setTimeout`` is non-blocking. Users can set multiple timeouts. 
+    The printing order is determined by the command executed time and the user-specified SECONDS.
+
+This is an example:
+
+.. image:: /images/lab4_adv1.png
+
+
 
 Advanced Exercise 2 - Concurrent I/O Devices Handling 20%
 =========================================================
