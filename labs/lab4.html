@@ -322,7 +322,12 @@
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-timer-multiplexing-20">Advanced Exercise 1 - Timer Multiplexing - 20%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20">Advanced Exercise 2 - Concurrent I/O Devices Handling 20%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20">Advanced Exercise 2 - Concurrent I/O Devices Handling 20%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#decouple-the-interrupt-handlers">Decouple the Interrupt Handlers</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-interrupt">Nested Interrupt</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#preemption">Preemption</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -455,7 +460,7 @@ You need to:</p>
 <p>Timer interrupts are essential for OS scheduling. You will use the Supervisor Binary Interface (SBI) to program the timer.</p>
 <ol class="arabic simple">
 <li><p>Read the current time using the <code class="docutils literal notranslate"><span class="pre">rdtime</span></code> instruction.</p></li>
-<li><p>Calculate the target time by adding the CPU’s frequency to the current time (this represents 1 second).</p></li>
+<li><p>Calculate the target time by adding twice the CPU’s frequency to the current time (this represents 2 seconds).</p></li>
 <li><p>Call <code class="docutils literal notranslate"><span class="pre">sbi_set_timer(target_time)</span></code> to schedule the interrupt.</p></li>
 <li><p>Set the <code class="docutils literal notranslate"><span class="pre">STIE</span></code> bit in the <code class="docutils literal notranslate"><span class="pre">sie</span></code> register to enable timer interrupts.</p></li>
 <li><p>Set the <code class="docutils literal notranslate"><span class="pre">SIE</span></code> bit in <code class="docutils literal notranslate"><span class="pre">sstatus</span></code> to enable global interrupts.</p></li>
@@ -464,7 +469,7 @@ You need to:</p>
 </ol>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting and set the next timeout to 2 seconds later.</p>
+<p>Enable the core timer’s interrupt. The interrupt handler should print the seconds after booting every 2 seconds and set the next timeout to 2 seconds later.</p>
 </div>
 <p>The result would be like this:</p>
 <img alt="../_images/lab4_b2.png" src="../_images/lab4_b2.png" />
@@ -540,17 +545,61 @@ The printing order is determined by the command executed time and the user-speci
 </section>
 <section id="advanced-exercise-2-concurrent-i-o-devices-handling-20">
 <h3>Advanced Exercise 2 - Concurrent I/O Devices Handling 20%<a class="headerlink" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20" title="Link to this heading">#</a></h3>
-<p>Currently, interrupts are disabled while executing an Interrupt Service Routine (ISR). If a slow device (like UART printing a long string) triggers an interrupt, crucial events like Timer ticks might be dropped.
-Implement an Event Task Queue:</p>
+<p>The kernel needs to handle a lot of I/O devices at the same time.
+For devices(e.g. UART) that have a short period of process time,
+the kernel can finish their handlers immediately right after they’re ready.
+However, for those devices(e.g. network interface controller) that require a longer time for the follow-up processing,
+the kernel needs to schedule the execution order.</p>
+<p>Usually, we want to use the first come first serve principle to prevent starvation.
+However, we may also want prioritized execution for some critical handlers.
+In this part, you need to know how to implement it using a single thread(i.e. a single stack).</p>
+<section id="decouple-the-interrupt-handlers">
+<h4>Decouple the Interrupt Handlers<a class="headerlink" href="#decouple-the-interrupt-handlers" title="Link to this heading">#</a></h4>
+<p>A simpler way to implement an interrupt handler is processing all the device’s data one at a time with interrupts disabled.
+However, a less critical interrupt handler can block a more critical one for a long time.
+Hence, we want to decouple the interrupt handler and the actual processing.</p>
+<p>This can be achieved by a task queue.
+In the interrupt handler, the kernel</p>
 <ol class="arabic simple">
-<li><p>The hardware ISR merely acknowledges the hardware, masks that specific interrupt, and enqueues a “Task” into a software queue.</p></li>
-<li><p>Before returning from the trap (<code class="docutils literal notranslate"><span class="pre">sret</span></code>), the kernel re-enables global interrupts (<code class="docutils literal notranslate"><span class="pre">sstatus.SIE</span></code>) and starts processing the Task queue.</p></li>
-<li><p>This allows nested interrupts: a high-priority Timer interrupt can now preempt a low-priority UART task currently being processed.</p></li>
+<li><p>masks the device’s interrupt line,</p></li>
+<li><p>move data from the device’s buffer through DMA, or manually copy,</p></li>
+<li><p>enqueues the processing task to the event queue,</p></li>
+<li><p>do the tasks with interrupts enabled,</p></li>
+<li><p>unmasks the interrupt line to get the next interrupt at the end of the task.</p></li>
 </ol>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Use nested interrupt handling and task prioritization to support fair and responsive device scheduling.</p>
+<p>Those tasks in the queue can be processed when the system is idle.
+Also, the kernel can execute the task in any order such as FIFO or LIFO.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement a task queue mechanism, so interrupt handlers can add their processing tasks to it.</p>
 </div>
+</section>
+<section id="nested-interrupt">
+<h4>Nested Interrupt<a class="headerlink" href="#nested-interrupt" title="Link to this heading">#</a></h4>
+<p>The tasks in the queue can be executed at any time, but we want them to be executed as soon as possible.
+It’s because that a high-priority process may be waiting for the data.</p>
+<p>Therefore, before the interrupt handler return to the user program,
+it should execute the tasks in the interrupt context with interrupts enabled (otherwise, critical interrupts are blocked).
+Then, the interrupt handler may be nested.
+Hence, besides general-purpose registers, you should also save <code class="docutils literal notranslate"><span class="pre">sstatus</span></code> and <code class="docutils literal notranslate"><span class="pre">sepc</span></code> so the previously saved data are preserved.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Execute the tasks in the queue before returning to the user program with interrupts enabled.</p>
+</div>
+</section>
+<section id="preemption">
+<h4>Preemption<a class="headerlink" href="#preemption" title="Link to this heading">#</a></h4>
+<p>Now, any interrupt handler can preempt the task’s execution, but the newly enqueued task still needs to wait for
+the currently running task’s completion.
+It’d be better if the newly enqueued task with a higher priority can preempt the currently running task.</p>
+<p>To achieve the preemption,
+the kernel can check the last executing task’s priority before returning to the previous interrupt handler.
+If there are higher priority tasks, execute the highest priority task.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the task queue’s preemption mechanism.</p>
+</div>
+</section>
 </section>
 </section>
 </section>
@@ -625,7 +674,12 @@ Implement an Event Task Queue:</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-timer-multiplexing-20">Advanced Exercise 1 - Timer Multiplexing - 20%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20">Advanced Exercise 2 - Concurrent I/O Devices Handling 20%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-concurrent-i-o-devices-handling-20">Advanced Exercise 2 - Concurrent I/O Devices Handling 20%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#decouple-the-interrupt-handlers">Decouple the Interrupt Handlers</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-interrupt">Nested Interrupt</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#preemption">Preemption</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
