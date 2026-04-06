@@ -406,9 +406,9 @@ In our OS design, the kernel executes in <strong>Supervisor mode (S-mode)</stron
 <p>OrangePi RV2 uses the <strong>Platform-Level Interrupt Controller (PLIC)</strong> to handle external interrupts from devices such as UART.</p>
 <p>Key facts:</p>
 <ul class="simple">
-<li><p>Each device interrupt has an ID (e.g., UART0 is usually ID 10).</p></li>
+<li><p>Each device interrupt has an ID.</p></li>
 <li><p>PLIC routes interrupt requests to CPU cores with a priority mechanism.</p></li>
-<li><p>Supervisor Context: Because the kernel runs in S-mode, you must configure and access the PLIC using the registers specific to the S-mode context (Claim/Complete registers, Priority Threshold registers, etc.).</p></li>
+<li><p>Each hart has context-specific registers to claim/complete interrupts.</p></li>
 </ul>
 <p>See documentation or DTB for actual interrupt IDs and PLIC base addresses.</p>
 </section>

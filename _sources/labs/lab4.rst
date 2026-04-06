@@ -75,9 +75,9 @@ OrangePi RV2 uses the **Platform-Level Interrupt Controller (PLIC)** to handle e
 
 Key facts:
 
-- Each device interrupt has an ID (e.g., UART0 is usually ID 10).
+- Each device interrupt has an ID.
 - PLIC routes interrupt requests to CPU cores with a priority mechanism.
-- Supervisor Context: Because the kernel runs in S-mode, you must configure and access the PLIC using the registers specific to the S-mode context (Claim/Complete registers, Priority Threshold registers, etc.).
+- Each hart has context-specific registers to claim/complete interrupts.
 
 See documentation or DTB for actual interrupt IDs and PLIC base addresses.
 
