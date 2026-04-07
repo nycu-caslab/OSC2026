@@ -103,7 +103,7 @@ Setup includes:
 
 .. admonition:: Todo
 
-   Add command ``exec`` that can load the user program in the initramfs. Then, run it in U-mode by steps mentioned above.
+   Add command ``exec`` that can load the `user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/prog.bin>`_ in the initramfs. Then, run it in U-mode by steps mentioned above.
 
 Trap Handling from U-mode
 -------------------------
