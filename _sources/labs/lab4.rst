@@ -1,8 +1,3 @@
-.. warning::
-
-   This document is currently under construction and may be incomplete or subject to significant changes.
-   Please check back later for updates, and consult the instructor if you are unsure about any missing parts.
-
 ==============================
 Lab 4: Exception and Interrupt
 ==============================
@@ -302,3 +297,30 @@ If there are higher priority tasks, execute the highest priority task.
 .. admonition:: Todo
 
     Implement the task queue's preemption mechanism.
+
+In this advanced part, you need to implement the task API that the kernel can register a callback function with priority. The API and its use case should look like the below pseudo code.
+
+.. code:: c
+
+    //An example API
+    typedef void (*task_callback_t)(void *arg);
+    void add_task(task_callback_t callback, void *arg, int priority) {
+      ...
+    }
+
+    //An example use case
+    void test_task_cb(void *arg) {
+        uart_puts("[Task] Executing Priority ");
+        uart_putc((char*)arg);
+        uart_putc("\n");
+    }
+
+    void main(...){
+        ...
+        add_task(test_task_cb, "3", 3);
+        ...
+    }
+
+.. admonition:: Todo
+
+    Implement the ``add_task`` api.

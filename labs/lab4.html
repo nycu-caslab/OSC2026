@@ -341,12 +341,7 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This document is currently under construction and may be incomplete or subject to significant changes.
-Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
-</div>
-<section id="lab-4-exception-and-interrupt">
+  <section id="lab-4-exception-and-interrupt">
 <h1>Lab 4: Exception and Interrupt<a class="headerlink" href="#lab-4-exception-and-interrupt" title="Link to this heading">#</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
@@ -598,6 +593,31 @@ If there are higher priority tasks, execute the highest priority task.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement the task queue’s preemption mechanism.</p>
+</div>
+<p>In this advanced part, you need to implement the task API that the kernel can register a callback function with priority. The API and its use case should look like the below pseudo code.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">//An example API</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">task_callback_t</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">add_task</span><span class="p">(</span><span class="n">task_callback_t</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">priority</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">...</span>
+<span class="p">}</span>
+
+<span class="c1">//An example use case</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">test_task_cb</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uart_puts</span><span class="p">(</span><span class="s">&quot;[Task] Executing Priority &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">uart_putc</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">arg</span><span class="p">);</span>
+<span class="w">    </span><span class="n">uart_putc</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(...){</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">add_task</span><span class="p">(</span><span class="n">test_task_cb</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement the <code class="docutils literal notranslate"><span class="pre">add_task</span></code> api.</p>
 </div>
 </section>
 </section>
