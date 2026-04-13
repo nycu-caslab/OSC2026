@@ -332,7 +332,7 @@ QEMU
 ^^^^
 
 For your QEMU command, add ``-device ramfb`` to enable the framebuffer, 
-and remove ``-display none`` to to create a window for display output.
+and remove ``-display none`` to create a window for display output.
 Before use, the framebuffer base address must be registered with QEMU via the ``fw_cfg`` interface.
 You can either hardcode an available memory address or dynamically allocate a region.
 
