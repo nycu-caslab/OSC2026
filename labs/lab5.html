@@ -646,7 +646,7 @@ To display an image, simply write pixel data to the framebuffer address.</p>
 <section id="qemu">
 <h5>QEMU<a class="headerlink" href="#qemu" title="Link to this heading">#</a></h5>
 <p>For your QEMU command, add <code class="docutils literal notranslate"><span class="pre">-device</span> <span class="pre">ramfb</span></code> to enable the framebuffer,
-and remove <code class="docutils literal notranslate"><span class="pre">-display</span> <span class="pre">none</span></code> to to create a window for display output.
+and remove <code class="docutils literal notranslate"><span class="pre">-display</span> <span class="pre">none</span></code> to create a window for display output.
 Before use, the framebuffer base address must be registered with QEMU via the <code class="docutils literal notranslate"><span class="pre">fw_cfg</span></code> interface.
 You can either hardcode an available memory address or dynamically allocate a region.</p>
 <div class="admonition note">
