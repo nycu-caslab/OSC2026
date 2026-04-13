@@ -387,16 +387,11 @@ Moreover, you’ll learn how a user program becomes a user process and accesses 
 <section id="threads">
 <h3>Threads<a class="headerlink" href="#threads" title="Link to this heading">#</a></h3>
 <p>In the previous lab, you already learned how to implement multitasking with a single stack.
-However, in the case of single stack multitasking, the CPU thread can’t switch between two tasks at any time.
+However, in the case of single stack multitasking, the threads can’t switch between two tasks at any time.
 Otherwise, a task may corrupt another task’s context stored on the stack.</p>
 <p>A better approach is to give each thread its own register set and stack.
 The scheduler can then save the current thread’s register set, load another thread’s, and resume execution.
 From the thread’s perspective, it was never interrupted.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In this spec, a thread means a software thread.
-For processing elements containing their hardware register sets are called CPU threads.</p>
-</div>
 </section>
 <section id="user-process">
 <h3>User Process<a class="headerlink" href="#user-process" title="Link to this heading">#</a></h3>
@@ -406,7 +401,7 @@ When a process needs kernel services, it invokes system calls.
 The kernel handles the request and returns the result to the process.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>MMU is not enabled in this lab. Each process has its own user stack, but code and global variables remain at fixed physical addresses.
+<p>MMU is not enabled in this lab. Each process has its own user stack, but the global variables remain at fixed physical addresses.
 Running multiple copies of the same program simultaneously will cause overlap.</p>
 </div>
 </section>
@@ -489,8 +484,10 @@ the scheduler picks it to guarantee the CPU always executes the next instruction
 <h4>End of a Thread<a class="headerlink" href="#end-of-a-thread" title="Link to this heading">#</a></h4>
 <p>When a thread finishes, it should call an exit function to mark itself as terminated.
 A thread cannot free its own stack while still using it, so the remaining resources must be recycled by someone else.</p>
-<p>In UNIX-like operating systems, the parent is responsible for recycling its zombie children.
-In this lab, you can simplify this by letting the idle thread handle recycling instead.</p>
+<p>In this lab, both the idle thread and the parent thread are responsible for recycling zombie threads.
+You need to ensure that zombie threads are eventually cleaned up and no memory is leaked.
+The recycling strategy is up to you.</p>
+<p>The idle thread should be implemented as follows:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">idle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">kill_zombies</span><span class="p">();</span><span class="w"> </span><span class="c1">// recycle zombie threads</span>
@@ -569,14 +566,16 @@ and implement the system calls needed to run user programs.</p>
 </dd>
 <dt>2: long uart_write(const char *buf, long count)</dt><dd><p>Write <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes from <code class="docutils literal notranslate"><span class="pre">buf</span></code>. Return the number of bytes written.</p>
 </dd>
-<dt>3: int exec(const char *path)</dt><dd><p>Load and execute the program specified by <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p>
+<dt>3: int exec(const char *path)</dt><dd><p>Load and execute the program specified by <code class="docutils literal notranslate"><span class="pre">path</span></code>. Return 0 on success, -1 on failure.</p>
 </dd>
 <dt>4: long fork()</dt><dd><p>Duplicate the current process.
 Return the child’s pid to the parent, and 0 to the child.</p>
 </dd>
-<dt>5: void exit(int status)</dt><dd><p>Terminate the current process.</p>
+<dt>5: long waitpid(long pid)</dt><dd><p>Wait for the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code> to finish. Return the pid of the finished process.</p>
 </dd>
-<dt>6: int stop(long pid)</dt><dd><p>Terminate the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>.</p>
+<dt>6: void exit(int status)</dt><dd><p>Terminate the current process. The <code class="docutils literal notranslate"><span class="pre">status</span></code> can be used to indicate the exit reason, but it is not required in this lab.</p>
+</dd>
+<dt>7: int stop(long pid)</dt><dd><p>Terminate the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>. Return 0 on success, -1 on failure.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -593,29 +592,32 @@ Return the child’s pid to the parent, and 0 to the child.</p>
 <h4>Test<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
 <p>You can pack the <a class="reference internal" href="#user-program"><span class="std std-ref">User Program</span></a> used in Video Player into your initrd and execute it.
 Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the user shell to run the test.</p>
+<p>The fork test code in the user program is shown below:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Fork test (pid = %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">());</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="kt">long</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">;</span>
 <span class="w">      </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">      </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
 <span class="w">      </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
 
 <span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fork</span><span class="p">())</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">          </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">          </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child1: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">          </span><span class="n">waitpid</span><span class="p">(</span><span class="n">ret</span><span class="p">);</span>
 <span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">cnt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;mv %0, sp&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;=r&quot;</span><span class="p">(</span><span class="n">cur_sp</span><span class="p">));</span>
-<span class="w">              </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;child2: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
+<span class="w">              </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;child2: pid = %d, cnt = %d, &amp;cnt = %p, sp = %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span><span class="w"> </span><span class="n">cur_sp</span><span class="p">);</span>
 <span class="w">              </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000000000</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">);</span>
 <span class="w">              </span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;parent: pid = %d, child pid = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
+<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;parent: pid = %d, child pid = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">ret</span><span class="p">);</span>
+<span class="w">      </span><span class="n">waitpid</span><span class="p">(</span><span class="n">ret</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="w">  </span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 <span class="p">}</span>
@@ -643,7 +645,8 @@ The display hardware reads from this memory and outputs it to the screen.
 To display an image, simply write pixel data to the framebuffer address.</p>
 <section id="qemu">
 <h5>QEMU<a class="headerlink" href="#qemu" title="Link to this heading">#</a></h5>
-<p>Add <code class="docutils literal notranslate"><span class="pre">-device</span> <span class="pre">ramfb</span></code> and remove <code class="docutils literal notranslate"><span class="pre">-display</span> <span class="pre">none</span></code> from your QEMU command to enable the framebuffer.
+<p>For your QEMU command, add <code class="docutils literal notranslate"><span class="pre">-device</span> <span class="pre">ramfb</span></code> to enable the framebuffer,
+and remove <code class="docutils literal notranslate"><span class="pre">-display</span> <span class="pre">none</span></code> to to create a window for display output.
 Before use, the framebuffer base address must be registered with QEMU via the <code class="docutils literal notranslate"><span class="pre">fw_cfg</span></code> interface.
 You can either hardcode an available memory address or dynamically allocate a region.</p>
 <div class="admonition note">
@@ -677,9 +680,9 @@ Otherwise, use the raw instruction encoding instead:</p>
 <section id="id2">
 <h4>Required System Calls<a class="headerlink" href="#id2" title="Link to this heading">#</a></h4>
 <dl class="simple">
-<dt>7: void display(unsigned int *bmp_image, unsigned int width, unsigned int height)</dt><dd><p>Display the video.</p>
+<dt>8: void display(unsigned int *bmp_image, unsigned int width, unsigned int height)</dt><dd><p>Display the video.</p>
 </dd>
-<dt>8: int usleep(unsigned int usec)</dt><dd><p>Sleep for a specified number of microseconds.</p>
+<dt>9: int usleep(unsigned int usec)</dt><dd><p>Sleep for a specified number of microseconds. Return 0 on success, -1 on failure.</p>
 </dd>
 </dl>
 </section>
@@ -733,15 +736,17 @@ The kernel then restores the saved context and resumes the original execution.</
 <section id="id5">
 <h4>Required System Calls<a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
 <dl class="simple">
-<dt>9: long signal(int signum, void (*handler)())</dt><dd><p>Register a user-space handler for the given signal. The handler must run in U-mode.</p>
+<dt>10: long signal(int signum, void (*handler)())</dt><dd><p>Register a user-space handler for the given signal. The handler must run in U-mode.
+The return value is the previous handler for the signal, you can ignore it in this lab.</p>
 </dd>
-<dt>10: int sigreturn()</dt><dd><p>Restore the original user context after a signal handler returns.
+<dt>11: void sigreturn()</dt><dd><p>Restore the original user context after a signal handler returns.
 This syscall is called automatically via a trampoline set by the kernel.
 The kernel also recycles the signal stack upon completion.</p>
 </dd>
-<dt>11: int kill(int pid, int signum)</dt><dd><p>Send a signal to the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>.
+<dt>12: int kill(int pid, int signum)</dt><dd><p>Send a signal to the process identified by <code class="docutils literal notranslate"><span class="pre">pid</span></code>.
 If the process has a registered handler for the signal, the handler is executed.
-Otherwise, the process is terminated by default.</p>
+Otherwise, the process is terminated by default.
+Return 0 on success, -1 on failure.</p>
 </dd>
 </dl>
 <div class="admonition note">
