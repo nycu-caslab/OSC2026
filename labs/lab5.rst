@@ -32,16 +32,12 @@ Threads
 =======
 
 In the previous lab, you already learned how to implement multitasking with a single stack.
-However, in the case of single stack multitasking, the CPU thread can't switch between two tasks at any time.
+However, in the case of single stack multitasking, the threads can't switch between two tasks at any time.
 Otherwise, a task may corrupt another task's context stored on the stack.
 
 A better approach is to give each thread its own register set and stack.
 The scheduler can then save the current thread's register set, load another thread's, and resume execution.
 From the thread's perspective, it was never interrupted.
-
-.. note::
-    In this spec, a thread means a software thread. 
-    For processing elements containing their hardware register sets are called CPU threads.
 
 User Process
 ============
@@ -53,7 +49,7 @@ The kernel handles the request and returns the result to the process.
 
 .. warning::
 
-  MMU is not enabled in this lab. Each process has its own user stack, but code and global variables remain at fixed physical addresses.
+  MMU is not enabled in this lab. Each process has its own user stack, but the global variables remain at fixed physical addresses.
   Running multiple copies of the same program simultaneously will cause overlap.
 
 Run Queue and Scheduling
@@ -151,8 +147,11 @@ End of a Thread
 When a thread finishes, it should call an exit function to mark itself as terminated.
 A thread cannot free its own stack while still using it, so the remaining resources must be recycled by someone else.
 
-In UNIX-like operating systems, the parent is responsible for recycling its zombie children.
-In this lab, you can simplify this by letting the idle thread handle recycling instead.
+In this lab, both the idle thread and the parent thread are responsible for recycling zombie threads.
+You need to ensure that zombie threads are eventually cleaned up and no memory is leaked.
+The recycling strategy is up to you. 
+
+The idle thread should be implemented as follows:
 
 .. code-block:: c
 
@@ -243,17 +242,20 @@ You need to implement the following system calls and their corresponding numbers
   Write ``count`` bytes from ``buf``. Return the number of bytes written.
 
 3: int exec(const char \*path)
-  Load and execute the program specified by ``path``.
+  Load and execute the program specified by ``path``. Return 0 on success, -1 on failure.
 
 4: long fork()
   Duplicate the current process.
   Return the child's pid to the parent, and 0 to the child.
 
-5: void exit(int status)
-  Terminate the current process.
+5: long waitpid(long pid)
+  Wait for the process identified by ``pid`` to finish. Return the pid of the finished process.
 
-6: int stop(long pid)
-  Terminate the process identified by ``pid``.
+6: void exit(int status)
+  Terminate the current process. The ``status`` can be used to indicate the exit reason, but it is not required in this lab.
+
+7: int stop(long pid)
+  Terminate the process identified by ``pid``. Return 0 on success, -1 on failure.
 
 .. important::
 
@@ -270,31 +272,35 @@ Test
 You can pack the :ref:`user_program` used in Video Player into your initrd and execute it.
 Type ``fork_test`` in the user shell to run the test.
 
+The fork test code in the user program is shown below:
+
 .. code:: c
 
   void fork_test() {
-    printk("Fork test (pid = %d)\n", getpid());
+    printf("Fork test (pid = %d)\n", getpid());
     int cnt = 1;
     int ret = 0;
     if ((ret = fork()) == 0) {
         long cur_sp;
         asm volatile("mv %0, sp" : "=r"(cur_sp));
-        printk("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+        printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
         cnt++;
 
         if ((ret = fork()) != 0) {
             asm volatile("mv %0, sp" : "=r"(cur_sp));
-            printk("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+            printf("child1: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+            waitpid(ret);
         } else {
             while (cnt < 5) {
                 asm volatile("mv %0, sp" : "=r"(cur_sp));
-                printk("child2: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
+                printf("child2: pid = %d, cnt = %d, &cnt = %p, sp = %p\n", getpid(), cnt, &cnt, cur_sp);
                 for (int i = 0; i < 1000000000; i++);
                 cnt++;
             }
         }
     } else {
-        printk("parent: pid = %d, child pid = %d\n", getpid(), ret);
+        printf("parent: pid = %d, child pid = %d\n", getpid(), ret);
+        waitpid(ret);
     }
     exit(0);
   }
@@ -325,7 +331,8 @@ To display an image, simply write pixel data to the framebuffer address.
 QEMU
 ^^^^
 
-Add ``-device ramfb`` and remove ``-display none`` from your QEMU command to enable the framebuffer.
+For your QEMU command, add ``-device ramfb`` to enable the framebuffer, 
+and remove ``-display none`` to to create a window for display output.
 Before use, the framebuffer base address must be registered with QEMU via the ``fw_cfg`` interface.
 You can either hardcode an available memory address or dynamically allocate a region.
 
@@ -361,11 +368,11 @@ Otherwise, use the raw instruction encoding instead:
 Required System Calls
 ---------------------
 
-7: void display(unsigned int \*bmp_image, unsigned int width, unsigned int height)
+8: void display(unsigned int \*bmp_image, unsigned int width, unsigned int height)
   Display the video.
 
-8: int usleep(unsigned int usec)
-  Sleep for a specified number of microseconds.
+9: int usleep(unsigned int usec)
+  Sleep for a specified number of microseconds. Return 0 on success, -1 on failure.
 
 .. _user_program:
 
@@ -429,18 +436,20 @@ The kernel then restores the saved context and resumes the original execution.
 Required System Calls
 ---------------------
 
-9: long signal(int signum, void (\*handler)())
+10: long signal(int signum, void (\*handler)())
   Register a user-space handler for the given signal. The handler must run in U-mode.
+  The return value is the previous handler for the signal, you can ignore it in this lab.
 
-10: int sigreturn()
+11: void sigreturn()
   Restore the original user context after a signal handler returns.
   This syscall is called automatically via a trampoline set by the kernel.
   The kernel also recycles the signal stack upon completion.
 
-11: int kill(int pid, int signum)
+12: int kill(int pid, int signum)
   Send a signal to the process identified by ``pid``.
   If the process has a registered handler for the signal, the handler is executed.
   Otherwise, the process is terminated by default.
+  Return 0 on success, -1 on failure.
 
 .. note:: 
 
