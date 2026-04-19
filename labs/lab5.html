@@ -360,12 +360,7 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This document is currently under construction and may be incomplete or subject to significant changes.
-Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
-</div>
-<section id="lab-5-thread-and-user-process">
+  <section id="lab-5-thread-and-user-process">
 <h1>Lab 5: Thread and User Process<a class="headerlink" href="#lab-5-thread-and-user-process" title="Link to this heading">#</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
@@ -444,30 +439,22 @@ The thread should have its own kernel stack and be added to the run queue.</p>
 <p>Implement the <code class="docutils literal notranslate"><span class="pre">schedule()</span></code> API.
 When called, the scheduler picks the next runnable thread from the run queue and performs a context switch using <code class="docutils literal notranslate"><span class="pre">switch_to(prev,</span> <span class="pre">next)</span></code>.
 Your scheduler should support <strong>round-robin</strong> scheduling.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">switch_to</span></code> function saves the current thread’s callee-saved registers into its thread data structure, then loads the next thread’s registers.
+<p>The <code class="docutils literal notranslate"><span class="pre">switch_to</span></code> function saves the current thread’s callee-saved registers into its data structure, then loads the next thread’s registers.
 The <code class="docutils literal notranslate"><span class="pre">tp</span></code> register is updated to point to the next thread’s data structure. You can use it to track the current thread.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="n">global</span><span class="w"> </span><span class="n">switch_to</span>
 <span class="nl">switch_to</span><span class="p">:</span>
-<span class="w">    </span><span class="cm">/* Save context into prev-&gt;context */</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">0</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">1</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">2</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">...</span>
-<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">13</span><span class="p">(</span><span class="n">a0</span><span class="p">)</span>
+<span class="w">    </span><span class="cm">/* Save context */</span>
+<span class="w">    </span><span class="n">sd</span><span class="w"> </span><span class="p">...</span>
 
-<span class="w">    </span><span class="cm">/* Restore context from next-&gt;context */</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">ra</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">0</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">sp</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">1</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w">  </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="mi">2</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
-<span class="w">    </span><span class="p">...</span>
-<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="n">s11</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">13</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+<span class="w">    </span><span class="cm">/* Restore context */</span>
+<span class="w">    </span><span class="n">ld</span><span class="w"> </span><span class="p">...</span>
 
 <span class="w">    </span><span class="n">move</span><span class="w"> </span><span class="n">tp</span><span class="p">,</span><span class="w"> </span><span class="n">a1</span>
 <span class="w">    </span><span class="n">ret</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>Only callee-saved registers and <code class="docutils literal notranslate"><span class="pre">ra</span></code> need to be saved here.
 <code class="docutils literal notranslate"><span class="pre">ra</span></code> must be saved explicitly because it holds the return address for the thread to resume from.
 All other caller-saved registers are saved by the compiler before calling <code class="docutils literal notranslate"><span class="pre">switch_to</span></code>,
@@ -499,7 +486,7 @@ The recycling strategy is up to you.</p>
 </section>
 <section id="test">
 <h4>Test<a class="headerlink" href="#test" title="Link to this heading">#</a></h4>
-<p>Please test your implementation with the following code or equivalent logic code in the demo.</p>
+<p>Please test your implementation with the following code or equivalent logic code.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">printk</span><span class="p">(</span><span class="s">&quot;Thread id: %d %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_current</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
@@ -580,7 +567,7 @@ Return the child’s pid to the parent, and 0 to the child.</p>
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>To execute the test program in Video Player, make sure your system calls match the system call numbers.</p>
+<p>To execute the test program in Basic Exercise 3, make sure your system calls match the system call numbers.</p>
 </div>
 </section>
 </section>
@@ -590,7 +577,7 @@ Return the child’s pid to the parent, and 0 to the child.</p>
 </section>
 <section id="id1">
 <h4>Test<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
-<p>You can pack the <a class="reference internal" href="#user-program"><span class="std std-ref">User Program</span></a> used in Video Player into your initrd and execute it.
+<p>You can pack the <a class="reference internal" href="#user-program"><span class="std std-ref">User Program</span></a> used in Basic Exercise 3 into your initrd and execute it.
 Type <code class="docutils literal notranslate"><span class="pre">fork_test</span></code> in the user shell to run the test.</p>
 <p>The fork test code in the user program is shown below:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">fork_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -622,6 +609,12 @@ Type <code class="docutils literal notranslate"><span class="pre">fork_test</spa
 <span class="w">  </span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+<p>The result would be like this:</p>
+<img alt="../_images/lab5_fork_test.png" src="../_images/lab5_fork_test.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You don’t need to show the results of Basic Exercise 1 and 2 if you can pass Basic Exercise 3.</p>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
@@ -661,7 +654,7 @@ Related questions will not be asked during the demo.</p>
 <h5>Orange Pi RV2<a class="headerlink" href="#orange-pi-rv2" title="Link to this heading">#</a></h5>
 <p>Connect the HDMI output to a monitor.
 The framebuffer is initialized by U-Boot at physical address <code class="docutils literal notranslate"><span class="pre">0x7f700000</span></code>, so no additional initialization is needed.</p>
-<p>After writing to the framebuffer, the CPU cache must be flushed using <code class="docutils literal notranslate"><span class="pre">cbo.flush</span></code>
+<p>After writing to the framebuffer, the CPU cache must be flushed on Orange Pi RV2 using <code class="docutils literal notranslate"><span class="pre">cbo.flush</span></code>
 to ensure the display hardware reads the latest data from DRAM rather than stale cache.
 If your toolchain supports <code class="docutils literal notranslate"><span class="pre">-march=rv64gc_zicbom</span></code>, you can use the instruction directly.
 Otherwise, use the raw instruction encoding instead:</p>
@@ -695,11 +688,14 @@ Otherwise, use the raw instruction encoding instead:</p>
 </div>
 <p>A snapshot of the user program:</p>
 <img alt="../_images/lab5_help.png" src="../_images/lab5_help.png" />
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>You should be able to type commands in the shell while the video plays simultaneously.
-You can receive all the points only if you can run our test program fluently.
-Otherwise, even though you implemented the system call correctly, you will receive <strong>no points</strong> in this section.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You will receive <strong>0 point</strong> in this part if any of the following happens during the demo:</p>
+<ol class="arabic simple">
+<li><p>The shell and the video cannot run simultaneously.</p></li>
+<li><p>The video is not displayed normally. e.g., artifacts due to cache, distorted, wrong color, etc.</p></li>
+<li><p>Your program crashes or gets stuck.</p></li>
+</ol>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>

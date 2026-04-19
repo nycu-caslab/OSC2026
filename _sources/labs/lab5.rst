@@ -1,8 +1,3 @@
-.. warning::
-
-   This document is currently under construction and may be incomplete or subject to significant changes.
-   Please check back later for updates, and consult the instructor if you are unsure about any missing parts.
-
 ==============================
 Lab 5: Thread and User Process
 ==============================
@@ -103,31 +98,23 @@ Implement the ``schedule()`` API.
 When called, the scheduler picks the next runnable thread from the run queue and performs a context switch using ``switch_to(prev, next)``.
 Your scheduler should support **round-robin** scheduling.
 
-The ``switch_to`` function saves the current thread's callee-saved registers into its thread data structure, then loads the next thread's registers.
+The ``switch_to`` function saves the current thread's callee-saved registers into its data structure, then loads the next thread's registers.
 The ``tp`` register is updated to point to the next thread's data structure. You can use it to track the current thread.
 
 .. code:: c
 
   .global switch_to
   switch_to:
-      /* Save context into prev->context */
-      sd ra,  8 *  0(a0)
-      sd sp,  8 *  1(a0)
-      sd s0,  8 *  2(a0)
-      ...
-      sd s11, 8 * 13(a0)
+      /* Save context */
+      sd ...
 
-      /* Restore context from next->context */
-      ld ra,  8 *  0(a1)
-      ld sp,  8 *  1(a1)
-      ld s0,  8 *  2(a1)
-      ...
-      ld s11, 8 * 13(a1)
+      /* Restore context */
+      ld ...
 
       move tp, a1
       ret
 
-.. note::
+.. tip::
 
   Only callee-saved registers and ``ra`` need to be saved here.
   ``ra`` must be saved explicitly because it holds the return address for the thread to resume from.
@@ -165,7 +152,7 @@ The idle thread should be implemented as follows:
 Test
 ----
 
-Please test your implementation with the following code or equivalent logic code in the demo.
+Please test your implementation with the following code or equivalent logic code.
 
 .. code:: c
 
@@ -259,7 +246,7 @@ You need to implement the following system calls and their corresponding numbers
 
 .. important::
 
-  To execute the test program in Video Player, make sure your system calls match the system call numbers.
+  To execute the test program in Basic Exercise 3, make sure your system calls match the system call numbers.
 
 Kernel Preemption
 -----------------
@@ -269,7 +256,7 @@ Disable interrupts or preemption only when absolutely necessary. Your kernel sho
 Test
 ----
 
-You can pack the :ref:`user_program` used in Video Player into your initrd and execute it.
+You can pack the :ref:`user_program` used in Basic Exercise 3 into your initrd and execute it.
 Type ``fork_test`` in the user shell to run the test.
 
 The fork test code in the user program is shown below:
@@ -304,6 +291,14 @@ The fork test code in the user program is shown below:
     }
     exit(0);
   }
+
+The result would be like this:
+
+.. image:: /images/lab5_fork_test.png
+
+.. note::
+
+  You don't need to show the results of Basic Exercise 1 and 2 if you can pass Basic Exercise 3.
 
 .. admonition:: Todo
 
@@ -349,7 +344,7 @@ Orange Pi RV2
 Connect the HDMI output to a monitor.
 The framebuffer is initialized by U-Boot at physical address ``0x7f700000``, so no additional initialization is needed.
 
-After writing to the framebuffer, the CPU cache must be flushed using ``cbo.flush``
+After writing to the framebuffer, the CPU cache must be flushed on Orange Pi RV2 using ``cbo.flush``
 to ensure the display hardware reads the latest data from DRAM rather than stale cache.
 If your toolchain supports ``-march=rv64gc_zicbom``, you can use the instruction directly.
 Otherwise, use the raw instruction encoding instead:
@@ -390,11 +385,13 @@ A snapshot of the user program:
 
 .. image:: /images/lab5_help.png
 
-.. warning::
+.. important::
 
-  You should be able to type commands in the shell while the video plays simultaneously.
-  You can receive all the points only if you can run our test program fluently.
-  Otherwise, even though you implemented the system call correctly, you will receive **no points** in this section.
+  You will receive **0 point** in this part if any of the following happens during the demo:
+
+  1. The shell and the video cannot run simultaneously.
+  2. The video is not displayed normally. e.g., artifacts due to cache, distorted, wrong color, etc.
+  3. Your program crashes or gets stuck.
 
 .. admonition:: Todo
 
