@@ -745,9 +745,10 @@ Otherwise, the process is terminated by default.
 Return 0 on success, -1 on failure.</p>
 </dd>
 </dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Signal handlers must be inherited by child processes on <code class="docutils literal notranslate"><span class="pre">fork</span></code>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You must print a message in the <code class="docutils literal notranslate"><span class="pre">sigreturn</span></code> function to verify your implementation is correct.
+The message should be printed every time a signal handler finishes.</p>
 </div>
 <p>To test with the provided user program:</p>
 <ol class="arabic simple">
