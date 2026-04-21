@@ -448,9 +448,10 @@ Required System Calls
   Otherwise, the process is terminated by default.
   Return 0 on success, -1 on failure.
 
-.. note:: 
+.. important::
 
-  Signal handlers must be inherited by child processes on ``fork``.
+  You must print a message in the ``sigreturn`` function to verify your implementation is correct.
+  The message should be printed every time a signal handler finishes.
 
 To test with the provided user program:
 
