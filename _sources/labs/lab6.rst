@@ -30,8 +30,6 @@ Goals of this lab
 Background
 ##########
 
-Terminology
-===========
 
 Translation Levels
 ------------------
@@ -111,7 +109,7 @@ RISC-V Sv39 Memory Layout
 
 In the 39-bit virtual address space of Sv39, the upper address space is usually for kernel mode, and the lower address space is for user mode.
 
-.. image:: /images/mem_layout_riscv.png
+.. image:: /images/Riscv_SV39_Memory_Layout.png
 
 .. note::
   The entire accessible physical address could be linearly mapped to offset 0xffff_ffc0_0000_0000 for kernel access in this lab.
@@ -130,7 +128,7 @@ To keep everything simple, the following configuration is specified for this lab
 * Physical memory access via linear mapping in kernel space
 * No ASID support
 
-.. image:: /images/lab6_sv39.jpg
+.. image:: /images/lab6_sv39.png
 
 Reference
 =========
@@ -141,12 +139,12 @@ For details, you can refer to:
 * `The RISC-V Instruction Set Manual: Volume II - Privileged Architecture(Version 20250724: Intermediate Release) <https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-853e233-2025-07-24/riscv-privileged.pdf>`_
 * **12.4. Sv39: Page-Based 39-bit Virtual-Memory System** of the RISC-V privileged architecture manual.
 
-###############
+##############
 Basic Exercises
-###############
+##############
 
 Basic Exercise 1 - Virtual Memory in Kernel Space - 10%
-=======================================================
+-------------------------------------------------------
 
 We provide a step-by-step tutorial to guide you to make your original kernel work with virtual memory.
 However, we only give the essential explanation in each step.
@@ -270,7 +268,7 @@ Map MMIO regions as non-executable and use `volatile` accesses to avoid speculat
 
   Use 3-level mapping with finer granularity to distinguish MMIO and RAM.
 
-Basic Exercise 2 - Virtual Memory in User Space - 30%
+Basic Exercise 2 - Virtual Memory in User Space - 40%
 =====================================================
 
 PGD Allocation
@@ -309,19 +307,16 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
   Implement function like ``mappages(pagetable pagetable, uint64_t va, uint64_t size, uint64_t pa, ...)`` and use it to map user code at 0x0 and user stack at 0xfffffffff000.
 
 .. note::
-
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
 
 Revisit Syscalls
-^^^^^^^^^^^^^^^^
+------------------
 
-You can now allow user programs to share the same virtual addresses, using per-process mappings.
-
-Reimplement `fork()`, `exec()`, and system calls like `mbox_call` to use virtual memory properly.
+In Lab 5, user programs relied on custom linker scripts to prevent physical address overlaps, and child processes required distinct stack addresses. Virtual memory eliminates these restrictions. By using per-process page tables, you can now provide every user program with an identical virtual memory layout, mapping the same virtual addresses to isolated physical frames.
 
 .. admonition:: Todo
 
-  Revisit syscalls to support address isolation via virtual memory.
+  Reimplement the `fork()` and `exec()` system calls to properly utilize isolated virtual address spaces.
 
 Context Switch
 --------------
@@ -338,73 +333,87 @@ To switch address space, write the process’s PGD to the `satp` register and fl
 
   Implement address space switch using `satp` and `sfence.vma`.
 
-Video Player - 40%
+Video Player - 15%
 ==================
 
-In order to test the correctness of your previous implementation, we provide a :download:`user program <vm.img>` that runs only if your kernel behaves as expected.
+In order to test the correctness of your implementation, you can use the provided :download:`user program <vm.img>` that runs only if your kernel behaves as expected.
 
 .. admonition:: Note
 
-   The user program uses all syscalls from the previous lab.
+   The video player uses same syscalls from the previous lab.
 
 .. warning::
 
-  Only if you can run our test program fluently will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.
+  Only if you can run video fluently and without noise will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.
+
+.. admonition:: Todo
+
+  Make the video player run on virtual memory.
 
 ##################
 Advanced Exercises
 ##################
 
-Advanced Exercise 1 - Mmap - 10%
-================================
+Advanced Exercise 1 - Mmap - 15%
+--------------------------------
 
-``mmap()`` is a system call to create memory regions for a user process.
-Each region can be mapped to a file or anonymous pages (i.e., page frames not related to any file) with different protection.
+``mmap()`` is a system call used to create memory regions for a user process.
+Each region can be mapped to a file or to anonymous pages (i.e., page frames not related to any file) with specific access protections.
 Users can create heap and memory-mapped regions using this system call.
 
 The kernel can also use it to implement the program loader.
-Memory regions such as .text and .data can be created by **memory-mapped files**.
-Regions like **.bss** and **user stack** can be created by **anonymous page mapping**.
+Memory regions such as ``.text`` and ``.data`` can be created by **memory-mapped files**.
+Regions like **.bss** and the **user stack** can be created by **anonymous page mapping**.
 
 .. admonition:: Note
 
-   Because this lab does not use ELF files or actual files, you only need to implement anonymous page mapping.
+   Because this lab does not use ELF files or actual files on a file system, you only need to implement anonymous page mapping.
 
 API Specification
 -----------------
 
-(void*) mmap(void* addr, size_t len, int prot, int flags, int fd, int file_offset)
+.. code-block:: c
 
-* If `addr` is NULL, the kernel chooses the start address.
-* If `addr` is not NULL:
-  * If the region overlaps with existing ones or is not page-aligned, treat `addr` as a hint.
-  * Otherwise, use `addr` as the base of the new region.
+    void *mmap(void *addr, size_t length, int prot, int flags);
 
-* `len` must be page-aligned (rounded up if not).
-* `prot` specifies access:
-  * PROT_NONE: 0, inaccessible
-  * PROT_READ: 1, readable
-  * PROT_WRITE: 2, writable
-  * PROT_EXEC: 4, executable
 
-* `flags` include:
-  * MAP_ANONYMOUS: Create anonymous pages (used for stack/heap)
-  * MAP_POPULATE: Allocate physical pages immediately (optional if implementing demand paging)
+* ``addr``: 
+
+  * If it is ``NULL``, the kernel chooses the starting address.
+  * If it is not ``NULL``: If the region overlaps with existing ones or is not page-aligned, treat ``addr`` as a hint. Otherwise, use ``addr`` as the exact base of the new region.
+* ``length``: The size of the mapping. It must be page-aligned (the kernel should round it up if it is not).
+* ``prot``: Specifies the access protection for the region:
+
+  * ``PROT_NONE``: 0 (inaccessible)
+  * ``PROT_READ``: 1 (readable)
+  * ``PROT_WRITE``: 2 (writable)
+  * ``PROT_EXEC``: 4 (executable)
+* ``flags``: Memory mapping flags:
+
+  * ``MAP_ANONYMOUS``: Create anonymous pages (used for stack/heap).
+  * ``MAP_POPULATE``: Allocate physical pages immediately (optional if you are implementing demand paging).
+
 
 Region Page Mapping
 -------------------
 
-If the user specifies MAP_POPULATE, the kernel should map physical pages immediately.
+If the user specifies ``MAP_POPULATE``, the kernel should map physical pages immediately.
 
 * For anonymous pages:
-  1. Allocate page frames.
+
+  1. Allocate the required page frames.
   2. Map the region to the allocated frames using the requested protection bits.
 
 .. admonition:: Todo
 
-  Implement the `mmap` syscall. Syscall number: 10.
+  Implement the ``mmap()`` system call. Syscall number: 13.
 
-Advanced Exercise 2 - Page Fault Handler & Demand Paging - 10%
+.. warning::
+   **Updated User Program!**
+   
+   The test programs for this lab have been updated. Please ensure you download and load the new :download:`user program <vm.img>`.
+
+Advanced Exercise 2 - Page Fault Handler & Demand Paging - 15%
 ==============================================================
 
 So far, page frames have been pre-allocated.
@@ -424,19 +433,31 @@ When a page fault occurs:
 .. admonition:: Note
 
   To verify correctness, log each fault:
+  
+  .. code-block:: c
 
-.. code-block:: c
-
-  // Translation fault
-  printf("[Translation fault]: %lx\n", addr);
-  // Segmentation fault
-  printf("[Segmentation fault]: Kill Process\n");
+    // Translation fault
+    printf("[Translation fault]: %lx\n", addr);
+    // Segmentation fault
+    printf("[Segmentation fault]: Kill Process\n");
 
 .. admonition:: Todo
 
   Implement page fault handler for demand paging.
 
-Advanced Exercise 3 - Copy on Write - 10%
+.. admonition:: Note
+
+  We have prepared a testing function within the updated user program to help you verify your logic.
+  
+  .. code-block:: text
+
+      $ demand
+
+  This command allocates an array and touches the memory boundaries to trigger page faults.\
+  You should see your translation fault logs printed out.
+
+
+Advanced Exercise 3 - Copy on Write - 15%
 =========================================
 
 In your previous fork implementation, the kernel copies all page frames for the child.
@@ -458,13 +479,14 @@ If a process writes to a read-only page, a **permission fault** occurs.
 Then:
 
 * If the region is marked read-only:
+
   * Segmentation fault.
 * If the region is writable:
-  * It's a copy-on-write fault:
-    * Allocate a new frame
-    * Copy the data
-    * Update PTE to be writable and point to the new frame
-    * Update reference count
+
+  * Allocate a new frame
+  * Copy the data
+  * Update PTE to be writable and point to the new frame
+  * Update reference count
 
 .. note::
 

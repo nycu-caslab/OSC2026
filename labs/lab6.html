@@ -302,54 +302,49 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-40">Basic Exercise 2 - Virtual Memory in User Space - 40%</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-30">Basic Exercise 2 - Virtual Memory in User Space - 30%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-15">Video Player - 15%</a></li>
 </ul>
 </li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-10">Advanced Exercise 1 - Mmap - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-15">Advanced Exercise 1 - Mmap - 15%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-15">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 15%</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-15">Advanced Exercise 3 - Copy on Write - 15%</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-10">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-10">Advanced Exercise 3 - Copy on Write - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
 </ul>
 </li>
 </ul>
@@ -388,28 +383,26 @@ set up the address spaces for the kernel and user processes to achieve process i
 </section>
 <section id="background">
 <h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
-<section id="terminology">
-<h3>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">#</a></h3>
 <section id="translation-levels">
-<h4>Translation Levels<a class="headerlink" href="#translation-levels" title="Link to this heading">#</a></h4>
+<h3>Translation Levels<a class="headerlink" href="#translation-levels" title="Link to this heading">#</a></h3>
 <p>Translating a virtual address to a physical address involves levels of translation.
 RISC-V Sv39 uses a three-level page table translation.</p>
 <p>The top-level is page global directory (PGD), followed by page middle directory (PMD), and page table entry (PTE).</p>
 </section>
 <section id="page-vs-page-frame-vs-page-table">
-<h4>Page vs. Page Frame vs. Page Table<a class="headerlink" href="#page-vs-page-frame-vs-page-table" title="Link to this heading">#</a></h4>
+<h3>Page vs. Page Frame vs. Page Table<a class="headerlink" href="#page-vs-page-frame-vs-page-table" title="Link to this heading">#</a></h3>
 <p><strong>Page</strong>: A chunk of virtual memory pointed to by one entry of a page table.</p>
 <p><strong>Page frame</strong>: A chunk of physical memory.</p>
 <p><strong>Page table</strong>: A page frame whose entries point to the next level page tables or pages.
 In this documentation, PGD, PMD, and PTE are all called page tables.</p>
-</section>
-</section>
 <section id="page-entry-descriptor">
-<h3>Page Entry Descriptor<a class="headerlink" href="#page-entry-descriptor" title="Link to this heading">#</a></h3>
+<h4>Page Entry Descriptor<a class="headerlink" href="#page-entry-descriptor" title="Link to this heading">#</a></h4>
 <p>Each page table entry (PTE) contains the physical page number and flags describing access permissions and status.</p>
 <p>We list the necessary content for you.</p>
+</section>
+</section>
 <section id="descriptor-s-format-simplified">
-<h4>Descriptor’s Format (simplified)<a class="headerlink" href="#descriptor-s-format-simplified" title="Link to this heading">#</a></h4>
+<h3>Descriptor’s Format (simplified)<a class="headerlink" href="#descriptor-s-format-simplified" title="Link to this heading">#</a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>63               10 9 8 7 6 5 4 3 2 1 0
 +----------------+---+---------------+
 |  PPN[2:0]      |...| flags         |
@@ -429,7 +422,7 @@ Flags:
 </div>
 </section>
 <section id="attributes-used-in-this-lab">
-<h4>Attributes Used in this Lab<a class="headerlink" href="#attributes-used-in-this-lab" title="Link to this heading">#</a></h4>
+<h3>Attributes Used in this Lab<a class="headerlink" href="#attributes-used-in-this-lab" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt><strong>Bit[0] V (Valid)</strong></dt><dd><p>Indicates the entry is valid.</p>
 </dd>
@@ -448,12 +441,10 @@ Flags:
 <dt><strong>Bit[7] D (Dirty)</strong></dt><dd><p>Set by hardware when the page is written.</p>
 </dd>
 </dl>
-</section>
-</section>
 <section id="risc-v-sv39-memory-layout">
-<h3>RISC-V Sv39 Memory Layout<a class="headerlink" href="#risc-v-sv39-memory-layout" title="Link to this heading">#</a></h3>
+<h4>RISC-V Sv39 Memory Layout<a class="headerlink" href="#risc-v-sv39-memory-layout" title="Link to this heading">#</a></h4>
 <p>In the 39-bit virtual address space of Sv39, the upper address space is usually for kernel mode, and the lower address space is for user mode.</p>
-<img alt="images/mem_layout_riscv.png" src="images/mem_layout_riscv.png" />
+<img alt="../_images/Riscv_SV39_Memory_Layout.png" src="../_images/Riscv_SV39_Memory_Layout.png" />
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The entire accessible physical address could be linearly mapped to offset 0xffff_ffc0_0000_0000 for kernel access in this lab.
@@ -461,7 +452,7 @@ It simplifies the design.</p>
 </div>
 </section>
 <section id="configuration">
-<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h3>
+<h4>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h4>
 <p>RISC-V Sv39 uses 3-level page table with 4KB page size and 512 entries per table.</p>
 <p>To keep everything simple, the following configuration is specified for this lab:</p>
 <ul class="simple">
@@ -471,16 +462,17 @@ It simplifies the design.</p>
 <li><p>Physical memory access via linear mapping in kernel space</p></li>
 <li><p>No ASID support</p></li>
 </ul>
-<img alt="images/lab6_sv39.jpg" src="images/lab6_sv39.jpg" />
+<img alt="../_images/lab6_sv39.png" src="../_images/lab6_sv39.png" />
 </section>
 <section id="reference">
-<h3>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h3>
+<h4>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h4>
 <p>So far, we have briefly introduced the concept of virtual memory and RISC-V Sv39 virtual memory system architecture.
 For details, you can refer to:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-853e233-2025-07-24/riscv-privileged.pdf">The RISC-V Instruction Set Manual: Volume II - Privileged Architecture(Version 20250724: Intermediate Release)</a></p></li>
 <li><p><strong>12.4. Sv39: Page-Based 39-bit Virtual-Memory System</strong> of the RISC-V privileged architecture manual.</p></li>
 </ul>
+</section>
 </section>
 </section>
 <section id="basic-exercises">
@@ -490,8 +482,9 @@ For details, you can refer to:</p>
 <p>We provide a step-by-step tutorial to guide you to make your original kernel work with virtual memory.
 However, we only give the essential explanation in each step.
 For details, please refer to the manual.</p>
+</section>
 <section id="satp-register">
-<h4>SATP Register<a class="headerlink" href="#satp-register" title="Link to this heading">#</a></h4>
+<h3>SATP Register<a class="headerlink" href="#satp-register" title="Link to this heading">#</a></h3>
 <p>Paging is enabled by writing to the <cite>satp</cite> register.</p>
 <p>The following configuration is used in this lab:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SATP_SV39    (8L &lt;&lt; 60)</span>
@@ -509,7 +502,7 @@ For details, please refer to the manual.</p>
 </div>
 </section>
 <section id="memory-attributes">
-<h4>Memory Attributes<a class="headerlink" href="#memory-attributes" title="Link to this heading">#</a></h4>
+<h3>Memory Attributes<a class="headerlink" href="#memory-attributes" title="Link to this heading">#</a></h3>
 <p>In RISC-V, memory attributes like cacheability and permissions are managed through PTE bits and not separate attribute tables.</p>
 <p>Use the following for this lab:</p>
 <ul class="simple">
@@ -519,7 +512,7 @@ For details, please refer to the manual.</p>
 </ul>
 </section>
 <section id="identity-mapping">
-<h4>Identity Mapping<a class="headerlink" href="#identity-mapping" title="Link to this heading">#</a></h4>
+<h3>Identity Mapping<a class="headerlink" href="#identity-mapping" title="Link to this heading">#</a></h3>
 <p>Before enabling the MMU, you need to set up the page tables for the kernel.
 Start with identity mapping using 2MB pages.</p>
 <p>Each entry of PMD (second level) points to a 2MB block.
@@ -564,7 +557,7 @@ Hence, you only need:</p>
 </div>
 </section>
 <section id="map-the-kernel-space">
-<h4>Map the Kernel Space<a class="headerlink" href="#map-the-kernel-space" title="Link to this heading">#</a></h4>
+<h3>Map the Kernel Space<a class="headerlink" href="#map-the-kernel-space" title="Link to this heading">#</a></h3>
 <p>You should map the kernel to the upper half of the virtual address space, e.g., starting from <cite>0xffffffffc0000000</cite>.</p>
 <p>Modify your linker script:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>SECTIONS
@@ -586,7 +579,7 @@ Hence, you only need:</p>
 </div>
 </section>
 <section id="finer-granularity-paging">
-<h4>Finer Granularity Paging<a class="headerlink" href="#finer-granularity-paging" title="Link to this heading">#</a></h4>
+<h3>Finer Granularity Paging<a class="headerlink" href="#finer-granularity-paging" title="Link to this heading">#</a></h3>
 <p>Use 4KB pages for regions where fine-grained protection is needed (e.g., user stack, .bss).
 RISC-V supports 3-level paging: 4KB pages via PTE entries.</p>
 <p>Map normal memory with readable/writable/executable bits as needed.
@@ -595,16 +588,16 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <p class="admonition-title">Todo</p>
 <p>Use 3-level mapping with finer granularity to distinguish MMIO and RAM.</p>
 </div>
+<section id="basic-exercise-2-virtual-memory-in-user-space-40">
+<h4>Basic Exercise 2 - Virtual Memory in User Space - 40%<a class="headerlink" href="#basic-exercise-2-virtual-memory-in-user-space-40" title="Link to this heading">#</a></h4>
 </section>
 </section>
-<section id="basic-exercise-2-virtual-memory-in-user-space-30">
-<h3>Basic Exercise 2 - Virtual Memory in User Space - 30%<a class="headerlink" href="#basic-exercise-2-virtual-memory-in-user-space-30" title="Link to this heading">#</a></h3>
 <section id="pgd-allocation">
-<h4>PGD Allocation<a class="headerlink" href="#pgd-allocation" title="Link to this heading">#</a></h4>
+<h3>PGD Allocation<a class="headerlink" href="#pgd-allocation" title="Link to this heading">#</a></h3>
 <p>To isolate user processes, you should allocate a separate PGD for each user process.</p>
 </section>
 <section id="map-the-user-space">
-<h4>Map the User Space<a class="headerlink" href="#map-the-user-space" title="Link to this heading">#</a></h4>
+<h3>Map the User Space<a class="headerlink" href="#map-the-user-space" title="Link to this heading">#</a></h3>
 <p>For mapping user memory, walk through 3-level page tables:</p>
 <p>PGD → PMD → PTE</p>
 <p>Allocate intermediate tables as needed. Here is a simplified walk function:</p>
@@ -632,18 +625,17 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <p class="admonition-title">Note</p>
 <p>User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.</p>
 </div>
+</section>
 <section id="revisit-syscalls">
-<h5>Revisit Syscalls<a class="headerlink" href="#revisit-syscalls" title="Link to this heading">#</a></h5>
-<p>You can now allow user programs to share the same virtual addresses, using per-process mappings.</p>
-<p>Reimplement <cite>fork()</cite>, <cite>exec()</cite>, and system calls like <cite>mbox_call</cite> to use virtual memory properly.</p>
+<h3>Revisit Syscalls<a class="headerlink" href="#revisit-syscalls" title="Link to this heading">#</a></h3>
+<p>In Lab 5, user programs relied on custom linker scripts to prevent physical address overlaps, and child processes required distinct stack addresses. Virtual memory eliminates these restrictions. By using per-process page tables, you can now provide every user program with an identical virtual memory layout, mapping the same virtual addresses to isolated physical frames.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Revisit syscalls to support address isolation via virtual memory.</p>
+<p>Reimplement the <cite>fork()</cite> and <cite>exec()</cite> system calls to properly utilize isolated virtual address spaces.</p>
 </div>
 </section>
-</section>
 <section id="context-switch">
-<h4>Context Switch<a class="headerlink" href="#context-switch" title="Link to this heading">#</a></h4>
+<h3>Context Switch<a class="headerlink" href="#context-switch" title="Link to this heading">#</a></h3>
 <p>To switch address space, write the process’s PGD to the <cite>satp</cite> register and flush TLB.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">next_pgd</span><span class="p">);</span>
 <span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
@@ -654,70 +646,90 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <p class="admonition-title">Todo</p>
 <p>Implement address space switch using <cite>satp</cite> and <cite>sfence.vma</cite>.</p>
 </div>
-</section>
-</section>
-<section id="video-player-40">
-<h3>Video Player - 40%<a class="headerlink" href="#video-player-40" title="Link to this heading">#</a></h3>
-<p>In order to test the correctness of your previous implementation, we provide a <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> that runs only if your kernel behaves as expected.</p>
+<section id="video-player-15">
+<h4>Video Player - 15%<a class="headerlink" href="#video-player-15" title="Link to this heading">#</a></h4>
+<p>In order to test the correctness of your implementation, you can use the provided <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> that runs only if your kernel behaves as expected.</p>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
-<p>The user program uses all syscalls from the previous lab.</p>
+<p>The video player uses same syscalls from the previous lab.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Only if you can run our test program fluently will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.</p>
+<p>Only if you can run video fluently and without noise will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.</p>
 </div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Make the video player run on virtual memory.</p>
+</div>
+</section>
 </section>
 </section>
 <section id="advanced-exercises">
 <h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
-<section id="advanced-exercise-1-mmap-10">
-<h3>Advanced Exercise 1 - Mmap - 10%<a class="headerlink" href="#advanced-exercise-1-mmap-10" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">mmap()</span></code> is a system call to create memory regions for a user process.
-Each region can be mapped to a file or anonymous pages (i.e., page frames not related to any file) with different protection.
+<section id="advanced-exercise-1-mmap-15">
+<h3>Advanced Exercise 1 - Mmap - 15%<a class="headerlink" href="#advanced-exercise-1-mmap-15" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mmap()</span></code> is a system call used to create memory regions for a user process.
+Each region can be mapped to a file or to anonymous pages (i.e., page frames not related to any file) with specific access protections.
 Users can create heap and memory-mapped regions using this system call.</p>
 <p>The kernel can also use it to implement the program loader.
-Memory regions such as .text and .data can be created by <strong>memory-mapped files</strong>.
-Regions like <strong>.bss</strong> and <strong>user stack</strong> can be created by <strong>anonymous page mapping</strong>.</p>
+Memory regions such as <code class="docutils literal notranslate"><span class="pre">.text</span></code> and <code class="docutils literal notranslate"><span class="pre">.data</span></code> can be created by <strong>memory-mapped files</strong>.
+Regions like <strong>.bss</strong> and the <strong>user stack</strong> can be created by <strong>anonymous page mapping</strong>.</p>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
-<p>Because this lab does not use ELF files or actual files, you only need to implement anonymous page mapping.</p>
+<p>Because this lab does not use ELF files or actual files on a file system, you only need to implement anonymous page mapping.</p>
 </div>
+</section>
 <section id="api-specification">
-<h4>API Specification<a class="headerlink" href="#api-specification" title="Link to this heading">#</a></h4>
-<p>(void*) mmap(void* addr, size_t len, int prot, int flags, int fd, int file_offset)</p>
+<h3>API Specification<a class="headerlink" href="#api-specification" title="Link to this heading">#</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">mmap</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">addr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">prot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span>
+</pre></div>
+</div>
 <ul class="simple">
-<li><p>If <cite>addr</cite> is NULL, the kernel chooses the start address.</p></li>
-<li><p>If <cite>addr</cite> is not NULL:
-* If the region overlaps with existing ones or is not page-aligned, treat <cite>addr</cite> as a hint.
-* Otherwise, use <cite>addr</cite> as the base of the new region.</p></li>
-<li><p><cite>len</cite> must be page-aligned (rounded up if not).</p></li>
-<li><p><cite>prot</cite> specifies access:
-* PROT_NONE: 0, inaccessible
-* PROT_READ: 1, readable
-* PROT_WRITE: 2, writable
-* PROT_EXEC: 4, executable</p></li>
-<li><p><cite>flags</cite> include:
-* MAP_ANONYMOUS: Create anonymous pages (used for stack/heap)
-* MAP_POPULATE: Allocate physical pages immediately (optional if implementing demand paging)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">addr</span></code>:</p>
+<ul>
+<li><p>If it is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, the kernel chooses the starting address.</p></li>
+<li><p>If it is not <code class="docutils literal notranslate"><span class="pre">NULL</span></code>: If the region overlaps with existing ones or is not page-aligned, treat <code class="docutils literal notranslate"><span class="pre">addr</span></code> as a hint. Otherwise, use <code class="docutils literal notranslate"><span class="pre">addr</span></code> as the exact base of the new region.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code>: The size of the mapping. It must be page-aligned (the kernel should round it up if it is not).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prot</span></code>: Specifies the access protection for the region:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">PROT_NONE</span></code>: 0 (inaccessible)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PROT_READ</span></code>: 1 (readable)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PROT_WRITE</span></code>: 2 (writable)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PROT_EXEC</span></code>: 4 (executable)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>: Memory mapping flags:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAP_ANONYMOUS</span></code>: Create anonymous pages (used for stack/heap).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAP_POPULATE</span></code>: Allocate physical pages immediately (optional if you are implementing demand paging).</p></li>
+</ul>
+</li>
 </ul>
 </section>
 <section id="region-page-mapping">
-<h4>Region Page Mapping<a class="headerlink" href="#region-page-mapping" title="Link to this heading">#</a></h4>
-<p>If the user specifies MAP_POPULATE, the kernel should map physical pages immediately.</p>
+<h3>Region Page Mapping<a class="headerlink" href="#region-page-mapping" title="Link to this heading">#</a></h3>
+<p>If the user specifies <code class="docutils literal notranslate"><span class="pre">MAP_POPULATE</span></code>, the kernel should map physical pages immediately.</p>
 <ul class="simple">
-<li><p>For anonymous pages:
-1. Allocate page frames.
-2. Map the region to the allocated frames using the requested protection bits.</p></li>
+<li><p>For anonymous pages:</p>
+<ol class="arabic simple">
+<li><p>Allocate the required page frames.</p></li>
+<li><p>Map the region to the allocated frames using the requested protection bits.</p></li>
+</ol>
+</li>
 </ul>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement the <cite>mmap</cite> syscall. Syscall number: 10.</p>
+<p>Implement the <code class="docutils literal notranslate"><span class="pre">mmap()</span></code> system call. Syscall number: 13.</p>
 </div>
-</section>
-</section>
-<section id="advanced-exercise-2-page-fault-handler-demand-paging-10">
-<h3>Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%<a class="headerlink" href="#advanced-exercise-2-page-fault-handler-demand-paging-10" title="Link to this heading">#</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Updated User Program!</strong></p>
+<p>The test programs for this lab have been updated. Please ensure you download and load the new <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code>.</p>
+</div>
+<section id="advanced-exercise-2-page-fault-handler-demand-paging-15">
+<h4>Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 15%<a class="headerlink" href="#advanced-exercise-2-page-fault-handler-demand-paging-15" title="Link to this heading">#</a></h4>
 <p>So far, page frames have been pre-allocated.
 But a user program may reserve large address spaces (e.g., heap, mmap) and not use all of them.
 Pre-allocating wastes CPU time and memory.</p>
@@ -733,25 +745,35 @@ When a page fault occurs:</p>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
 <p>To verify correctness, log each fault:</p>
-</div>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Translation fault</span>
 <span class="n">printf</span><span class="p">(</span><span class="s">&quot;[Translation fault]: %lx</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">addr</span><span class="p">);</span>
 <span class="c1">// Segmentation fault</span>
 <span class="n">printf</span><span class="p">(</span><span class="s">&quot;[Segmentation fault]: Kill Process</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
+</div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement page fault handler for demand paging.</p>
 </div>
+<div class="admonition-note admonition">
+<p class="admonition-title">Note</p>
+<p>We have prepared a testing function within the updated user program to help you verify your logic.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ demand
+</pre></div>
+</div>
+<p>This command allocates an array and touches the memory boundaries to trigger page faults.You should see your translation fault logs printed out.</p>
+</div>
 </section>
-<section id="advanced-exercise-3-copy-on-write-10">
-<h3>Advanced Exercise 3 - Copy on Write - 10%<a class="headerlink" href="#advanced-exercise-3-copy-on-write-10" title="Link to this heading">#</a></h3>
+<section id="advanced-exercise-3-copy-on-write-15">
+<h4>Advanced Exercise 3 - Copy on Write - 15%<a class="headerlink" href="#advanced-exercise-3-copy-on-write-15" title="Link to this heading">#</a></h4>
 <p>In your previous fork implementation, the kernel copies all page frames for the child.
 But <cite>exec()</cite> usually follows <cite>fork()</cite>, meaning those frames may never be used.</p>
 <p>To optimize this, implement <strong>copy-on-write (COW)</strong>.</p>
+</section>
+</section>
 <section id="on-fork-a-new-process">
-<h4>On Fork a New Process<a class="headerlink" href="#on-fork-a-new-process" title="Link to this heading">#</a></h4>
+<h3>On Fork a New Process<a class="headerlink" href="#on-fork-a-new-process" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p>Copy the page tables (PGD, etc.).</p></li>
 <li><p>Mark all user PTE entries <strong>read-only</strong>, even if they were originally read-write.</p></li>
@@ -759,22 +781,22 @@ But <cite>exec()</cite> usually follows <cite>fork()</cite>, meaning those frame
 </ol>
 </section>
 <section id="on-page-write-by-either-process">
-<h4>On Page Write by Either Process<a class="headerlink" href="#on-page-write-by-either-process" title="Link to this heading">#</a></h4>
+<h3>On Page Write by Either Process<a class="headerlink" href="#on-page-write-by-either-process" title="Link to this heading">#</a></h3>
 <p>If a process writes to a read-only page, a <strong>permission fault</strong> occurs.
 Then:</p>
+<ul class="simple">
+<li><p>If the region is marked read-only:</p>
 <ul>
-<li><p>If the region is marked read-only:
-* Segmentation fault.</p></li>
-<li><p>If the region is writable:
-* It’s a copy-on-write fault:</p>
-<blockquote>
-<div><ul class="simple">
+<li><p>Segmentation fault.</p></li>
+</ul>
+</li>
+<li><p>If the region is writable:</p>
+<ul>
 <li><p>Allocate a new frame</p></li>
 <li><p>Copy the data</p></li>
 <li><p>Update PTE to be writable and point to the new frame</p></li>
 <li><p>Update reference count</p></li>
 </ul>
-</div></blockquote>
 </li>
 </ul>
 <div class="admonition note">
@@ -789,7 +811,6 @@ Then:</p>
 <p class="admonition-title">Note</p>
 <p>If your user program accesses any memory-mapped I/O regions for inter-process communication, ensure these regions are mapped directly in each process without copy-on-write, to maintain correct behavior.</p>
 </div>
-</section>
 </section>
 </section>
 </section>
@@ -826,54 +847,49 @@ Then:</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#translation-levels">Translation Levels</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-vs-page-frame-vs-page-table">Page vs. Page Frame vs. Page Table</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#page-entry-descriptor">Page Entry Descriptor</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#descriptor-s-format-simplified">Descriptor’s Format (simplified)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes-used-in-this-lab">Attributes Used in this Lab</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#risc-v-sv39-memory-layout">RISC-V Sv39 Memory Layout</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-kernel-space">Map the Kernel Space</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#finer-granularity-paging">Finer Granularity Paging</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-40">Basic Exercise 2 - Virtual Memory in User Space - 40%</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-virtual-memory-in-user-space-30">Basic Exercise 2 - Virtual Memory in User Space - 30%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pgd-allocation">PGD Allocation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-15">Video Player - 15%</a></li>
 </ul>
 </li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player-40">Video Player - 40%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-10">Advanced Exercise 1 - Mmap - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-15">Advanced Exercise 1 - Mmap - 15%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-15">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 15%</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-15">Advanced Exercise 3 - Copy on Write - 15%</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-2-page-fault-handler-demand-paging-10">Advanced Exercise 2 - Page Fault Handler &amp; Demand Paging - 10%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-3-copy-on-write-10">Advanced Exercise 3 - Copy on Write - 10%</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#on-fork-a-new-process">On Fork a New Process</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#on-page-write-by-either-process">On Page Write by Either Process</a></li>
 </ul>
 </li>
 </ul>
