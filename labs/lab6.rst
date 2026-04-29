@@ -344,7 +344,7 @@ To switch address space, write the process’s PGD to the `satp` register and fl
 Basic Exercise 3 - Video Player - 15%
 ------------------------------------------
 
-In order to test the correctness of your implementation, you can use the provided :download:`user program <vm.img>` that runs only if your kernel behaves as expected.
+In order to test the correctness of your implementation, you can use the provided :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest_new.bin>` that runs only if your kernel behaves as expected.
 
 .. admonition:: Note
 
@@ -419,7 +419,7 @@ If the user specifies ``MAP_POPULATE``, the kernel should map physical pages imm
 .. warning::
    **Updated User Program!**
    
-   The test programs for this lab have been updated. Please ensure you download and load the new :download:`user program <vm.img>`.
+   The test programs for this lab have been updated. Please ensure you download and load the new :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest_new.bin>`.
 
 
 .. admonition:: Note
