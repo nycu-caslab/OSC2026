@@ -54,55 +54,54 @@ Page Entry Descriptor
 
 Each page table entry (PTE) contains the physical page number and flags describing access permissions and status.
 
-We list the necessary content for you.
 
-Descriptor's Format (simplified)
---------------------------------
+.. Descriptor's Format (simplified)
+.. --------------------------------
 
-.. code:: none
+.. .. code:: none
 
-  63               10 9 8 7 6 5 4 3 2 1 0
-  +----------------+---+---------------+
-  |  PPN[2:0]      |...| flags         |
-  +----------------+---+---------------+
+..   63               10 9 8 7 6 5 4 3 2 1 0
+..   +----------------+---+---------------+
+..   |  PPN[2:0]      |...| flags         |
+..   +----------------+---+---------------+
 
-  PPN: Physical Page Number (combined from fields across bits 10-53).
-  Flags:
-    V: valid
-    R: readable
-    W: writable
-    X: executable
-    U: user accessible
-    G: global
-    A: accessed
-    D: dirty
+..   PPN: Physical Page Number (combined from fields across bits 10-53).
+..   Flags:
+..     V: valid
+..     R: readable
+..     W: writable
+..     X: executable
+..     U: user accessible
+..     G: global
+..     A: accessed
+..     D: dirty
 
-Attributes Used in this Lab
----------------------------
+.. Attributes Used in this Lab
+.. ---------------------------
 
-**Bit[0] V (Valid)**  
-  Indicates the entry is valid.
+.. **Bit[0] V (Valid)**  
+..   Indicates the entry is valid.
 
-**Bit[1] R (Readable)**  
-  Page is readable.
+.. **Bit[1] R (Readable)**  
+..   Page is readable.
 
-**Bit[2] W (Writable)**  
-  Page is writable.
+.. **Bit[2] W (Writable)**  
+..   Page is writable.
 
-**Bit[3] X (Executable)**  
-  Page is executable.
+.. **Bit[3] X (Executable)**  
+..   Page is executable.
 
-**Bit[4] U (User)**  
-  1 for user mode accessible, 0 for kernel only.
+.. **Bit[4] U (User)**  
+..   1 for user mode accessible, 0 for kernel only.
 
-**Bit[5] G (Global)**  
-  1 if mapping is global.
+.. **Bit[5] G (Global)**  
+..   1 if mapping is global.
 
-**Bit[6] A (Accessed)**  
-  Set by hardware when the page is accessed.
+.. **Bit[6] A (Accessed)**  
+..   Set by hardware when the page is accessed.
 
-**Bit[7] D (Dirty)**  
-  Set by hardware when the page is written.
+.. **Bit[7] D (Dirty)**  
+..   Set by hardware when the page is written.
 
 RISC-V Sv39 Memory Layout
 =========================
@@ -112,7 +111,7 @@ In the 39-bit virtual address space of Sv39, the upper address space is usually 
 .. image:: /images/Riscv_SV39_Memory_Layout.png
 
 .. note::
-  The entire accessible physical address could be linearly mapped to offset 0xffff_ffc0_0000_0000 for kernel access in this lab.
+  The entire accessible physical address could be linearly mapped to offset ``0xffff_ffc0_0000_0000`` for kernel access in this lab.
   It simplifies the design.
 
 Configuration
@@ -129,6 +128,20 @@ To keep everything simple, the following configuration is specified for this lab
 * No ASID support
 
 .. image:: /images/lab6_sv39.png
+
+Attributes Used in this Lab
+---------------------------
+
+When setting up your page tables, you will need to manipulate the following descriptor flags:
+
+* **Bit[0] V (Valid):** Indicates the entry is valid.
+* **Bit[1] R (Readable):** Page is readable.
+* **Bit[2] W (Writable):** Page is writable.
+* **Bit[3] X (Executable):** Page is executable.
+* **Bit[4] U (User):** 1 for user mode accessible, 0 for kernel only.
+* **Bit[5] G (Global):** 1 if mapping is global.
+* **Bit[6] A (Accessed):** Set by hardware when the page is accessed.
+* **Bit[7] D (Dirty):** Set by hardware when the page is written.
 
 Reference
 =========
@@ -151,7 +164,7 @@ However, we only give the essential explanation in each step.
 For details, please refer to the manual.
 
 SATP Register
--------------
+=================
 
 Paging is enabled by writing to the `satp` register.
 
@@ -172,7 +185,7 @@ The following configuration is used in this lab:
   Set up `satp` to enable virtual memory.
 
 Memory Attributes
------------------
+====================
 
 In RISC-V, memory attributes like cacheability and permissions are managed through PTE bits and not separate attribute tables.
 
@@ -183,7 +196,7 @@ Use the following for this lab:
 * User mapping: readable, writable, valid, user
 
 Identity Mapping
-----------------
+==================
 
 Before enabling the MMU, you need to set up the page tables for the kernel.
 Start with identity mapping using 2MB pages.
@@ -230,7 +243,7 @@ Hence, you only need:
   Set up identity mapping and enable MMU.
 
 Map the Kernel Space
---------------------
+=====================
 
 You should map the kernel to the upper half of the virtual address space, e.g., starting from `0xffffffffc0000000`.
 
@@ -240,9 +253,9 @@ Modify your linker script:
 
   SECTIONS
   {
-    . = 0xffffffffc0000000;
-    _kernel_start = .;
-    ...
+    . = 0xffffffc000000000;
+    . += 0x80200000;
+    _start = .;
   }
 
 You should create page table entries mapping the kernel's physical memory to this virtual region.
@@ -256,7 +269,7 @@ You should create page table entries mapping the kernel's physical memory to thi
   Hard-coded addresses such as MMIO addresses should also be mapped in the upper address space.
 
 Finer Granularity Paging
-------------------------
+=========================
 
 Use 4KB pages for regions where fine-grained protection is needed (e.g., user stack, .bss).
 RISC-V supports 3-level paging: 4KB pages via PTE entries.
@@ -269,15 +282,15 @@ Map MMIO regions as non-executable and use `volatile` accesses to avoid speculat
   Use 3-level mapping with finer granularity to distinguish MMIO and RAM.
 
 Basic Exercise 2 - Virtual Memory in User Space - 40%
-=====================================================
+---------------------------------------------------------
 
 PGD Allocation
---------------
+=================
 
 To isolate user processes, you should allocate a separate PGD for each user process.
 
 Map the User Space
-------------------
+=================
 
 For mapping user memory, walk through 3-level page tables:
 
@@ -287,19 +300,14 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
 
 .. code-block:: c
 
-  pte_t *walk(pagetable_t pagetable, uint64_t va, int alloc) {
+  static void pagewalk(unsigned long va, unsigned long pa, unsigned long prot) {
+    // Get current PGD
+    // Walk through level 2 (PGD) and level 1 (PMD)
     for (int level = 2; level > 0; level--) {
-      pte_t *pte = &pagetable[PX(level, va)];
-      if (*pte & PTE_V) {
-        pagetable = (pagetable_t)PTE2PA(*pte);
-      } else {
-        if (!alloc) return 0;
-        pagetable = alloc_page();
-        memset(pagetable, 0, PAGE_SIZE);
-        *pte = PA2PTE(pagetable) | PTE_V;
-      }
+    ...
     }
-    return &pagetable[PX(0, va)];
+    // Reached level 0 (PTE)
+    ...
   }
 
 .. admonition:: Todo
@@ -310,7 +318,7 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
 
 Revisit Syscalls
-------------------
+=================
 
 In Lab 5, user programs relied on custom linker scripts to prevent physical address overlaps, and child processes required distinct stack addresses. Virtual memory eliminates these restrictions. By using per-process page tables, you can now provide every user program with an identical virtual memory layout, mapping the same virtual addresses to isolated physical frames.
 
@@ -319,7 +327,7 @@ In Lab 5, user programs relied on custom linker scripts to prevent physical addr
   Reimplement the `fork()` and `exec()` system calls to properly utilize isolated virtual address spaces.
 
 Context Switch
---------------
+=================
 
 To switch address space, write the process’s PGD to the `satp` register and flush TLB.
 
@@ -333,8 +341,8 @@ To switch address space, write the process’s PGD to the `satp` register and fl
 
   Implement address space switch using `satp` and `sfence.vma`.
 
-Video Player - 15%
-==================
+Basic Exercise 3 - Video Player - 15%
+------------------------------------------
 
 In order to test the correctness of your implementation, you can use the provided :download:`user program <vm.img>` that runs only if your kernel behaves as expected.
 
@@ -370,7 +378,7 @@ Regions like **.bss** and the **user stack** can be created by **anonymous page 
    Because this lab does not use ELF files or actual files on a file system, you only need to implement anonymous page mapping.
 
 API Specification
------------------
+===================
 
 .. code-block:: c
 
@@ -395,7 +403,7 @@ API Specification
 
 
 Region Page Mapping
--------------------
+====================
 
 If the user specifies ``MAP_POPULATE``, the kernel should map physical pages immediately.
 
@@ -413,8 +421,13 @@ If the user specifies ``MAP_POPULATE``, the kernel should map physical pages imm
    
    The test programs for this lab have been updated. Please ensure you download and load the new :download:`user program <vm.img>`.
 
+
+.. admonition:: Note
+
+  You can verify your implementation with ``mmap_r`` (read test) or ``mmap_w`` (write test).
+
 Advanced Exercise 2 - Page Fault Handler & Demand Paging - 15%
-==============================================================
+-----------------------------------------------------------------
 
 So far, page frames have been pre-allocated.
 But a user program may reserve large address spaces (e.g., heap, mmap) and not use all of them.
@@ -422,58 +435,43 @@ Pre-allocating wastes CPU time and memory.
 
 Instead, allocate page frames **on demand**.
 
-At process creation, only PGD is allocated.
+At process creation, only the PGD is allocated.
 When a page fault occurs:
 
 * If the fault address is not in any mapped region:
-  * Generate segmentation fault and terminate the process.
+
+  * Generate a segmentation fault and terminate the process.
+  * Log the error: ``printf("[Segmentation fault]: Kill Process\n");``
 * If the fault address is in a valid region:
+
   * Allocate a page frame and map only that page.
-
-.. admonition:: Note
-
-  To verify correctness, log each fault:
-  
-  .. code-block:: c
-
-    // Translation fault
-    printf("[Translation fault]: %lx\n", addr);
-    // Segmentation fault
-    printf("[Segmentation fault]: Kill Process\n");
+  * Log the translation: ``printf("[Translation fault]: %lx\n", addr);``
 
 .. admonition:: Todo
 
-  Implement page fault handler for demand paging.
+  Implement the page fault handler for demand paging.
 
-.. admonition:: Note
-
-  We have prepared a testing function within the updated user program to help you verify your logic.
-  
-  .. code-block:: text
-
-      $ demand
-
-  This command allocates an array and touches the memory boundaries to trigger page faults.\
-  You should see your translation fault logs printed out.
+We have prepared a testing function within the updated user program to help you verify your logic. Run ``$ demand`` in your shell,
+this command allocates an array and touches the memory boundaries to trigger page faults. You should see your translation fault logs printed out.
 
 
 Advanced Exercise 3 - Copy on Write - 15%
-=========================================
+--------------------------------------------
 
 In your previous fork implementation, the kernel copies all page frames for the child.
-But `exec()` usually follows `fork()`, meaning those frames may never be used.
-
-To optimize this, implement **copy-on-write (COW)**.
+But ``exec()`` usually follows ``fork()``, meaning those frames may never be used. To optimize this, implement **copy-on-write (COW)**.
 
 On Fork a New Process
----------------------
+=====================
+
+When a process forks, instead of copying all page frames, do the following:
 
 1. Copy the page tables (PGD, etc.).
 2. Mark all user PTE entries **read-only**, even if they were originally read-write.
 3. Increment reference counts for each shared page frame.
 
 On Page Write by Either Process
--------------------------------
+===============================
 
 If a process writes to a read-only page, a **permission fault** occurs.
 Then:
