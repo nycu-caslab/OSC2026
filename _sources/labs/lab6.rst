@@ -166,23 +166,33 @@ For details, please refer to the manual.
 SATP Register
 =================
 
-Paging is enabled by writing to the `satp` register.
+Paging is enabled by writing to the ``satp`` register. Its top 4 bits
+select the translation mode (8 = Sv39), and the low 44 bits hold the
+physical page number (PPN) of the root page table.
 
-The following configuration is used in this lab:
+The following helpers are used in this lab:
 
 .. code:: c
 
-  #define SATP_SV39    (8L << 60)
-  #define SATP_MODE_MASK (0xFULL << 60)
-  #define MAKE_SATP(pagetable) (SATP_SV39 | ((((uint64_t)pagetable) >> 12) & 0xFFFFFFFFFFF))
+  #define SATP_SV39           (8UL << 60)
+  #define MAKE_SATP(pgd_pa)   (SATP_SV39 | ((unsigned long)(pgd_pa) >> 12))
 
-  uint64_t satp_val = MAKE_SATP(pgd);
-  asm volatile("csrw satp, %0" : : "r"(satp_val));
-  asm volatile("sfence.vma");
+After populating ``pgd``, write ``satp`` and flush any stale TLB
+entries before the next instruction is fetched:
+
+.. code:: c
+
+  asm volatile(
+      "csrw satp, %0\n"
+      "sfence.vma zero, zero\n"
+      :
+      : "r"(MAKE_SATP(pgd))
+      : "memory"
+  );
 
 .. admonition:: Todo
 
-  Set up `satp` to enable virtual memory.
+  Set up ``satp`` to enable virtual memory.
 
 Memory Attributes
 ====================
@@ -198,49 +208,55 @@ Use the following for this lab:
 Identity Mapping
 ==================
 
-Before enabling the MMU, you need to set up the page tables for the kernel.
-Start with identity mapping using 2MB pages.
+Before enabling the MMU, set up the kernel page tables using **2 MiB
+pages** at the PMD level. Each PMD entry maps a 2 MiB block, and 512
+entries cover 1 GiB.
 
-Each entry of PMD (second level) points to a 2MB block. 
-Hence, you only need:
+Build two parallel mappings:
 
-* One PGD
-* One PMD (512 entries, each 2MB, for 1GB mapping)
+* **Identity:**     VA = PA  (temporary, dropped after boot)
+* **Higher-half:**  VA = PA + ``PAGE_OFFSET``  (permanent kernel map)
 
-**Setup**
-
-* Allocate two pages: one for PGD, one for PMD
-* Each PGD entry points to a PMD
-* Each PMD entry maps 2MB of physical memory
+PTE descriptor bits and helpers:
 
 .. code:: c
 
-  #define PTE_V (1L << 0)
-  #define PTE_R (1L << 1)
-  #define PTE_W (1L << 2)
-  #define PTE_X (1L << 3)
-  #define PTE_U (1L << 4)
-  #define PTE_G (1L << 5)
-  #define PTE_A (1L << 6)
-  #define PTE_D (1L << 7)
+  #define PTE_V  (1UL << 0)   /* Valid       */
+  #define PTE_R  (1UL << 1)   /* Readable    */
+  #define PTE_W  (1UL << 2)   /* Writable    */
+  #define PTE_X  (1UL << 3)   /* Executable  */
+  #define PTE_U  (1UL << 4)   /* User        */
+  #define PTE_G  (1UL << 5)   /* Global      */
+  #define PTE_A  (1UL << 6)   /* Accessed    */
+  #define PTE_D  (1UL << 7)   /* Dirty       */
 
-  uint64_t *pgd = alloc_page();
-  uint64_t *pmd = alloc_page();
+  #define PROT_KERNEL  (PTE_V | PTE_R | PTE_W | PTE_X | PTE_G | PTE_A | PTE_D)
 
-  pgd[0] = ((uint64_t)pmd >> 12 << 10) | PTE_V;
+  #define MAKE_PTE(pa, flags) \
+      ((((unsigned long)(pa)) >> 12) << 10 | (flags))
 
-  for (int i = 0; i < 512; i++) {
-    uint64_t pa = i * 0x200000;
-    pmd[i] = (pa >> 12 << 10) | PTE_R | PTE_W | PTE_X | PTE_V | PTE_G;
-  }
+``setup_vm``::
 
-  uint64_t satp_val = MAKE_SATP(pgd);
-  asm volatile("csrw satp, %0" : : "r"(satp_val));
-  asm volatile("sfence.vma");
+  1. for each GiB of physical memory: fill one PMD and install it
+     in the PGD at both the identity slot and the higher-half slot
+  2. write satp register
+  3. flush TLB
+
+``drop_identity_map``::
+
+  1. zero every identity PGD entry
+  2. Flush TLB
 
 .. admonition:: Todo
 
-  Set up identity mapping and enable MMU.
+  Implement ``indentity mapping`` and ``identity map dropping``.
+
+.. warning::
+
+  The identity map is **temporary scaffolding**. After transitioning
+  to the higher half, you must zero out the identity PGD entries.
+  Using Exercise 6.2 start.S for setup VM will receive **0 points** for this part, even if the
+  kernel appears to run.
 
 Map the Kernel Space
 =====================
@@ -330,12 +346,6 @@ Context Switch
 =================
 
 To switch address space, write the process’s PGD to the `satp` register and flush TLB.
-
-.. code:: c
-
-  uint64_t satp_val = MAKE_SATP(next_pgd);
-  asm volatile("csrw satp, %0" : : "r"(satp_val));
-  asm volatile("sfence.vma");
 
 .. admonition:: Todo
 

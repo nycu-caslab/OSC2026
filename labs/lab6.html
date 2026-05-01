@@ -457,20 +457,28 @@ However, we only give the essential explanation in each step.
 For details, please refer to the manual.</p>
 <section id="satp-register">
 <h4>SATP Register<a class="headerlink" href="#satp-register" title="Link to this heading">#</a></h4>
-<p>Paging is enabled by writing to the <cite>satp</cite> register.</p>
-<p>The following configuration is used in this lab:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SATP_SV39    (8L &lt;&lt; 60)</span>
-<span class="cp">#define SATP_MODE_MASK (0xFULL &lt;&lt; 60)</span>
-<span class="cp">#define MAKE_SATP(pagetable) (SATP_SV39 | ((((uint64_t)pagetable) &gt;&gt; 12) &amp; 0xFFFFFFFFFFF))</span>
-
-<span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">pgd</span><span class="p">);</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
+<p>Paging is enabled by writing to the <code class="docutils literal notranslate"><span class="pre">satp</span></code> register. Its top 4 bits
+select the translation mode (8 = Sv39), and the low 44 bits hold the
+physical page number (PPN) of the root page table.</p>
+<p>The following helpers are used in this lab:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SATP_SV39           (8UL &lt;&lt; 60)</span>
+<span class="cp">#define MAKE_SATP(pgd_pa)   (SATP_SV39 | ((unsigned long)(pgd_pa) &gt;&gt; 12))</span>
+</pre></div>
+</div>
+<p>After populating <code class="docutils literal notranslate"><span class="pre">pgd</span></code>, write <code class="docutils literal notranslate"><span class="pre">satp</span></code> and flush any stale TLB
+entries before the next instruction is fetched:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;csrw satp, %0</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="s">&quot;sfence.vma zero, zero</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="o">:</span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">pgd</span><span class="p">))</span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;memory&quot;</span>
+<span class="p">);</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Set up <cite>satp</cite> to enable virtual memory.</p>
+<p>Set up <code class="docutils literal notranslate"><span class="pre">satp</span></code> to enable virtual memory.</p>
 </div>
 </section>
 <section id="memory-attributes">
@@ -485,47 +493,52 @@ For details, please refer to the manual.</p>
 </section>
 <section id="identity-mapping">
 <h4>Identity Mapping<a class="headerlink" href="#identity-mapping" title="Link to this heading">#</a></h4>
-<p>Before enabling the MMU, you need to set up the page tables for the kernel.
-Start with identity mapping using 2MB pages.</p>
-<p>Each entry of PMD (second level) points to a 2MB block.
-Hence, you only need:</p>
+<p>Before enabling the MMU, set up the kernel page tables using <strong>2 MiB
+pages</strong> at the PMD level. Each PMD entry maps a 2 MiB block, and 512
+entries cover 1 GiB.</p>
+<p>Build two parallel mappings:</p>
 <ul class="simple">
-<li><p>One PGD</p></li>
-<li><p>One PMD (512 entries, each 2MB, for 1GB mapping)</p></li>
+<li><p><strong>Identity:</strong>     VA = PA  (temporary, dropped after boot)</p></li>
+<li><p><strong>Higher-half:</strong>  VA = PA + <code class="docutils literal notranslate"><span class="pre">PAGE_OFFSET</span></code>  (permanent kernel map)</p></li>
 </ul>
-<p><strong>Setup</strong></p>
-<ul class="simple">
-<li><p>Allocate two pages: one for PGD, one for PMD</p></li>
-<li><p>Each PGD entry points to a PMD</p></li>
-<li><p>Each PMD entry maps 2MB of physical memory</p></li>
-</ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PTE_V (1L &lt;&lt; 0)</span>
-<span class="cp">#define PTE_R (1L &lt;&lt; 1)</span>
-<span class="cp">#define PTE_W (1L &lt;&lt; 2)</span>
-<span class="cp">#define PTE_X (1L &lt;&lt; 3)</span>
-<span class="cp">#define PTE_U (1L &lt;&lt; 4)</span>
-<span class="cp">#define PTE_G (1L &lt;&lt; 5)</span>
-<span class="cp">#define PTE_A (1L &lt;&lt; 6)</span>
-<span class="cp">#define PTE_D (1L &lt;&lt; 7)</span>
+<p>PTE descriptor bits and helpers:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PTE_V  (1UL &lt;&lt; 0)   </span><span class="cm">/* Valid       */</span>
+<span class="cp">#define PTE_R  (1UL &lt;&lt; 1)   </span><span class="cm">/* Readable    */</span>
+<span class="cp">#define PTE_W  (1UL &lt;&lt; 2)   </span><span class="cm">/* Writable    */</span>
+<span class="cp">#define PTE_X  (1UL &lt;&lt; 3)   </span><span class="cm">/* Executable  */</span>
+<span class="cp">#define PTE_U  (1UL &lt;&lt; 4)   </span><span class="cm">/* User        */</span>
+<span class="cp">#define PTE_G  (1UL &lt;&lt; 5)   </span><span class="cm">/* Global      */</span>
+<span class="cp">#define PTE_A  (1UL &lt;&lt; 6)   </span><span class="cm">/* Accessed    */</span>
+<span class="cp">#define PTE_D  (1UL &lt;&lt; 7)   </span><span class="cm">/* Dirty       */</span>
 
-<span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">pgd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_page</span><span class="p">();</span>
-<span class="kt">uint64_t</span><span class="w"> </span><span class="o">*</span><span class="n">pmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_page</span><span class="p">();</span>
+<span class="cp">#define PROT_KERNEL  (PTE_V | PTE_R | PTE_W | PTE_X | PTE_G | PTE_A | PTE_D)</span>
 
-<span class="n">pgd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">pmd</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_V</span><span class="p">;</span>
-
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">512</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">pa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mh">0x200000</span><span class="p">;</span>
-<span class="w">  </span><span class="n">pmd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">pa</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_R</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_W</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_X</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_V</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_G</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">pgd</span><span class="p">);</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
+<span class="cp">#define MAKE_PTE(pa, flags) \</span>
+<span class="cp">    ((((unsigned long)(pa)) &gt;&gt; 12) &lt;&lt; 10 | (flags))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">setup_vm</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="k">for</span> <span class="n">each</span> <span class="n">GiB</span> <span class="n">of</span> <span class="n">physical</span> <span class="n">memory</span><span class="p">:</span> <span class="n">fill</span> <span class="n">one</span> <span class="n">PMD</span> <span class="ow">and</span> <span class="n">install</span> <span class="n">it</span>
+   <span class="ow">in</span> <span class="n">the</span> <span class="n">PGD</span> <span class="n">at</span> <span class="n">both</span> <span class="n">the</span> <span class="n">identity</span> <span class="n">slot</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">higher</span><span class="o">-</span><span class="n">half</span> <span class="n">slot</span>
+<span class="mf">2.</span> <span class="n">write</span> <span class="n">satp</span> <span class="n">register</span>
+<span class="mf">3.</span> <span class="n">flush</span> <span class="n">TLB</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">drop_identity_map</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">zero</span> <span class="n">every</span> <span class="n">identity</span> <span class="n">PGD</span> <span class="n">entry</span>
+<span class="mf">2.</span> <span class="n">Flush</span> <span class="n">TLB</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Set up identity mapping and enable MMU.</p>
+<p>Implement <code class="docutils literal notranslate"><span class="pre">indentity</span> <span class="pre">mapping</span></code> and <code class="docutils literal notranslate"><span class="pre">identity</span> <span class="pre">map</span> <span class="pre">dropping</span></code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The identity map is <strong>temporary scaffolding</strong>. After transitioning
+to the higher half, you must zero out the identity PGD entries.
+Using Exercise 6.2 start.S for setup VM will receive <strong>0 points</strong> for this part, even if the
+kernel appears to run.</p>
 </div>
 </section>
 <section id="map-the-kernel-space">
@@ -604,11 +617,6 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <section id="context-switch">
 <h4>Context Switch<a class="headerlink" href="#context-switch" title="Link to this heading">#</a></h4>
 <p>To switch address space, write the process’s PGD to the <cite>satp</cite> register and flush TLB.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">satp_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAKE_SATP</span><span class="p">(</span><span class="n">next_pgd</span><span class="p">);</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;csrw satp, %0&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">(</span><span class="n">satp_val</span><span class="p">));</span>
-<span class="k">asm</span><span class="w"> </span><span class="k">volatile</span><span class="p">(</span><span class="s">&quot;sfence.vma&quot;</span><span class="p">);</span>
-</pre></div>
-</div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement address space switch using <cite>satp</cite> and <cite>sfence.vma</cite>.</p>
