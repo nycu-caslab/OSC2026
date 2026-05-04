@@ -345,7 +345,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-posix-signal-30">Advanced Exercise - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Required System Calls</a></li>
 </ul>
 </li>
 </ul>
@@ -682,7 +682,7 @@ Otherwise, use the raw instruction encoding instead:</p>
 </section>
 <section id="user-program">
 <span id="id3"></span><h4>User Program<a class="headerlink" href="#user-program" title="Link to this heading">#</a></h4>
-<p>Load this <a class="reference external" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin">user program</a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
+<p>Load this <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab5/osctest.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a> to your kernel and execute it. The system call you defined above would be used by the user program.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The user program must run in U-mode.</p>
@@ -730,8 +730,8 @@ The kernel then restores the saved context and resumes the original execution.</
 <p>Nested signal handlers do not need to be handled.</p>
 </div>
 </section>
-<section id="id5">
-<h4>Required System Calls<a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
+<section id="id4">
+<h4>Required System Calls<a class="headerlink" href="#id4" title="Link to this heading">#</a></h4>
 <dl class="simple">
 <dt>10: long signal(int signum, void (*handler)())</dt><dd><p>Register a user-space handler for the given signal. The handler must run in U-mode.
 The return value is the previous handler for the signal, you can ignore it in this lab.</p>
@@ -861,7 +861,7 @@ Note that only processes forked after <code class="docutils literal notranslate"
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise">Advanced Exercise</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-posix-signal-30">Advanced Exercise - POSIX Signal - 30%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Required System Calls</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Required System Calls</a></li>
 </ul>
 </li>
 </ul>

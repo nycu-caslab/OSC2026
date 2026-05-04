@@ -402,7 +402,7 @@ In this documentation, PGD, PMD, and PTE are all called page tables.</p>
 <img alt="../_images/Riscv_SV39_Memory_Layout.png" src="../_images/Riscv_SV39_Memory_Layout.png" />
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The entire accessible physical address could be linearly mapped to offset <code class="docutils literal notranslate"><span class="pre">0xffff_ffc0_0000_0000</span></code> for kernel access in this lab.
+<p>The entire accessible physical address space is linearly mapped to offset <code class="docutils literal notranslate"><span class="pre">0xffff_ffc0_0000_0000</span></code> for kernel access in this lab.
 It simplifies the design.</p>
 </div>
 </section>
@@ -482,9 +482,9 @@ entries before the next instruction is fetched:</p>
 <p>In RISC-V, memory attributes like cacheability and permissions are managed through PTE bits and not separate attribute tables.</p>
 <p>Use the following for this lab:</p>
 <ul class="simple">
-<li><p>Kernel mapping: readable, writable, executable, valid</p></li>
-<li><p>MMIO mapping: readable, writable, valid (not executable)</p></li>
-<li><p>User mapping: readable, writable, valid, user</p></li>
+<li><p>Kernel mapping: V-R-W-X-G-A-D</p></li>
+<li><p>MMIO mapping: V-R-W (not X)</p></li>
+<li><p>User mapping: V-U-A-D (set R/W/X as needed)</p></li>
 </ul>
 </section>
 <section id="identity-mapping">
@@ -495,39 +495,39 @@ entries cover 1 GiB.</p>
 <p>Build two parallel mappings:</p>
 <ul class="simple">
 <li><p><strong>Identity:</strong>     VA = PA  (temporary, dropped after boot)</p></li>
-<li><p><strong>Higher-half:</strong>  VA = PA + <code class="docutils literal notranslate"><span class="pre">PAGE_OFFSET</span></code>  (permanent kernel map)</p></li>
+<li><p><strong>Higher-half:</strong>  VA = PA + <code class="docutils literal notranslate"><span class="pre">0xffff_ffc0_0000_0000</span></code>  (permanent kernel mapping)</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">setup_vm</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Build</span> <span class="n">identity</span> <span class="ow">and</span> <span class="n">higher</span><span class="o">-</span><span class="n">half</span> <span class="n">mappings</span>
-<span class="mf">2.</span> <span class="n">Write</span> <span class="n">to</span> <span class="n">the</span> <span class="n">satp</span> <span class="n">register</span><span class="o">.</span>
-<span class="mf">3.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span><span class="o">.</span>
+<span class="mf">2.</span> <span class="n">Write</span> <span class="n">to</span> <span class="n">the</span> <span class="n">satp</span> <span class="n">register</span>
+<span class="mf">3.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">drop_identity_map</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Zero</span> <span class="n">out</span> <span class="n">the</span> <span class="n">low</span><span class="o">-</span><span class="n">half</span> <span class="n">PGD</span> <span class="n">entries</span><span class="o">.</span>
-<span class="mf">2.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span><span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Zero</span> <span class="n">out</span> <span class="n">the</span> <span class="n">low</span><span class="o">-</span><span class="n">half</span> <span class="n">PGD</span> <span class="n">entries</span>
+<span class="mf">2.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement indentity mapping and identity map dropping.</p>
+<p>Implement identity mapping and dropping.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The identity map is <code class="docutils literal notranslate"><span class="pre">temporary</span> <span class="pre">scaffolding</span></code>. After transitioning
+<p>The identity mapping is <strong>temporary scaffolding</strong>. After transitioning
 to the higher half, you must zero out the identity PGD entries.
-Using Exercise 6.2 start.S for setup VM will receive <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">points</span></code> for this part, even if the
+Using Exercise 6.2 <code class="docutils literal notranslate"><span class="pre">start.S</span></code> for setup VM will receive <strong>0 points</strong> for this part, even if the
 kernel appears to run.</p>
 </div>
 </section>
 <section id="map-the-kernel-space">
 <h4>Map the Kernel Space<a class="headerlink" href="#map-the-kernel-space" title="Link to this heading">#</a></h4>
-<p>You should map the kernel to the upper half of the virtual address space, e.g., starting from <cite>0xffffffffc0000000</cite>.</p>
+<p>You should map the kernel to the upper half of the virtual address space, starting from <code class="docutils literal notranslate"><span class="pre">0xffff_ffc0_0000_0000</span></code>.</p>
 <p>Modify your linker script:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>SECTIONS
 {
   . = 0xffffffc000000000;
-  . += 0x80200000;
+  . += 0x00200000;
   _start = .;
 }
 </pre></div>
@@ -544,10 +544,10 @@ kernel appears to run.</p>
 </section>
 <section id="finer-granularity-paging">
 <h4>Finer Granularity Paging<a class="headerlink" href="#finer-granularity-paging" title="Link to this heading">#</a></h4>
-<p>Use 4KB pages for regions where fine-grained protection is needed (e.g., user stack, .bss).
+<p>Use 4KB pages for regions where fine-grained protection is needed.
 RISC-V supports 3-level paging: 4KB pages via PTE entries.</p>
 <p>Map normal memory with readable/writable/executable bits as needed.
-Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avoid speculative load.</p>
+Map MMIO regions as <strong>non-executable</strong> and use <code class="docutils literal notranslate"><span class="pre">volatile</span></code> accesses to avoid speculative load.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Use 3-level mapping with finer granularity to distinguish MMIO and RAM.</p>
@@ -578,7 +578,7 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement a page mapping function <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">map_pages(unsigned</span> <span class="pre">long</span> <span class="pre">*pgd,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">va,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">pa,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">size,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">flags)</span></code>. Use this function to map the user code at virtual address <code class="docutils literal notranslate"><span class="pre">0x0</span></code> and the user stack at <code class="docutils literal notranslate"><span class="pre">0xfffffffff000</span></code> with their respective permission flags.</p>
+<p>Implement a page mapping function <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">map_pages(unsigned</span> <span class="pre">long</span> <span class="pre">*pgd,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">va,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">pa,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">size,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">flags)</span></code>. Use this function to map the user code at virtual address <code class="docutils literal notranslate"><span class="pre">0x0</span></code> and the user stack at <code class="docutils literal notranslate"><span class="pre">0x003f_ffff_f000</span></code> with their respective permission flags.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -595,22 +595,18 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 </section>
 <section id="context-switch">
 <h4>Context Switch<a class="headerlink" href="#context-switch" title="Link to this heading">#</a></h4>
-<p>To switch address space, write the process’s PGD to the <cite>satp</cite> register and flush TLB.</p>
+<p>To switch address spaces, write the process’s PGD to the <code class="docutils literal notranslate"><span class="pre">satp</span></code> register and flush TLB.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement address space switch using <cite>satp</cite> and <cite>sfence.vma</cite>.</p>
+<p>Implement address space switch using <code class="docutils literal notranslate"><span class="pre">satp</span></code> and <code class="docutils literal notranslate"><span class="pre">sfence.vma</span></code>.</p>
 </div>
 </section>
 <section id="video-player">
 <h4>Video Player<a class="headerlink" href="#video-player" title="Link to this heading">#</a></h4>
-<p>In order to test the correctness of your implementation, you can use the provided <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a> that runs only if your kernel behaves as expected.</p>
-<div class="admonition-note admonition">
-<p class="admonition-title">Note</p>
-<p>The video player uses same syscalls from the previous lab.</p>
-</div>
+<p>Replace the <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab6/osctest.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a> used in Lab 5. The video player uses same syscalls as before.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Only if you can run video fluently and without noise will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.</p>
+<p>Only if you can run video fluently as before will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive <strong>no points</strong> in this section.</p>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
@@ -628,14 +624,14 @@ Each region can be mapped to a file or to anonymous pages (i.e., page frames not
 Users can create heap and memory-mapped regions using this system call.</p>
 <p>The kernel can also use it to implement the program loader.
 Memory regions such as <code class="docutils literal notranslate"><span class="pre">.text</span></code> and <code class="docutils literal notranslate"><span class="pre">.data</span></code> can be created by <strong>memory-mapped files</strong>.
-Regions like <strong>.bss</strong> and the <strong>user stack</strong> can be created by <strong>anonymous page mapping</strong>.</p>
+Regions like <code class="docutils literal notranslate"><span class="pre">.bss</span></code> and the <strong>user stack</strong> can be created by <strong>anonymous page mapping</strong>.</p>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
 <p>Because this lab does not use ELF files or actual files on a file system, you only need to implement anonymous page mapping.</p>
 </div>
 <section id="api-specification">
 <h4>API Specification<a class="headerlink" href="#api-specification" title="Link to this heading">#</a></h4>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">mmap</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">addr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">prot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">mmap</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">addr</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">prot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -675,12 +671,7 @@ Regions like <strong>.bss</strong> and the <strong>user stack</strong> can be cr
 </ul>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement the <code class="docutils literal notranslate"><span class="pre">mmap()</span></code> system call. Syscall number: 13.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>Updated User Program!</strong></p>
-<p>The test programs for this lab have been updated. Please ensure you download and load the new <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a>.</p>
+<p>Implement the <code class="docutils literal notranslate"><span class="pre">mmap()</span></code> system call. <strong>Syscall number: 13</strong>.</p>
 </div>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
@@ -714,13 +705,13 @@ When a page fault occurs:</p>
 <p class="admonition-title">Todo</p>
 <p>Implement the page fault handler for demand paging.</p>
 </div>
-<p>We have prepared a testing function within the updated user program to help you verify your logic. Run <code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">demand</span></code> in your shell,
+<p>We have prepared a testing function within the updated user program to help you verify your logic. Run <code class="docutils literal notranslate"><span class="pre">demand</span></code> in your shell,
 this command allocates an array and touches the memory boundaries to trigger page faults. You should see your translation fault logs printed out.</p>
 </section>
 <section id="advanced-exercise-3-copy-on-write-15">
 <h3>Advanced Exercise 3 - Copy on Write - 15%<a class="headerlink" href="#advanced-exercise-3-copy-on-write-15" title="Link to this heading">#</a></h3>
 <p>In your previous fork implementation, the kernel copies all page frames for the child.
-But <code class="docutils literal notranslate"><span class="pre">exec()</span></code> usually follows <code class="docutils literal notranslate"><span class="pre">fork()</span></code>, meaning those frames may never be used. To optimize this, implement <strong>copy-on-write (COW)</strong>.</p>
+But <code class="docutils literal notranslate"><span class="pre">exec()</span></code> usually follows <code class="docutils literal notranslate"><span class="pre">fork()</span></code>, meaning those frames may never be used. To optimize this, implement <strong>copy-on-write (CoW)</strong>.</p>
 <section id="on-fork-a-new-process">
 <h4>On Fork a New Process<a class="headerlink" href="#on-fork-a-new-process" title="Link to this heading">#</a></h4>
 <p>When a process forks, instead of copying all page frames, do the following:</p>
@@ -735,7 +726,7 @@ But <code class="docutils literal notranslate"><span class="pre">exec()</span></
 <p>If a process writes to an already mapped read-only page, a <strong>permission fault</strong> occurs.
 Then:</p>
 <ul class="simple">
-<li><p>If the region is writable (Copy-on-Write):</p>
+<li><p>If the region is writable (copy-on-write):</p>
 <ul>
 <li><p>Allocate a new frame</p></li>
 <li><p>Copy the data</p></li>
@@ -746,7 +737,8 @@ Then:</p>
 </li>
 <li><p>Otherwise:</p>
 <ul>
-<li><p>Follow the actions above.</p></li>
+<li><p>Generate a segmentation fault and terminate the process.</p></li>
+<li><p>Log the error: <code class="docutils literal notranslate"><span class="pre">printf(&quot;[Segmentation</span> <span class="pre">fault]:</span> <span class="pre">Kill</span> <span class="pre">Process\n&quot;);</span></code></p></li>
 </ul>
 </li>
 </ul>
@@ -756,11 +748,7 @@ Then:</p>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement copy-on-write mechanism and <code class="docutils literal notranslate"><span class="pre">clear</span> <span class="pre">logs</span></code> is demanded.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If your user program accesses any memory-mapped I/O regions for inter-process communication, ensure these regions are mapped directly in each process without copy-on-write, to maintain correct behavior.</p>
+<p>Implement copy-on-write mechanism. Your implementation should print the required log messages.</p>
 </div>
 </section>
 </section>
