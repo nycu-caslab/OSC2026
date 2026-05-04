@@ -316,7 +316,7 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-20">Basic Exercise 1 - Virtual Memory in Kernel Space - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
@@ -329,13 +329,13 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player">Video Player</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-video-player-15">Basic Exercise 3 - Video Player - 15%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-15">Advanced Exercise 1 - Mmap - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-20">Advanced Exercise 1 - Mmap - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
 </ul>
@@ -450,8 +450,8 @@ For details, you can refer to:</p>
 </section>
 <section id="basic-exercises">
 <h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
-<section id="basic-exercise-1-virtual-memory-in-kernel-space-10">
-<h3>Basic Exercise 1 - Virtual Memory in Kernel Space - 10%<a class="headerlink" href="#basic-exercise-1-virtual-memory-in-kernel-space-10" title="Link to this heading">#</a></h3>
+<section id="basic-exercise-1-virtual-memory-in-kernel-space-20">
+<h3>Basic Exercise 1 - Virtual Memory in Kernel Space - 20%<a class="headerlink" href="#basic-exercise-1-virtual-memory-in-kernel-space-20" title="Link to this heading">#</a></h3>
 <p>We provide a step-by-step tutorial to guide you to make your original kernel work with virtual memory.
 However, we only give the essential explanation in each step.
 For details, please refer to the manual.</p>
@@ -501,43 +501,26 @@ entries cover 1 GiB.</p>
 <li><p><strong>Identity:</strong>     VA = PA  (temporary, dropped after boot)</p></li>
 <li><p><strong>Higher-half:</strong>  VA = PA + <code class="docutils literal notranslate"><span class="pre">PAGE_OFFSET</span></code>  (permanent kernel map)</p></li>
 </ul>
-<p>PTE descriptor bits and helpers:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PTE_V  (1UL &lt;&lt; 0)   </span><span class="cm">/* Valid       */</span>
-<span class="cp">#define PTE_R  (1UL &lt;&lt; 1)   </span><span class="cm">/* Readable    */</span>
-<span class="cp">#define PTE_W  (1UL &lt;&lt; 2)   </span><span class="cm">/* Writable    */</span>
-<span class="cp">#define PTE_X  (1UL &lt;&lt; 3)   </span><span class="cm">/* Executable  */</span>
-<span class="cp">#define PTE_U  (1UL &lt;&lt; 4)   </span><span class="cm">/* User        */</span>
-<span class="cp">#define PTE_G  (1UL &lt;&lt; 5)   </span><span class="cm">/* Global      */</span>
-<span class="cp">#define PTE_A  (1UL &lt;&lt; 6)   </span><span class="cm">/* Accessed    */</span>
-<span class="cp">#define PTE_D  (1UL &lt;&lt; 7)   </span><span class="cm">/* Dirty       */</span>
-
-<span class="cp">#define PROT_KERNEL  (PTE_V | PTE_R | PTE_W | PTE_X | PTE_G | PTE_A | PTE_D)</span>
-
-<span class="cp">#define MAKE_PTE(pa, flags) \</span>
-<span class="cp">    ((((unsigned long)(pa)) &gt;&gt; 12) &lt;&lt; 10 | (flags))</span>
-</pre></div>
-</div>
 <p><code class="docutils literal notranslate"><span class="pre">setup_vm</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="k">for</span> <span class="n">each</span> <span class="n">GiB</span> <span class="n">of</span> <span class="n">physical</span> <span class="n">memory</span><span class="p">:</span> <span class="n">fill</span> <span class="n">one</span> <span class="n">PMD</span> <span class="ow">and</span> <span class="n">install</span> <span class="n">it</span>
-   <span class="ow">in</span> <span class="n">the</span> <span class="n">PGD</span> <span class="n">at</span> <span class="n">both</span> <span class="n">the</span> <span class="n">identity</span> <span class="n">slot</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">higher</span><span class="o">-</span><span class="n">half</span> <span class="n">slot</span>
-<span class="mf">2.</span> <span class="n">write</span> <span class="n">satp</span> <span class="n">register</span>
-<span class="mf">3.</span> <span class="n">flush</span> <span class="n">TLB</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Build</span> <span class="n">identity</span> <span class="ow">and</span> <span class="n">higher</span><span class="o">-</span><span class="n">half</span> <span class="n">mappings</span>
+<span class="mf">2.</span> <span class="n">Write</span> <span class="n">to</span> <span class="n">the</span> <span class="n">satp</span> <span class="n">register</span><span class="o">.</span>
+<span class="mf">3.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span><span class="o">.</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">drop_identity_map</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">zero</span> <span class="n">every</span> <span class="n">identity</span> <span class="n">PGD</span> <span class="n">entry</span>
-<span class="mf">2.</span> <span class="n">Flush</span> <span class="n">TLB</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Zero</span> <span class="n">out</span> <span class="n">the</span> <span class="n">low</span><span class="o">-</span><span class="n">half</span> <span class="n">PGD</span> <span class="n">entries</span><span class="o">.</span>
+<span class="mf">2.</span> <span class="n">Flush</span> <span class="n">the</span> <span class="n">TLB</span> <span class="k">with</span> <span class="n">sfence</span><span class="o">.</span><span class="n">vma</span><span class="o">.</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement <code class="docutils literal notranslate"><span class="pre">indentity</span> <span class="pre">mapping</span></code> and <code class="docutils literal notranslate"><span class="pre">identity</span> <span class="pre">map</span> <span class="pre">dropping</span></code>.</p>
+<p>Implement indentity mapping and identity map dropping.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The identity map is <strong>temporary scaffolding</strong>. After transitioning
+<p>The identity map is <code class="docutils literal notranslate"><span class="pre">temporary</span> <span class="pre">scaffolding</span></code>. After transitioning
 to the higher half, you must zero out the identity PGD entries.
-Using Exercise 6.2 start.S for setup VM will receive <strong>0 points</strong> for this part, even if the
+Using Exercise 6.2 start.S for setup VM will receive <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">points</span></code> for this part, even if the
 kernel appears to run.</p>
 </div>
 </section>
@@ -599,7 +582,7 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement function like <code class="docutils literal notranslate"><span class="pre">mappages(pagetable</span> <span class="pre">pagetable,</span> <span class="pre">uint64_t</span> <span class="pre">va,</span> <span class="pre">uint64_t</span> <span class="pre">size,</span> <span class="pre">uint64_t</span> <span class="pre">pa,</span> <span class="pre">...)</span></code> and use it to map user code at 0x0 and user stack at 0xfffffffff000.</p>
+<p>Implement a page mapping function <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">map_pages(unsigned</span> <span class="pre">long</span> <span class="pre">*pgd,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">va,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">pa,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">size,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">flags)</span></code>. Use this function to map the user code at virtual address <code class="docutils literal notranslate"><span class="pre">0x0</span></code> and the user stack at <code class="docutils literal notranslate"><span class="pre">0xfffffffff000</span></code> with their respective permission flags.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -611,7 +594,7 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <p>In Lab 5, user programs relied on custom linker scripts to prevent physical address overlaps, and child processes required distinct stack addresses. Virtual memory eliminates these restrictions. By using per-process page tables, you can now provide every user program with an identical virtual memory layout, mapping the same virtual addresses to isolated physical frames.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Reimplement the <cite>fork()</cite> and <cite>exec()</cite> system calls to properly utilize isolated virtual address spaces.</p>
+<p>Reimplement the <code class="docutils literal notranslate"><span class="pre">fork()</span></code> and <code class="docutils literal notranslate"><span class="pre">exec()</span></code> system calls to properly utilize isolated virtual address spaces.</p>
 </div>
 </section>
 <section id="context-switch">
@@ -622,9 +605,8 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 <p>Implement address space switch using <cite>satp</cite> and <cite>sfence.vma</cite>.</p>
 </div>
 </section>
-</section>
-<section id="basic-exercise-3-video-player-15">
-<h3>Basic Exercise 3 - Video Player - 15%<a class="headerlink" href="#basic-exercise-3-video-player-15" title="Link to this heading">#</a></h3>
+<section id="video-player">
+<h4>Video Player<a class="headerlink" href="#video-player" title="Link to this heading">#</a></h4>
 <p>In order to test the correctness of your implementation, you can use the provided <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest_new.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a> that runs only if your kernel behaves as expected.</p>
 <div class="admonition-note admonition">
 <p class="admonition-title">Note</p>
@@ -640,10 +622,11 @@ Map MMIO regions as non-executable and use <cite>volatile</cite> accesses to avo
 </div>
 </section>
 </section>
+</section>
 <section id="advanced-exercises">
 <h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
-<section id="advanced-exercise-1-mmap-15">
-<h3>Advanced Exercise 1 - Mmap - 15%<a class="headerlink" href="#advanced-exercise-1-mmap-15" title="Link to this heading">#</a></h3>
+<section id="advanced-exercise-1-mmap-20">
+<h3>Advanced Exercise 1 - Mmap - 20%<a class="headerlink" href="#advanced-exercise-1-mmap-20" title="Link to this heading">#</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">mmap()</span></code> is a system call used to create memory regions for a user process.
 Each region can be mapped to a file or to anonymous pages (i.e., page frames not related to any file) with specific access protections.
 Users can create heap and memory-mapped regions using this system call.</p>
@@ -833,7 +816,7 @@ Then:</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-10">Basic Exercise 1 - Virtual Memory in Kernel Space - 10%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-virtual-memory-in-kernel-space-20">Basic Exercise 1 - Virtual Memory in Kernel Space - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#satp-register">SATP Register</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-attributes">Memory Attributes</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-mapping">Identity Mapping</a></li>
@@ -846,13 +829,13 @@ Then:</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#map-the-user-space">Map the User Space</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#revisit-syscalls">Revisit Syscalls</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#context-switch">Context Switch</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#video-player">Video Player</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-video-player-15">Basic Exercise 3 - Video Player - 15%</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-15">Advanced Exercise 1 - Mmap - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercise-1-mmap-20">Advanced Exercise 1 - Mmap - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#api-specification">API Specification</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#region-page-mapping">Region Page Mapping</a></li>
 </ul>
