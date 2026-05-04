@@ -485,18 +485,20 @@ When a process forks, instead of copying all page frames, do the following:
 On Page Write by Either Process
 ===============================
 
-If a process writes to a read-only page, a **permission fault** occurs.
+If a process writes to an already mapped read-only page, a **permission fault** occurs. 
 Then:
 
-* If the region is marked read-only:
-
-  * Segmentation fault.
-* If the region is writable:
+* If the region is writable (Copy-on-Write):
 
   * Allocate a new frame
   * Copy the data
   * Update PTE to be writable and point to the new frame
   * Update reference count
+  * Log the permission fault: ``printf("[Permission fault]: %lx\n", addr);``
+
+* Otherwise:
+
+  * Follow the actions above.
 
 .. note::
 
@@ -504,7 +506,7 @@ Then:
 
 .. admonition:: Todo
 
-  Implement copy-on-write mechanism.
+  Implement copy-on-write mechanism and ``clear logs`` is demanded.
 
 .. note::
 

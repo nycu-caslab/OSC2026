@@ -732,20 +732,21 @@ But <code class="docutils literal notranslate"><span class="pre">exec()</span></
 </section>
 <section id="on-page-write-by-either-process">
 <h4>On Page Write by Either Process<a class="headerlink" href="#on-page-write-by-either-process" title="Link to this heading">#</a></h4>
-<p>If a process writes to a read-only page, a <strong>permission fault</strong> occurs.
+<p>If a process writes to an already mapped read-only page, a <strong>permission fault</strong> occurs.
 Then:</p>
 <ul class="simple">
-<li><p>If the region is marked read-only:</p>
-<ul>
-<li><p>Segmentation fault.</p></li>
-</ul>
-</li>
-<li><p>If the region is writable:</p>
+<li><p>If the region is writable (Copy-on-Write):</p>
 <ul>
 <li><p>Allocate a new frame</p></li>
 <li><p>Copy the data</p></li>
 <li><p>Update PTE to be writable and point to the new frame</p></li>
 <li><p>Update reference count</p></li>
+<li><p>Log the permission fault: <code class="docutils literal notranslate"><span class="pre">printf(&quot;[Permission</span> <span class="pre">fault]:</span> <span class="pre">%lx\n&quot;,</span> <span class="pre">addr);</span></code></p></li>
+</ul>
+</li>
+<li><p>Otherwise:</p>
+<ul>
+<li><p>Follow the actions above.</p></li>
 </ul>
 </li>
 </ul>
@@ -755,7 +756,7 @@ Then:</p>
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement copy-on-write mechanism.</p>
+<p>Implement copy-on-write mechanism and <code class="docutils literal notranslate"><span class="pre">clear</span> <span class="pre">logs</span></code> is demanded.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
