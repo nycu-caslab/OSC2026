@@ -374,7 +374,7 @@ Required System Calls
 User Program
 ------------
 
-Load this `user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin>`_ to your kernel and execute it. The system call you defined above would be used by the user program.
+Load this :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab5/osctest.bin>` to your kernel and execute it. The system call you defined above would be used by the user program.
 
 .. important::
 

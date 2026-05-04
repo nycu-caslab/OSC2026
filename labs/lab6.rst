@@ -111,7 +111,7 @@ In the 39-bit virtual address space of Sv39, the upper address space is usually 
 .. image:: /images/Riscv_SV39_Memory_Layout.png
 
 .. note::
-  The entire accessible physical address could be linearly mapped to offset ``0xffff_ffc0_0000_0000`` for kernel access in this lab.
+  The entire accessible physical address space is linearly mapped to offset ``0xffff_ffc0_0000_0000`` for kernel access in this lab.
   It simplifies the design.
 
 Configuration
@@ -201,9 +201,9 @@ In RISC-V, memory attributes like cacheability and permissions are managed throu
 
 Use the following for this lab:
 
-* Kernel mapping: readable, writable, executable, valid
-* MMIO mapping: readable, writable, valid (not executable)
-* User mapping: readable, writable, valid, user
+* Kernel mapping: V-R-W-X-G-A-D
+* MMIO mapping: V-R-W (not X)
+* User mapping: V-U-A-D (set R/W/X as needed)
 
 Identity Mapping
 ==================
@@ -215,7 +215,7 @@ entries cover 1 GiB.
 Build two parallel mappings:
 
 * **Identity:**     VA = PA  (temporary, dropped after boot)
-* **Higher-half:**  VA = PA + ``PAGE_OFFSET``  (permanent kernel map)
+* **Higher-half:**  VA = PA + ``0xffff_ffc0_0000_0000``  (permanent kernel mapping)
 
 .. PTE descriptor bits and helpers:
 
@@ -238,29 +238,29 @@ Build two parallel mappings:
 ``setup_vm``::
 
   1. Build identity and higher-half mappings
-  2. Write to the satp register.
-  3. Flush the TLB with sfence.vma.
+  2. Write to the satp register
+  3. Flush the TLB with sfence.vma
 
 ``drop_identity_map``::
 
-  1. Zero out the low-half PGD entries.
-  2. Flush the TLB with sfence.vma.
+  1. Zero out the low-half PGD entries
+  2. Flush the TLB with sfence.vma
 
 .. admonition:: Todo
 
-  Implement indentity mapping and identity map dropping.
+  Implement identity mapping and dropping.
 
 .. warning::
 
-  The identity map is ``temporary scaffolding``. After transitioning
+  The identity mapping is **temporary scaffolding**. After transitioning
   to the higher half, you must zero out the identity PGD entries.
-  Using Exercise 6.2 start.S for setup VM will receive ``0 points`` for this part, even if the
+  Using Exercise 6.2 ``start.S`` for setup VM will receive **0 points** for this part, even if the
   kernel appears to run.
 
 Map the Kernel Space
 =====================
 
-You should map the kernel to the upper half of the virtual address space, e.g., starting from `0xffffffffc0000000`.
+You should map the kernel to the upper half of the virtual address space, starting from ``0xffff_ffc0_0000_0000``.
 
 Modify your linker script:
 
@@ -269,7 +269,7 @@ Modify your linker script:
   SECTIONS
   {
     . = 0xffffffc000000000;
-    . += 0x80200000;
+    . += 0x00200000;
     _start = .;
   }
 
@@ -286,11 +286,11 @@ You should create page table entries mapping the kernel's physical memory to thi
 Finer Granularity Paging
 =========================
 
-Use 4KB pages for regions where fine-grained protection is needed (e.g., user stack, .bss).
+Use 4KB pages for regions where fine-grained protection is needed.
 RISC-V supports 3-level paging: 4KB pages via PTE entries.
 
 Map normal memory with readable/writable/executable bits as needed.
-Map MMIO regions as non-executable and use `volatile` accesses to avoid speculative load.
+Map MMIO regions as **non-executable** and use ``volatile`` accesses to avoid speculative load.
 
 .. admonition:: Todo
 
@@ -328,7 +328,7 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
 .. admonition:: Todo
 
   Implement a page mapping function ``void map_pages(unsigned long *pgd, unsigned long va, unsigned long pa, unsigned long size, unsigned long flags)``. Use this function to map the user code at virtual address ``0x0`` \
-  and the user stack at ``0xfffffffff000`` with their respective permission flags.
+  and the user stack at ``0x003f_ffff_f000`` with their respective permission flags.
 .. note::
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
 
@@ -344,11 +344,11 @@ In Lab 5, user programs relied on custom linker scripts to prevent physical addr
 Context Switch
 =================
 
-To switch address space, write the process’s PGD to the `satp` register and flush TLB.
+To switch address spaces, write the process's PGD to the ``satp`` register and flush TLB.
 
 .. admonition:: Todo
 
-  Implement address space switch using `satp` and `sfence.vma`.
+  Implement address space switch using ``satp`` and ``sfence.vma``.
 
 .. Basic Exercise 3 - Video Player - 15%
 .. ------------------------------------------
@@ -356,15 +356,11 @@ To switch address space, write the process’s PGD to the `satp` register and fl
 Video Player 
 ==================
 
-In order to test the correctness of your implementation, you can use the provided :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin>` that runs only if your kernel behaves as expected.
-
-.. admonition:: Note
-
-   The video player uses same syscalls from the previous lab.
+Replace the :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab6/osctest.bin>` used in Lab 5. The video player uses same syscalls as before.
 
 .. warning::
 
-  Only if you can run video fluently and without noise will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive no points in this section.
+  Only if you can run video fluently as before will you receive all the points; otherwise, even though you implemented the system call correctly, you will receive **no points** in this section.
 
 .. admonition:: Todo
 
@@ -383,7 +379,7 @@ Users can create heap and memory-mapped regions using this system call.
 
 The kernel can also use it to implement the program loader.
 Memory regions such as ``.text`` and ``.data`` can be created by **memory-mapped files**.
-Regions like **.bss** and the **user stack** can be created by **anonymous page mapping**.
+Regions like ``.bss`` and the **user stack** can be created by **anonymous page mapping**.
 
 .. admonition:: Note
 
@@ -394,7 +390,7 @@ API Specification
 
 .. code-block:: c
 
-    void *mmap(void *addr, size_t length, int prot, int flags);
+    void *mmap(void *addr, unsigned long length, int prot, int flags);
 
 
 * ``addr``: 
@@ -426,13 +422,7 @@ If the user specifies ``MAP_POPULATE``, the kernel should map physical pages imm
 
 .. admonition:: Todo
 
-  Implement the ``mmap()`` system call. Syscall number: 13.
-
-.. warning::
-   **Updated User Program!**
-   
-   The test programs for this lab have been updated. Please ensure you download and load the new :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest.bin>`.
-
+  Implement the ``mmap()`` system call. **Syscall number: 13**.
 
 .. admonition:: Note
 
@@ -463,7 +453,7 @@ When a page fault occurs:
 
   Implement the page fault handler for demand paging.
 
-We have prepared a testing function within the updated user program to help you verify your logic. Run ``$ demand`` in your shell,
+We have prepared a testing function within the updated user program to help you verify your logic. Run ``demand`` in your shell,
 this command allocates an array and touches the memory boundaries to trigger page faults. You should see your translation fault logs printed out.
 
 
@@ -471,7 +461,7 @@ Advanced Exercise 3 - Copy on Write - 15%
 --------------------------------------------
 
 In your previous fork implementation, the kernel copies all page frames for the child.
-But ``exec()`` usually follows ``fork()``, meaning those frames may never be used. To optimize this, implement **copy-on-write (COW)**.
+But ``exec()`` usually follows ``fork()``, meaning those frames may never be used. To optimize this, implement **copy-on-write (CoW)**.
 
 On Fork a New Process
 =====================
@@ -488,7 +478,7 @@ On Page Write by Either Process
 If a process writes to an already mapped read-only page, a **permission fault** occurs. 
 Then:
 
-* If the region is writable (Copy-on-Write):
+* If the region is writable (copy-on-write):
 
   * Allocate a new frame
   * Copy the data
@@ -498,7 +488,8 @@ Then:
 
 * Otherwise:
 
-  * Follow the actions above.
+  * Generate a segmentation fault and terminate the process.
+  * Log the error: ``printf("[Segmentation fault]: Kill Process\n");``
 
 .. note::
 
@@ -506,8 +497,4 @@ Then:
 
 .. admonition:: Todo
 
-  Implement copy-on-write mechanism and ``clear logs`` is demanded.
-
-.. note::
-
-  If your user program accesses any memory-mapped I/O regions for inter-process communication, ensure these regions are mapped directly in each process without copy-on-write, to maintain correct behavior.
+  Implement copy-on-write mechanism. Your implementation should print the required log messages.
