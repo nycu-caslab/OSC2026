@@ -156,7 +156,7 @@ For details, you can refer to:
 Basic Exercises
 ##############
 
-Basic Exercise 1 - Virtual Memory in Kernel Space - 10%
+Basic Exercise 1 - Virtual Memory in Kernel Space - 20%
 -------------------------------------------------------
 
 We provide a step-by-step tutorial to guide you to make your original kernel work with virtual memory.
@@ -217,45 +217,44 @@ Build two parallel mappings:
 * **Identity:**     VA = PA  (temporary, dropped after boot)
 * **Higher-half:**  VA = PA + ``PAGE_OFFSET``  (permanent kernel map)
 
-PTE descriptor bits and helpers:
+.. PTE descriptor bits and helpers:
 
-.. code:: c
+.. .. code:: c
 
-  #define PTE_V  (1UL << 0)   /* Valid       */
-  #define PTE_R  (1UL << 1)   /* Readable    */
-  #define PTE_W  (1UL << 2)   /* Writable    */
-  #define PTE_X  (1UL << 3)   /* Executable  */
-  #define PTE_U  (1UL << 4)   /* User        */
-  #define PTE_G  (1UL << 5)   /* Global      */
-  #define PTE_A  (1UL << 6)   /* Accessed    */
-  #define PTE_D  (1UL << 7)   /* Dirty       */
+..   #define PTE_V  (1UL << 0)   /* Valid       */
+..   #define PTE_R  (1UL << 1)   /* Readable    */
+..   #define PTE_W  (1UL << 2)   /* Writable    */
+..   #define PTE_X  (1UL << 3)   /* Executable  */
+..   #define PTE_U  (1UL << 4)   /* User        */
+..   #define PTE_G  (1UL << 5)   /* Global      */
+..   #define PTE_A  (1UL << 6)   /* Accessed    */
+..   #define PTE_D  (1UL << 7)   /* Dirty       */
 
-  #define PROT_KERNEL  (PTE_V | PTE_R | PTE_W | PTE_X | PTE_G | PTE_A | PTE_D)
+..   #define PROT_KERNEL  (PTE_V | PTE_R | PTE_W | PTE_X | PTE_G | PTE_A | PTE_D)
 
-  #define MAKE_PTE(pa, flags) \
-      ((((unsigned long)(pa)) >> 12) << 10 | (flags))
+..   #define MAKE_PTE(pa, flags) \
+..       ((((unsigned long)(pa)) >> 12) << 10 | (flags))
 
 ``setup_vm``::
 
-  1. for each GiB of physical memory: fill one PMD and install it
-     in the PGD at both the identity slot and the higher-half slot
-  2. write satp register
-  3. flush TLB
+  1. Build identity and higher-half mappings
+  2. Write to the satp register.
+  3. Flush the TLB with sfence.vma.
 
 ``drop_identity_map``::
 
-  1. zero every identity PGD entry
-  2. Flush TLB
+  1. Zero out the low-half PGD entries.
+  2. Flush the TLB with sfence.vma.
 
 .. admonition:: Todo
 
-  Implement ``indentity mapping`` and ``identity map dropping``.
+  Implement indentity mapping and identity map dropping.
 
 .. warning::
 
-  The identity map is **temporary scaffolding**. After transitioning
+  The identity map is ``temporary scaffolding``. After transitioning
   to the higher half, you must zero out the identity PGD entries.
-  Using Exercise 6.2 start.S for setup VM will receive **0 points** for this part, even if the
+  Using Exercise 6.2 start.S for setup VM will receive ``0 points`` for this part, even if the
   kernel appears to run.
 
 Map the Kernel Space
@@ -328,8 +327,8 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
 
 .. admonition:: Todo
 
-  Implement function like ``mappages(pagetable pagetable, uint64_t va, uint64_t size, uint64_t pa, ...)`` and use it to map user code at 0x0 and user stack at 0xfffffffff000.
-
+  Implement a page mapping function ``void map_pages(unsigned long *pgd, unsigned long va, unsigned long pa, unsigned long size, unsigned long flags)``. Use this function to map the user code at virtual address ``0x0`` \
+  and the user stack at ``0xfffffffff000`` with their respective permission flags.
 .. note::
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
 
@@ -340,7 +339,7 @@ In Lab 5, user programs relied on custom linker scripts to prevent physical addr
 
 .. admonition:: Todo
 
-  Reimplement the `fork()` and `exec()` system calls to properly utilize isolated virtual address spaces.
+  Reimplement the ``fork()`` and ``exec()`` system calls to properly utilize isolated virtual address spaces.
 
 Context Switch
 =================
@@ -351,8 +350,11 @@ To switch address space, write the process’s PGD to the `satp` register and fl
 
   Implement address space switch using `satp` and `sfence.vma`.
 
-Basic Exercise 3 - Video Player - 15%
-------------------------------------------
+.. Basic Exercise 3 - Video Player - 15%
+.. ------------------------------------------
+
+Video Player 
+==================
 
 In order to test the correctness of your implementation, you can use the provided :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/osctest_new.bin>` that runs only if your kernel behaves as expected.
 
@@ -372,7 +374,7 @@ In order to test the correctness of your implementation, you can use the provide
 Advanced Exercises
 ##################
 
-Advanced Exercise 1 - Mmap - 15%
+Advanced Exercise 1 - Mmap - 20%
 --------------------------------
 
 ``mmap()`` is a system call used to create memory regions for a user process.
