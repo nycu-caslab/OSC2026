@@ -202,7 +202,7 @@ In RISC-V, memory attributes like cacheability and permissions are managed throu
 Use the following for this lab:
 
 * Kernel mapping: V-R-W-X-G-A-D
-* MMIO mapping: V-R-W (not X)
+* MMIO mapping: V-R-W-G-A
 * User mapping: V-U-A-D (set R/W/X as needed)
 
 Identity Mapping
@@ -327,7 +327,7 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
 
 .. admonition:: Todo
 
-  Implement a page mapping function ``void map_pages(unsigned long *pgd, unsigned long va, unsigned long pa, unsigned long size, unsigned long flags)``. Use this function to map the user code at virtual address ``0x0`` \
+  Implement a page mapping function ``void map_pages(unsigned long va, unsigned long size, unsigned long pa, unsigned long prot)``. Use this function to map the user code at virtual address ``0x0`` \
   and the user stack at ``0x003f_ffff_f000`` with their respective permission flags.
 .. note::
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
