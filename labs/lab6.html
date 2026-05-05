@@ -483,7 +483,7 @@ entries before the next instruction is fetched:</p>
 <p>Use the following for this lab:</p>
 <ul class="simple">
 <li><p>Kernel mapping: V-R-W-X-G-A-D</p></li>
-<li><p>MMIO mapping: V-R-W (not X)</p></li>
+<li><p>MMIO mapping: V-R-W-G-A</p></li>
 <li><p>User mapping: V-U-A-D (set R/W/X as needed)</p></li>
 </ul>
 </section>
@@ -578,7 +578,7 @@ Map MMIO regions as <strong>non-executable</strong> and use <code class="docutil
 </div>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Implement a page mapping function <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">map_pages(unsigned</span> <span class="pre">long</span> <span class="pre">*pgd,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">va,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">pa,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">size,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">flags)</span></code>. Use this function to map the user code at virtual address <code class="docutils literal notranslate"><span class="pre">0x0</span></code> and the user stack at <code class="docutils literal notranslate"><span class="pre">0x003f_ffff_f000</span></code> with their respective permission flags.</p>
+<p>Implement a page mapping function <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">map_pages(unsigned</span> <span class="pre">long</span> <span class="pre">va,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">size,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">pa,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">prot)</span></code>. Use this function to map the user code at virtual address <code class="docutils literal notranslate"><span class="pre">0x0</span></code> and the user stack at <code class="docutils literal notranslate"><span class="pre">0x003f_ffff_f000</span></code> with their respective permission flags.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
