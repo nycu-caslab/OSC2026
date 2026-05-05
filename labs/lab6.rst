@@ -202,7 +202,7 @@ In RISC-V, memory attributes like cacheability and permissions are managed throu
 Use the following for this lab:
 
 * Kernel mapping: V-R-W-X-G-A-D
-* MMIO mapping: V-R-W-G-A
+* MMIO mapping: V-R-W-G-A-D
 * User mapping: V-U-A-D (set R/W/X as needed)
 
 Identity Mapping
