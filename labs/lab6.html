@@ -652,8 +652,8 @@ Regions like <code class="docutils literal notranslate"><span class="pre">.bss</
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>: Memory mapping flags:</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">MAP_ANONYMOUS</span></code>: Create anonymous pages (used for stack/heap).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">MAP_POPULATE</span></code>: Allocate physical pages immediately (optional if you are implementing demand paging).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAP_ANONYMOUS</span></code>: 0x20, Create anonymous pages (used for stack/heap).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAP_POPULATE</span></code>: 0x8000, Allocate physical pages immediately (optional if you are implementing demand paging).</p></li>
 </ul>
 </li>
 </ul>
