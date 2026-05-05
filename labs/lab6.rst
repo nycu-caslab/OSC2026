@@ -406,8 +406,8 @@ API Specification
   * ``PROT_EXEC``: 4 (executable)
 * ``flags``: Memory mapping flags:
 
-  * ``MAP_ANONYMOUS``: Create anonymous pages (used for stack/heap).
-  * ``MAP_POPULATE``: Allocate physical pages immediately (optional if you are implementing demand paging).
+  * ``MAP_ANONYMOUS``: 0x20, Create anonymous pages (used for stack/heap).
+  * ``MAP_POPULATE``: 0x8000, Allocate physical pages immediately (optional if you are implementing demand paging).
 
 
 Region Page Mapping
