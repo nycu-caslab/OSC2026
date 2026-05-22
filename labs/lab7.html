@@ -1,0 +1,1194 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lab 7: Virtual File System &#8212; IOC5226: Operating System Capstone</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'labs/lab7';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">IOC5226: Operating System Capstone</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Class:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../class/staff.html">Staff</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Labs:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1: Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2: Booting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3: Memory Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4: Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5: Thread and User Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6: Virtual Memory</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../references/external_resources.html">External Resourses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/old_course.html">Old Course Websites</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/labs/lab7.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lab 7: Virtual File System</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tree-structure">Tree Structure</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system">File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#vnode">Vnode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#component-name">Component Name</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-handle">File Handle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-35">Basic Exercise 1 - Root File System - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system-registration">File System Registration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-file-system">Mounting File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#root-directory-s-vnode">Root directory’s vnode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#open-method">Open Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#close-method">Close Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#read-method">Read Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#write-method">Write Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#lookup-method">Lookup Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-method">Create Method</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-multi-level-vfs-15">Basic Exercise 2 - Multi-level VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mkdir-method">Mkdir Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-another-file-system">Mounting Another File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pathname-lookup">Pathname Lookup</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-15">Basic Exercise 3 - Multitask VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#current-working-directory">Current Working Directory</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-descriptor-table">File Descriptor Table</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls-for-vfs">System Calls for VFS</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#open">open</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#close">close</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#read">read</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#write">write</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#mkdir">mkdir</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#mount">mount</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#chdir">chdir</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-4-ramfs-15">Basic Exercise 4 - /ramfs - 15%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#special-file">Special File</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#device-file-registration">Device File Registration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mknod">Mknod</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative">Alternative</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-1-dev-uart-15">Advanced Exercises 1 - /dev/uart - 15%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-15">Advanced Exercises 2 - /dev/fb - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-specification">System Call Specification</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#lseek64">lseek64</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#ioctl">ioctl</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#test">Test</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="lab-7-virtual-file-system">
+<h1>Lab 7: Virtual File System<a class="headerlink" href="#lab-7-virtual-file-system" title="Link to this heading">#</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This document is currently under construction and may be incomplete or subject to significant changes.
+Please check back later for updates, and consult the instructor if you are unsure about any missing parts.</p>
+</div>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>A file system manages data in storage mediums.
+Each file system has a specific way to store and retrieve the data.
+Hence, a virtual file system (VFS) is common in general-purpose OS, providing a unified interface for all file systems.</p>
+<p>In this lab, you’ll implement a VFS interface for your kernel, and a memory-based file system (tmpfs) that mounts as the root file system, you’ll also implement special file for uart and framebuffer.</p>
+</section>
+<section id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Understand how VFS interface works.</p></li>
+<li><p>Understand how to set up a root file system.</p></li>
+<li><p>Understand how to operate on files.</p></li>
+<li><p>Understand how to mount a file system and look up a file across file systems.</p></li>
+<li><p>Understand how special file works.</p></li>
+</ul>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
+<section id="tree-structure">
+<h3>Tree Structure<a class="headerlink" href="#tree-structure" title="Link to this heading">#</a></h3>
+<p>A file system is usually hierarchical, and a tree is a suitable
+data structure to represent it.</p>
+<p>Each node represents an entity such as a file or directory in
+the file system, and each edge has its name, which is stored in the directory.</p>
+<p>Concatenating all the edges’ name on the path generates a
+pathname, which VFS can parse and traverse from one node to
+another.</p>
+<p>Example graph:</p>
+<img alt="../_images/lab7_vfs_ex.png" src="../_images/lab7_vfs_ex.png" />
+</section>
+<section id="terminology">
+<h3>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">#</a></h3>
+<section id="file-system">
+<h4>File System<a class="headerlink" href="#file-system" title="Link to this heading">#</a></h4>
+<p>In this documentation, a file system refers to a concrete
+file system type such as tmpfs, FAT32, etc.
+And the virtual file system will be shortened as VFS.</p>
+</section>
+<section id="vnode">
+<h4>Vnode<a class="headerlink" href="#vnode" title="Link to this heading">#</a></h4>
+<p>We call a node in a VFS tree a vnode, which is an abstract
+class that provides an unified interface, the underlying file
+systems should implement the methods and create the instance.</p>
+</section>
+<section id="component-name">
+<h4>Component Name<a class="headerlink" href="#component-name" title="Link to this heading">#</a></h4>
+<p>A pathname delimits each component name by ‘/’.</p>
+</section>
+<section id="file-handle">
+<h4>File Handle<a class="headerlink" href="#file-handle" title="Link to this heading">#</a></h4>
+<p>Files can be opened simultaneously. You should maintain a data
+structure that keeps information such as position of next R/W
+operation for each opened file. We call this data structure file
+handle.</p>
+</section>
+</section>
+</section>
+<section id="basic-exercises">
+<h2>Basic Exercises<a class="headerlink" href="#basic-exercises" title="Link to this heading">#</a></h2>
+<p>For basic exercises, you’ll need to create an VFS interface first.</p>
+<p>We’ve provide an example code for you, and it’s up to you
+to re-design or modify the code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="arabic simple">
+<li><p>There’s no constraint on the design of VFS API, as long as there are no hard coded method for any file system (VFS is an generalize interface).
+But if you only finish Basic 1 &amp; 2, please follow the API definition. Once you step into Basic 3, only syscall interface should be met the spec.</p></li>
+<li><p>The following steps are just recommendations, you don’t have to follow them.</p></li>
+<li><p>For tmpfs, you can assume that component name won’t excced 15 characters, and at most 16 entries for a directory. and at most 4096 bytes for a file.</p></li>
+<li><p>For VFS the max pathname length is 255.</p></li>
+<li><p>No need to support remove, rmdir, unlink …</p></li>
+<li><p>For file descriptor, max open fd is 16, so fd &lt; 16 if your fd number is reusable.</p></li>
+</ol>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define O_CREAT 00000100</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">mount</span><span class="o">*</span><span class="w"> </span><span class="n">mount</span><span class="p">;</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode_operations</span><span class="o">*</span><span class="w"> </span><span class="n">v_ops</span><span class="p">;</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">file_operations</span><span class="o">*</span><span class="w"> </span><span class="n">f_ops</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">internal</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// file handle</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">vnode</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">f_pos</span><span class="p">;</span><span class="w">  </span><span class="c1">// RW position of this file handle</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">file_operations</span><span class="o">*</span><span class="w"> </span><span class="n">f_ops</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">mount</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">root</span><span class="p">;</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">filesystem</span><span class="o">*</span><span class="w"> </span><span class="n">fs</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">filesystem</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setup_mount</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">filesystem</span><span class="o">*</span><span class="w"> </span><span class="n">fs</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">mount</span><span class="o">*</span><span class="w"> </span><span class="n">mount</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">file_operations</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">open</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">file_node</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">close</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">long</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">lseek64</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">whence</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">vnode_operations</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">lookup</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">dir_node</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">component_name</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">create</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">dir_node</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">component_name</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">mkdir</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">*</span><span class="w"> </span><span class="n">dir_node</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">,</span>
+<span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">component_name</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">mount</span><span class="o">*</span><span class="w"> </span><span class="n">rootfs</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">register_filesystem</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">filesystem</span><span class="o">*</span><span class="w"> </span><span class="n">fs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// register the file system to the kernel.</span>
+<span class="w">  </span><span class="c1">// you can also initialize memory pool of the file system here.</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_open</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Lookup pathname</span>
+<span class="w">  </span><span class="c1">// 2. Create a new file handle for this vnode if found.</span>
+<span class="w">  </span><span class="c1">// 3. Create a new file if O_CREAT is specified in flags and vnode not found</span>
+<span class="w">  </span><span class="c1">// lookup error code shows if file exist or not or other error occurs</span>
+<span class="w">  </span><span class="c1">// 4. Return error code if fails</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_close</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Release the file handle</span>
+<span class="w">  </span><span class="c1">// 2. Return error code if fails</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_write</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Write len byte from buf to the opened file.</span>
+<span class="w">  </span><span class="c1">// 2. Return written size or error code if an error occurs.</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_read</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Read min(len, readable size) byte to buf from the opened file.</span>
+<span class="w">  </span><span class="c1">// 2. Block if nothing to read for FIFO type.</span>
+<span class="w">  </span><span class="c1">// 3. Return read size or error code if an error occurs.</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_mkdir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_mount</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">filesystem</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_lookup</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">);</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>The structure of this example code may be visualized as:</p>
+<img alt="../_images/lab7_impl_vis.png" src="../_images/lab7_impl_vis.png" />
+<section id="basic-exercise-1-root-file-system-35">
+<h3>Basic Exercise 1 - Root File System - 35%<a class="headerlink" href="#basic-exercise-1-root-file-system-35" title="Link to this heading">#</a></h3>
+<p>In this part, you’ll need to implement tmpfs which follows the VFS
+interface, setup tmpfs as the root file system.</p>
+<section id="file-system-registration">
+<h4>File System Registration<a class="headerlink" href="#file-system-registration" title="Link to this heading">#</a></h4>
+<p>Since each file system has its own initialization method,
+the VFS should provide interface for each file system to
+register. Then, users can mount the file system by specifying
+the name.</p>
+</section>
+<section id="mounting-file-system">
+<h4>Mounting File System<a class="headerlink" href="#mounting-file-system" title="Link to this heading">#</a></h4>
+<p>The provided code uses <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">mount</span></code> to represent a mounted
+file system, VFS should provide an api for mounting a file
+system to a mount point.</p>
+<p>The root file system is at the top of the VFS tree, you should
+mount tmpfs at rootfs, at this point, lookup might not be
+available, you can call <code class="docutils literal notranslate"><span class="pre">setup_mount</span></code> directly to mount it.</p>
+</section>
+<section id="root-directory-s-vnode">
+<h4>Root directory’s vnode<a class="headerlink" href="#root-directory-s-vnode" title="Link to this heading">#</a></h4>
+<p>Each mounted file system has its own root vnode. You should create
+the root vnode during the mount setup.</p>
+<p>The internal representation of each filesystem’s vnode may differ,
+you can use <code class="docutils literal notranslate"><span class="pre">vnode.internal</span></code> to point to it.</p>
+</section>
+<section id="open-method">
+<h4>Open Method<a class="headerlink" href="#open-method" title="Link to this heading">#</a></h4>
+<p>It opens the vnode regardless of the underlying file system and
+file type, and creates a file handle for the file. If <code class="docutils literal notranslate"><span class="pre">O_CREAT</span></code> is
+set in flags, you should create the file if it doesn’t exist.</p>
+</section>
+<section id="close-method">
+<h4>Close Method<a class="headerlink" href="#close-method" title="Link to this heading">#</a></h4>
+<p>Close and release the file handle.</p>
+</section>
+<section id="read-method">
+<h4>Read Method<a class="headerlink" href="#read-method" title="Link to this heading">#</a></h4>
+<p>Given the file handle, VFS calls the corresponding read method
+to read the file starting from <code class="docutils literal notranslate"><span class="pre">f_pos</span></code>, then updates <code class="docutils literal notranslate"><span class="pre">f_pos</span></code> after
+read (or not if it’s a special file). The updated <code class="docutils literal notranslate"><span class="pre">f_pos</span></code> should point
+to the end of the read data (similar to Linux’s behavior).</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">f_pos</span></code> should not exceed the file size. Once a file
+read reaches the end of file (EOF), it should stop.</p>
+<p>Returns size read or error code on error.</p>
+</section>
+<section id="write-method">
+<h4>Write Method<a class="headerlink" href="#write-method" title="Link to this heading">#</a></h4>
+<p>Given the file handle, VFS calls the corresponding write
+method to write the file starting from <code class="docutils literal notranslate"><span class="pre">f_pos</span></code>, then updates
+<code class="docutils literal notranslate"><span class="pre">f_pos</span></code> and size after write (or not if it’s a special file).
+The updated <code class="docutils literal notranslate"><span class="pre">f_pos</span></code> should point to the end of the written data (similar to Linux’s behavior).</p>
+<p>Returns size written or error code on error.</p>
+</section>
+<section id="lookup-method">
+<h4>Lookup Method<a class="headerlink" href="#lookup-method" title="Link to this heading">#</a></h4>
+<p>File system iterates through directory entries and compares the
+component name to find the target file. Then, it passes the file’s
+vnode to the VFS if it finds the file.</p>
+</section>
+<section id="create-method">
+<h4>Create Method<a class="headerlink" href="#create-method" title="Link to this heading">#</a></h4>
+<p>create an regular file on underlying file system, should fail
+if file exist. Then passes the file’s vnode back to VFS.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define O_CREAT 00000100</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_open</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_close</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_write</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_read</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">file</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: Once you finished Basic 3, you don’t have to meet the interfaces of this part.</p>
+</div>
+</section>
+</section>
+<section id="basic-exercise-2-multi-level-vfs-15">
+<h3>Basic Exercise 2 - Multi-level VFS - 15%<a class="headerlink" href="#basic-exercise-2-multi-level-vfs-15" title="Link to this heading">#</a></h3>
+<p>In this part, your VFS should be able to</p>
+<ul class="simple">
+<li><p>create subdirectories</p></li>
+<li><p>mount file systems on directories</p></li>
+<li><p>look up a pathname</p></li>
+</ul>
+<section id="mkdir-method">
+<h4>Mkdir Method<a class="headerlink" href="#mkdir-method" title="Link to this heading">#</a></h4>
+<p>Create a directory on underlying file system, same as creating
+a regular file.</p>
+</section>
+<section id="mounting-another-file-system">
+<h4>Mounting Another File System<a class="headerlink" href="#mounting-another-file-system" title="Link to this heading">#</a></h4>
+<p>Same as mounting the root file system, except you should be
+able to mount a filesystem on any vnode.</p>
+</section>
+<section id="pathname-lookup">
+<h4>Pathname Lookup<a class="headerlink" href="#pathname-lookup" title="Link to this heading">#</a></h4>
+<p>VFS api takes pathname as argument (absolute path <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span></code> for now),
+you need to lookup the pathname by traversing vnodes, starting
+from root file system’s root vnode.</p>
+<p>Also, the lookup should be able to cross mounting point.
+For mounted vnode, VFS should go to the mounted file system’s
+root vnode.</p>
+<p>Here is the pseudo code, this code doesn’t show crossing of mount point or relative pathname.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">vfs_lookup</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">vnode</span><span class="o">**</span><span class="w"> </span><span class="n">target</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">vnode_itr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rootfs</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">component_name</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">pathname</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">next_vnode</span><span class="p">;</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vnode_itr</span><span class="o">-&gt;</span><span class="n">v_ops</span><span class="o">-&gt;</span><span class="n">lookup</span><span class="p">(</span><span class="n">vnode_itr</span><span class="p">,</span><span class="w"> </span><span class="n">next_vnode</span><span class="p">,</span><span class="w"> </span><span class="n">component_name</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">vnode_itr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">next_vnode</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="o">*</span><span class="n">target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vnode_itr</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">vfs_mkdir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">pathname</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">vfs_mount</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">filesystem</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The name of tmpfs is <code class="docutils literal notranslate"><span class="pre">&quot;tmpfs&quot;</span></code></p>
+<p><strong>Note</strong>: Once you finished Basic 3, you don’t have to meet the interfaces of this part.</p>
+</div>
+</section>
+</section>
+<section id="basic-exercise-3-multitask-vfs-15">
+<h3>Basic Exercise 3 - Multitask VFS - 15%<a class="headerlink" href="#basic-exercise-3-multitask-vfs-15" title="Link to this heading">#</a></h3>
+<p>In this part, you need to implement</p>
+<ul class="simple">
+<li><p>current working directory</p></li>
+<li><p>file descriptor table</p></li>
+<li><p>system calls for VFS</p></li>
+</ul>
+<section id="current-working-directory">
+<h4>Current Working Directory<a class="headerlink" href="#current-working-directory" title="Link to this heading">#</a></h4>
+<p>Each task may have different current working directory and
+root directory, you need to keep that information in your
+task struct, and VFS should traverse vnode base on those
+information.</p>
+<p>You’ll need to support relative path lookup (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;..&quot;</span></code>) and directory changing (<code class="docutils literal notranslate"><span class="pre">chdir</span></code>).
+Path traversal should follow standard UNIX-like pathname resolution guidelines:</p>
+<ul class="simple">
+<li><p>The special component <code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code> refers to the current directory, and <code class="docutils literal notranslate"><span class="pre">&quot;..&quot;</span></code> refers to the parent directory.</p></li>
+<li><p>Path resolution must remain robust at boundary conditions.
+For instance, the parent of the root directory <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span></code> is still the root directory <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span></code> itself,
+and resolving <code class="docutils literal notranslate"><span class="pre">&quot;..&quot;</span></code> at the root of a mounted filesystem should correctly cross the mount boundary back into the parent filesystem’s directory hierarchy.</p></li>
+<li><p>Pathname strings should be normalized correctly during parsing.
+Consecutive directory separators (e.g., multiple slashes) should be collapsed and treated as a single slash.</p></li>
+</ul>
+</section>
+<section id="file-descriptor-table">
+<h4>File Descriptor Table<a class="headerlink" href="#file-descriptor-table" title="Link to this heading">#</a></h4>
+<p>Each process should have a file descriptor table to bookkeep
+the opened files. When the user opens a file, the kernel
+creates a file handle in the table and returns the index
+(file descriptor) to the user. After that, the user can pass
+the file descriptor to the kernel to get the file handle. Then,
+the kernel calls the corresponding VFS API using the file handle
+and return the result to the user.</p>
+</section>
+<section id="system-calls-for-vfs">
+<h4>System Calls for VFS<a class="headerlink" href="#system-calls-for-vfs" title="Link to this heading">#</a></h4>
+<p>You’ll need to provide the following system calls. Each system call must map to the designated syscall number and behave according to the details below:</p>
+<section id="open">
+<h5>open<a class="headerlink" href="#open" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define O_CREAT 00000100</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 14</p></li>
+<li><p><strong>Description</strong>: Opens the file specified by <code class="docutils literal notranslate"><span class="pre">pathname</span></code>.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pathname</span></code>: The path to the file. It can be an absolute path (starting with <code class="docutils literal notranslate"><span class="pre">/</span></code>) or a relative path (relative to the current working directory).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>: Options for opening the file. You must support <code class="docutils literal notranslate"><span class="pre">O_CREAT</span></code> (octal <code class="docutils literal notranslate"><span class="pre">00000100</span></code>). If <code class="docutils literal notranslate"><span class="pre">O_CREAT</span></code> is specified and the file does not exist, it should be created as a regular file.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns the newly allocated file descriptor (a non-negative integer representing the index in the process’s file descriptor table) on success, or a negative error code on failure.</p></li>
+</ul>
+</section>
+<section id="close">
+<h5>close<a class="headerlink" href="#close" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 15</p></li>
+<li><p><strong>Description</strong>: Closes the file descriptor <code class="docutils literal notranslate"><span class="pre">fd</span></code>, releasing the associated file handle and freeing the descriptor slot.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fd</span></code>: The file descriptor to close.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> on success, or a negative error code on failure (e.g., if the file descriptor is invalid or not open).</p></li>
+</ul>
+</section>
+<section id="read">
+<h5>read<a class="headerlink" href="#read" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">long</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 16</p></li>
+<li><p><strong>Description</strong>: Reads up to <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes from the file referenced by <code class="docutils literal notranslate"><span class="pre">fd</span></code> into the buffer <code class="docutils literal notranslate"><span class="pre">buf</span></code>.
+Updates the file handle’s read/write position (<code class="docutils literal notranslate"><span class="pre">f_pos</span></code>) by the number of bytes read.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fd</span></code>: The file descriptor of the open file to read from.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The buffer to store the read data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">count</span></code>: The maximum number of bytes to read.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns the number of bytes successfully read (0 indicates EOF), or a negative error code on failure.</p></li>
+</ul>
+</section>
+<section id="write">
+<h5>write<a class="headerlink" href="#write" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">long</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 17</p></li>
+<li><p><strong>Description</strong>: Writes up to <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes from the buffer <code class="docutils literal notranslate"><span class="pre">buf</span></code> to the file referenced by <code class="docutils literal notranslate"><span class="pre">fd</span></code>.
+Updates the file handle’s read/write position (<code class="docutils literal notranslate"><span class="pre">f_pos</span></code>) by the number of bytes written.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fd</span></code>: The file descriptor of the open file to write to.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The buffer containing the data to be written.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">count</span></code>: The maximum number of bytes to write.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns the number of bytes successfully written on success, or a negative error code on failure (e.g., if fd is invalid, it is a read-only file system).</p></li>
+</ul>
+</section>
+<section id="mkdir">
+<h5>mkdir<a class="headerlink" href="#mkdir" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">mkdir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pathname</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">mode</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 18</p></li>
+<li><p><strong>Description</strong>: Creates a new directory specified by <code class="docutils literal notranslate"><span class="pre">pathname</span></code>.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pathname</span></code>: The path to the new directory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: The permission mode for the directory. You can ignore <code class="docutils literal notranslate"><span class="pre">mode</span></code> since there is no access control in this lab.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> on success, or a negative error code on failure.</p></li>
+</ul>
+</section>
+<section id="mount">
+<h5>mount<a class="headerlink" href="#mount" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">mount</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">filesystem</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">flags</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 19</p></li>
+<li><p><strong>Description</strong>: Mounts a filesystem specified by its name on the directory specified by <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">src</span></code>: The source device/path. This can be ignored for this lab.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target</span></code>: The directory path where the filesystem will be mounted.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filesystem</span></code>: The name of the filesystem type to mount (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;tmpfs&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">flags</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code>: Additional flags and filesystem-specific mount options. These can be ignored for this lab.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> on success, or a negative error code on failure.</p></li>
+</ul>
+</section>
+<section id="chdir">
+<h5>chdir<a class="headerlink" href="#chdir" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">chdir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">path</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 20</p></li>
+<li><p><strong>Description</strong>: Changes the current working directory of the process to the directory specified by <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The target directory path to change to.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> on success, or a negative error code on failure.</p></li>
+</ul>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Support relative path lookup, <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;..&quot;</span></code>.</p></li>
+<li><p>Support current working directory, change directory.</p></li>
+<li><p>Implement file descriptor table.</p></li>
+<li><p>Finish the above syscalls.</p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Please meet the interface specified, including the return value, since we may check the return value.
+Also remember to return <strong>negative</strong> error code on failure (the value is up to you).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">f_pos</span></code> is consistent for the same file descriptor.</p></li>
+<li><p>Ensure the robustness of your implementation.</p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="basic-exercise-4-ramfs-15">
+<h3>Basic Exercise 4 - /ramfs - 15%<a class="headerlink" href="#basic-exercise-4-ramfs-15" title="Link to this heading">#</a></h3>
+<p>In this part, you need to make ramfs as an <strong>read only</strong>
+file system which follows the VFS interface, and mount
+on <code class="docutils literal notranslate"><span class="pre">&quot;/ramfs&quot;</span></code>.</p>
+<p>You might need to create supporting data structure for
+ramfs at registration (or mount), then create directory
+<code class="docutils literal notranslate"><span class="pre">&quot;/ramfs&quot;</span></code> on root file system, then mount on it.</p>
+<p>All method like write, create, mkdir, should fail on this
+file system.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Create ramfs, and mount it on <code class="docutils literal notranslate"><span class="pre">/ramfs</span></code>.</p></li>
+<li><p>Ramfs should be <strong>read only</strong>.</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="advanced-exercises">
+<h2>Advanced Exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading">#</a></h2>
+<section id="special-file">
+<h3>Special File<a class="headerlink" href="#special-file" title="Link to this heading">#</a></h3>
+<p>A file in VFS can also represent a device.
+In order to create a special file, the normal way is to use <code class="docutils literal notranslate"><span class="pre">mknod</span></code>,
+which creates a special file with specified device driver,
+and <code class="docutils literal notranslate"><span class="pre">file_operations</span></code> points to driver’s method.</p>
+<section id="device-file-registration">
+<h4>Device File Registration<a class="headerlink" href="#device-file-registration" title="Link to this heading">#</a></h4>
+<p>A device can register itself to the VFS in its setup. The VFS
+assigns the device a unique device id. Then the device can be
+recognized by the VFS.</p>
+</section>
+<section id="mknod">
+<h4>Mknod<a class="headerlink" href="#mknod" title="Link to this heading">#</a></h4>
+<p>A user can use the device id to create a device file in a file system.</p>
+<p>After the device file created, the VFS uses the device id to
+find the device driver. Next, the driver initializes the file
+with its method. Then, the user can read/write the file to access
+the device.</p>
+<ol class="arabic simple">
+<li><p>mkdir <code class="docutils literal notranslate"><span class="pre">&quot;/dev&quot;</span></code></p></li>
+<li><p>mknod <code class="docutils literal notranslate"><span class="pre">&quot;/dev/uart&quot;</span></code></p></li>
+<li><p>mknod <code class="docutils literal notranslate"><span class="pre">&quot;/dev/fb&quot;</span></code></p></li>
+</ol>
+</section>
+<section id="alternative">
+<h4>Alternative<a class="headerlink" href="#alternative" title="Link to this heading">#</a></h4>
+<p>There’s also other way to hack this (which is weird, but it works).
+As long as it’s not hard coded on VFS, and it works fine with VFS api.</p>
+<ul class="simple">
+<li><p>Creat devfs, which have hard coded device file, and mount on <code class="docutils literal notranslate"><span class="pre">&quot;/dev&quot;</span></code></p>
+<ol class="arabic simple">
+<li><p>mkdir <code class="docutils literal notranslate"><span class="pre">&quot;/dev&quot;</span></code></p></li>
+<li><p>mount <code class="docutils literal notranslate"><span class="pre">&quot;devfs&quot;</span></code> on <code class="docutils literal notranslate"><span class="pre">&quot;/dev&quot;</span></code></p></li>
+</ol>
+</li>
+<li><p>Creat uartfs and mount on <code class="docutils literal notranslate"><span class="pre">&quot;/dev/uart&quot;</span></code></p>
+<ol class="arabic simple">
+<li><p>mkdir <code class="docutils literal notranslate"><span class="pre">&quot;/dev&quot;</span></code></p></li>
+<li><p>mkdir <code class="docutils literal notranslate"><span class="pre">&quot;/dev/uart&quot;</span></code></p></li>
+<li><p>mount <code class="docutils literal notranslate"><span class="pre">&quot;uartfs&quot;</span></code> on <code class="docutils literal notranslate"><span class="pre">&quot;/dev/uart&quot;</span></code></p></li>
+<li><p>mkdir <code class="docutils literal notranslate"><span class="pre">&quot;/dev/fb&quot;</span></code></p></li>
+<li><p>mount <code class="docutils literal notranslate"><span class="pre">&quot;framebufferfs&quot;</span></code> on <code class="docutils literal notranslate"><span class="pre">&quot;/dev/fb&quot;</span></code></p></li>
+</ol>
+</li>
+</ul>
+</section>
+</section>
+<section id="advanced-exercises-1-dev-uart-15">
+<h3>Advanced Exercises 1 - /dev/uart - 15%<a class="headerlink" href="#advanced-exercises-1-dev-uart-15" title="Link to this heading">#</a></h3>
+<p>You need to create a device file at <code class="docutils literal notranslate"><span class="pre">&quot;/dev/uart&quot;</span></code> for your UART
+device as the console. R/W to this file is same as
+uartread / uartwrite.</p>
+<p>You also need to open this file as stdin (<code class="docutils literal notranslate"><span class="pre">fd=0</span></code>), stdout (<code class="docutils literal notranslate"><span class="pre">fd=1</span></code>),
+and stderr (<code class="docutils literal notranslate"><span class="pre">fd=2</span></code>), for user process</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// there should be output on terminal</span>
+<span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hello world</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Implement device file setting.</p></li>
+<li><p>Implement one device file <code class="docutils literal notranslate"><span class="pre">/dev/uart</span></code>.</p></li>
+</ul>
+</div>
+</section>
+<section id="advanced-exercises-2-dev-fb-15">
+<h3>Advanced Exercises 2 - /dev/fb - 15%<a class="headerlink" href="#advanced-exercises-2-dev-fb-15" title="Link to this heading">#</a></h3>
+<p>In previous labs, we displayed images/video by writing to the framebuffer memory address directly.
+Which means a hardcoded address or a specific display system call is needed.</p>
+<p>In this part, we convert it to a special write-only device at <code class="docutils literal notranslate"><span class="pre">&quot;/dev/fb&quot;</span></code>,
+which allows the user process to configure and draw to the screen via standard VFS interfaces.</p>
+<p>If you are using QEMU, you need to initialize the framebuffer first using QEMU’s <code class="docutils literal notranslate"><span class="pre">fw_cfg</span></code> DMA interface
+at <code class="docutils literal notranslate"><span class="pre">mknod</span></code> (or <code class="docutils literal notranslate"><span class="pre">mount</span></code> or <code class="docutils literal notranslate"><span class="pre">ioctl</span></code>, we don’t care). And if on Orange Pi, it doesn’t need to do anything,
+like previous lab. When written, the driver writes directly to the framebuffer <code class="docutils literal notranslate"><span class="pre">lfb</span> <span class="pre">+</span> <span class="pre">f_pos</span></code> and flushes
+the data cache if needed. <code class="docutils literal notranslate"><span class="pre">lfb</span></code> is the base address of the framebuffer.</p>
+<section id="system-call-specification">
+<h4>System Call Specification<a class="headerlink" href="#system-call-specification" title="Link to this heading">#</a></h4>
+<p>You also need to support <code class="docutils literal notranslate"><span class="pre">lseek64</span></code> system call (to write framebuffer
+again without reopen) and <code class="docutils literal notranslate"><span class="pre">ioctl</span></code> system call (to query framebuffer
+info), which are also VFS api using underlying method.</p>
+<section id="lseek64">
+<h5>lseek64<a class="headerlink" href="#lseek64" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SEEK_SET 0</span>
+<span class="kt">long</span><span class="w"> </span><span class="nf">lseek64</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">whence</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 21</p></li>
+<li><p><strong>Description</strong>: Repositions the read/write file offset of the open file associated with the file descriptor <code class="docutils literal notranslate"><span class="pre">fd</span></code> to the argument <code class="docutils literal notranslate"><span class="pre">offset</span></code> according to the directive <code class="docutils literal notranslate"><span class="pre">whence</span></code>.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fd</span></code>: The file descriptor of the open file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">offset</span></code>: The offset in bytes relative to <code class="docutils literal notranslate"><span class="pre">whence</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">whence</span></code>: The method of positioning. You only need to implement <code class="docutils literal notranslate"><span class="pre">SEEK_SET</span></code> (value <code class="docutils literal notranslate"><span class="pre">0</span></code>).</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns the resulting offset location as measured in bytes from the beginning of the file on success, or a negative error code on failure.</p></li>
+</ul>
+</section>
+<section id="ioctl">
+<h5>ioctl<a class="headerlink" href="#ioctl" title="Link to this heading">#</a></h5>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">ioctl</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Syscall Number</strong>: 22</p></li>
+<li><p><strong>Description</strong>: Manipulates the underlying device parameters of special files.</p></li>
+<li><p><strong>Parameters</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fd</span></code>: The file descriptor of the open device file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request</span></code>: The device-dependent request code. For framebuffer, request <code class="docutils literal notranslate"><span class="pre">0</span></code> (or <code class="docutils literal notranslate"><span class="pre">FB_IOCTL_GET_INFO</span></code>) is used to get the framebuffer info.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">...</span></code>: A pointer to the structure to receive the device information (e.g., <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">framebuffer_info</span></code>). Remember to translate the userspace address to kernel space.</p></li>
+</ul>
+</li>
+<li><p><strong>Return Value</strong>: Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> on success, or a negative error code on failure.</p></li>
+</ul>
+<p>The following is the simplified code in test program:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define FB_IOCTL_GET_INFO 0</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/fb&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">O_WRONLY</span><span class="p">);</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">framebuffer_info</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">width</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">height</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">bpp</span><span class="p">;</span><span class="w">  </span><span class="c1">// byte per pixel</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">framebuffer_info</span><span class="w"> </span><span class="n">fb</span><span class="p">;</span>
+
+<span class="n">ioctl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="n">FB_IOCTL_GET_INFO</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fb</span><span class="p">)</span>
+
+<span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">lseek64</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">SEEK_SET</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">fb</span><span class="p">.</span><span class="n">bpp</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Implement <code class="docutils literal notranslate"><span class="pre">/dev/fb</span></code> and play the video via <code class="docutils literal notranslate"><span class="pre">vfs_fork</span></code>.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="test">
+<h3>Test<a class="headerlink" href="#test" title="Link to this heading">#</a></h3>
+<p>If you manage to complete basic3, put this <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> in initramfs.cpio.
+When entering your kernel, run <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">vfs.bin</span></code> to run the user program.
+<code class="docutils literal notranslate"><span class="pre">vfs_fork</span></code> will validate framebuffer, and <code class="docutils literal notranslate"><span class="pre">vfs</span></code> will validate the rest.</p>
+<p>If not, TAs will provide some functions (VFS API) to test during demo. (Only for those who just finish Basic 1 and 2)</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tree-structure">Tree Structure</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system">File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#vnode">Vnode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#component-name">Component Name</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-handle">File Handle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-35">Basic Exercise 1 - Root File System - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system-registration">File System Registration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-file-system">Mounting File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#root-directory-s-vnode">Root directory’s vnode</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#open-method">Open Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#close-method">Close Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#read-method">Read Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#write-method">Write Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#lookup-method">Lookup Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-method">Create Method</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-2-multi-level-vfs-15">Basic Exercise 2 - Multi-level VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mkdir-method">Mkdir Method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-another-file-system">Mounting Another File System</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pathname-lookup">Pathname Lookup</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-15">Basic Exercise 3 - Multitask VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#current-working-directory">Current Working Directory</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-descriptor-table">File Descriptor Table</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls-for-vfs">System Calls for VFS</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#open">open</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#close">close</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#read">read</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#write">write</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#mkdir">mkdir</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#mount">mount</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#chdir">chdir</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-4-ramfs-15">Basic Exercise 4 - /ramfs - 15%</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises">Advanced Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#special-file">Special File</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#device-file-registration">Device File Registration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mknod">Mknod</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative">Alternative</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-1-dev-uart-15">Advanced Exercises 1 - /dev/uart - 15%</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-15">Advanced Exercises 2 - /dev/fb - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-specification">System Call Specification</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#lseek64">lseek64</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#ioctl">ioctl</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#test">Test</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By  NYCU cas-lab
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, NYCU cas-lab.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
