@@ -328,7 +328,7 @@ Allocate intermediate tables as needed. Here is a simplified walk function:
 .. admonition:: Todo
 
   Implement a page mapping function ``void map_pages(unsigned long va, unsigned long size, unsigned long pa, unsigned long prot)``. Use this function to map the user code at virtual address ``0x0`` \
-  and the user stack at ``0x003f_ffff_f000`` with their respective permission flags.
+  and the user stack top at ``0x0040_0000_0000`` with their respective permission flags.
 .. note::
   User space uses 4KB pages in this lab, requiring PGD, PMD, and PTE.
 
