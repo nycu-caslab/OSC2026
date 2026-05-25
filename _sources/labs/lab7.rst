@@ -184,7 +184,7 @@ The structure of this example code may be visualized as:
 .. image:: /images/lab7_impl_vis.png
 
 
-Basic Exercise 1 - Root File System - 35%
+Basic Exercise 1 - Root File System - 15%
 ==========================================
 
 In this part, you'll need to implement tmpfs which follows the VFS 
@@ -340,7 +340,7 @@ Here is the pseudo code, this code doesn't show crossing of mount point or relat
 
   **Note**: Once you finished Basic 3, you don't have to meet the interfaces of this part.
 
-Basic Exercise 3 - Multitask VFS - 15%
+Basic Exercise 3 - Multitask VFS - 25%
 =======================================
 
 In this part, you need to implement
@@ -601,7 +601,7 @@ and stderr (``fd=2``), for user process
   * Implement one device file ``/dev/uart``.
 
 
-Advanced Exercises 2 - /dev/fb - 15%
+Advanced Exercises 2 - /dev/fb - 20%
 ==============================================================
 
 In previous labs, we displayed images/video by writing to the framebuffer memory address directly.
@@ -662,7 +662,7 @@ The following is the simplified code in test program:
 
   #define FB_IOCTL_GET_INFO 0
 
-  int fd = open("/dev/fb", O_WRONLY);
+  int fd = open("/dev/fb", 0);
 
   struct framebuffer_info {
       unsigned int width;
@@ -689,8 +689,13 @@ The following is the simplified code in test program:
 Test
 ====
 
-If you manage to complete basic3, put this :download:`user program <vfs.img>` in initramfs.cpio.
+If you manage to complete basic3, put this :download:`user program <https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab7/vfs.bin>` in initramfs.cpio.
 When entering your kernel, run ``exec vfs.bin`` to run the user program.
 ``vfs_fork`` will validate framebuffer, and ``vfs`` will validate the rest.
 
 If not, TAs will provide some functions (VFS API) to test during demo. (Only for those who just finish Basic 1 and 2)
+
+.. note::
+  
+  There will be some hidden test cases in the demo, so please ensure the robustness of your implementation.
+  If these hidden cases fail, you may receive some score deductions.

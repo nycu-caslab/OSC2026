@@ -314,7 +314,7 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-35">Basic Exercise 1 - Root File System - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-15">Basic Exercise 1 - Root File System - 15%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system-registration">File System Registration</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-file-system">Mounting File System</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#root-directory-s-vnode">Root directory’s vnode</a></li>
@@ -332,7 +332,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pathname-lookup">Pathname Lookup</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-15">Basic Exercise 3 - Multitask VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-25">Basic Exercise 3 - Multitask VFS - 25%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#current-working-directory">Current Working Directory</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-descriptor-table">File Descriptor Table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls-for-vfs">System Calls for VFS</a><ul class="nav section-nav flex-column">
@@ -358,7 +358,7 @@
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-1-dev-uart-15">Advanced Exercises 1 - /dev/uart - 15%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-15">Advanced Exercises 2 - /dev/fb - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-20">Advanced Exercises 2 - /dev/fb - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-specification">System Call Specification</a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#lseek64">lseek64</a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#ioctl">ioctl</a></li>
@@ -545,8 +545,8 @@ But if you only finish Basic 1 &amp; 2, please follow the API definition. Once y
 </div>
 <p>The structure of this example code may be visualized as:</p>
 <img alt="../_images/lab7_impl_vis.png" src="../_images/lab7_impl_vis.png" />
-<section id="basic-exercise-1-root-file-system-35">
-<h3>Basic Exercise 1 - Root File System - 35%<a class="headerlink" href="#basic-exercise-1-root-file-system-35" title="Link to this heading">#</a></h3>
+<section id="basic-exercise-1-root-file-system-15">
+<h3>Basic Exercise 1 - Root File System - 15%<a class="headerlink" href="#basic-exercise-1-root-file-system-15" title="Link to this heading">#</a></h3>
 <p>In this part, you’ll need to implement tmpfs which follows the VFS
 interface, setup tmpfs as the root file system.</p>
 <section id="file-system-registration">
@@ -677,8 +677,8 @@ root vnode.</p>
 </div>
 </section>
 </section>
-<section id="basic-exercise-3-multitask-vfs-15">
-<h3>Basic Exercise 3 - Multitask VFS - 15%<a class="headerlink" href="#basic-exercise-3-multitask-vfs-15" title="Link to this heading">#</a></h3>
+<section id="basic-exercise-3-multitask-vfs-25">
+<h3>Basic Exercise 3 - Multitask VFS - 25%<a class="headerlink" href="#basic-exercise-3-multitask-vfs-25" title="Link to this heading">#</a></h3>
 <p>In this part, you need to implement</p>
 <ul class="simple">
 <li><p>current working directory</p></li>
@@ -947,8 +947,8 @@ and stderr (<code class="docutils literal notranslate"><span class="pre">fd=2</s
 </ul>
 </div>
 </section>
-<section id="advanced-exercises-2-dev-fb-15">
-<h3>Advanced Exercises 2 - /dev/fb - 15%<a class="headerlink" href="#advanced-exercises-2-dev-fb-15" title="Link to this heading">#</a></h3>
+<section id="advanced-exercises-2-dev-fb-20">
+<h3>Advanced Exercises 2 - /dev/fb - 20%<a class="headerlink" href="#advanced-exercises-2-dev-fb-20" title="Link to this heading">#</a></h3>
 <p>In previous labs, we displayed images/video by writing to the framebuffer memory address directly.
 Which means a hardcoded address or a specific display system call is needed.</p>
 <p>In this part, we convert it to a special write-only device at <code class="docutils literal notranslate"><span class="pre">&quot;/dev/fb&quot;</span></code>,
@@ -1001,7 +1001,7 @@ info), which are also VFS api using underlying method.</p>
 <p>The following is the simplified code in test program:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define FB_IOCTL_GET_INFO 0</span>
 
-<span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/fb&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">O_WRONLY</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/fb&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">framebuffer_info</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">width</span><span class="p">;</span>
@@ -1031,10 +1031,15 @@ info), which are also VFS api using underlying method.</p>
 </section>
 <section id="test">
 <h3>Test<a class="headerlink" href="#test" title="Link to this heading">#</a></h3>
-<p>If you manage to complete basic3, put this <code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code> in initramfs.cpio.
+<p>If you manage to complete basic3, put this <a class="reference download external" download="" href="https://github.com/nycu-caslab/OSC2026/raw/main/uploads/lab7/vfs.bin"><code class="xref download docutils literal notranslate"><span class="pre">user</span> <span class="pre">program</span></code></a> in initramfs.cpio.
 When entering your kernel, run <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">vfs.bin</span></code> to run the user program.
 <code class="docutils literal notranslate"><span class="pre">vfs_fork</span></code> will validate framebuffer, and <code class="docutils literal notranslate"><span class="pre">vfs</span></code> will validate the rest.</p>
 <p>If not, TAs will provide some functions (VFS API) to test during demo. (Only for those who just finish Basic 1 and 2)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There will be some hidden test cases in the demo, so please ensure the robustness of your implementation.
+If these hidden cases fail, you may receive some score deductions.</p>
+</div>
 </section>
 </section>
 </section>
@@ -1082,7 +1087,7 @@ When entering your kernel, run <code class="docutils literal notranslate"><span 
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercises">Basic Exercises</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-35">Basic Exercise 1 - Root File System - 35%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-1-root-file-system-15">Basic Exercise 1 - Root File System - 15%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-system-registration">File System Registration</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mounting-file-system">Mounting File System</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#root-directory-s-vnode">Root directory’s vnode</a></li>
@@ -1100,7 +1105,7 @@ When entering your kernel, run <code class="docutils literal notranslate"><span 
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pathname-lookup">Pathname Lookup</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-15">Basic Exercise 3 - Multitask VFS - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-exercise-3-multitask-vfs-25">Basic Exercise 3 - Multitask VFS - 25%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#current-working-directory">Current Working Directory</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-descriptor-table">File Descriptor Table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-calls-for-vfs">System Calls for VFS</a><ul class="nav section-nav flex-column">
@@ -1126,7 +1131,7 @@ When entering your kernel, run <code class="docutils literal notranslate"><span 
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-1-dev-uart-15">Advanced Exercises 1 - /dev/uart - 15%</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-15">Advanced Exercises 2 - /dev/fb - 15%</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-exercises-2-dev-fb-20">Advanced Exercises 2 - /dev/fb - 20%</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#system-call-specification">System Call Specification</a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#lseek64">lseek64</a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#ioctl">ioctl</a></li>
