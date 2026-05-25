@@ -2,11 +2,6 @@
 Lab 7: Virtual File System
 ==========================
 
-.. warning::
-
-    This document is currently under construction and may be incomplete or subject to significant changes.
-    Please check back later for updates, and consult the instructor if you are unsure about any missing parts.
-
 ############
 Introduction
 ############
